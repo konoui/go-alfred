@@ -1,7 +1,6 @@
 package alfred
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -52,13 +51,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			f, err := os.Open(tt.filepath)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer f.Close()
-
-			want, err := ioutil.ReadAll(f)
+			want, err := ioutil.ReadFile(tt.filepath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -69,8 +62,8 @@ func TestScriptFilterMarshal(t *testing.T) {
 			}
 
 			got := wf.Marshal()
-			if !EqualJSON(want, got) {
-				t.Errorf("unexpected response: want: \n%+v, got: \n%+v", string(want), string(got))
+			if diff := DiffScriptFilter(want, got); diff != "" {
+				t.Errorf("unexpected response: (+want -got)\n%+v", diff)
 			}
 		})
 	}
@@ -160,23 +153,9 @@ func TestWorfkflowMarshal(t *testing.T) {
 			}
 
 			got := awf.Marshal()
-			if !EqualJSON(want, got) {
-				t.Errorf("unexpected response: want: \n%+v, got: \n%+v", string(want), string(got))
+			if diff := DiffScriptFilter(want, got); diff != "" {
+				t.Errorf("unexpected response: (+want -got)\n%+v", diff)
 			}
 		})
 	}
-}
-
-func EqualJSON(a, b []byte) bool {
-	var ao interface{}
-	var bo interface{}
-
-	if err := json.Unmarshal(a, &ao); err != nil {
-		return false
-	}
-	if err := json.Unmarshal(b, &bo); err != nil {
-		return false
-	}
-
-	return reflect.DeepEqual(ao, bo)
 }
