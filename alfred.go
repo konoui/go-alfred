@@ -82,24 +82,32 @@ type out struct {
 	Items     Items     `json:"items"`
 }
 
+const fatalErrorJSON = `{"items": [{"title": "Fatal Error: %s","subtitle": "",}]}`
+
 // NewScriptFilter creates a new ScriptFilter
 func NewScriptFilter() ScriptFilter {
 	return ScriptFilter{}
 }
 
 // Append a new Item to Items
-func (w *ScriptFilter) Append(item Item) {
-	w.items = append(w.items, item)
+func (s *ScriptFilter) Append(item Item) {
+	s.items = append(s.items, item)
 }
 
 // Marshal ScriptFilter as Json
-func (w *ScriptFilter) Marshal() ([]byte, error) {
-	return json.MarshalIndent(
+func (s *ScriptFilter) Marshal() []byte {
+	res, err := json.Marshal(
 		out{
-			Rerun:     w.rerun,
-			Variables: w.variables,
-			Items:     w.items,
-		}, "", "	")
+			Rerun:     s.rerun,
+			Variables: s.variables,
+			Items:     s.items,
+		},
+	)
+	if err != nil {
+		return []byte(fmt.Sprintf(fatalErrorJSON, err.Error()))
+	}
+
+	return res
 }
 
 // Workflow is map of ScriptFilters
@@ -115,14 +123,10 @@ type streams struct {
 	err io.Writer
 }
 
-// SetStdStream redirect stdout to s
-func (awf *Workflow) SetStdStream(s io.Writer) {
-	awf.streams.out = s
-}
-
-// SetErrStream redirect stderr to s
-func (awf *Workflow) SetErrStream(s io.Writer) {
-	awf.streams.out = s
+// SetStreams redirect stdout and stderr to s
+func (w *Workflow) SetStreams(out, err io.Writer) {
+	w.streams.out = out
+	w.streams.err = err
 }
 
 // NewWorkflow has simple ScriptFilter api
@@ -139,24 +143,24 @@ func NewWorkflow() *Workflow {
 }
 
 // Append a new Item to standard ScriptFilter
-func (awf *Workflow) Append(item Item) {
-	awf.std.Append(item)
+func (w *Workflow) Append(item Item) {
+	w.std.Append(item)
 }
 
 // EmptyWarning create a new Item to Marshal　when there are no standard items
-func (awf *Workflow) EmptyWarning(title, subtitle string) {
-	awf.warn = NewScriptFilter()
-	awf.warn.Append(
+func (w *Workflow) EmptyWarning(title, subtitle string) {
+	w.warn = NewScriptFilter()
+	w.warn.Append(
 		Item{
 			Title:    title,
 			Subtitle: subtitle,
 		})
 }
 
-// Warning append a new Item to error ScriptFilter
-func (awf *Workflow) error(title, subtitle string) {
-	awf.err = NewScriptFilter()
-	awf.err.Append(
+// error append a new Item to error ScriptFilter
+func (w *Workflow) error(title, subtitle string) {
+	w.err = NewScriptFilter()
+	w.err.Append(
 		Item{
 			Title:    title,
 			Subtitle: subtitle,
@@ -164,38 +168,23 @@ func (awf *Workflow) error(title, subtitle string) {
 }
 
 // Marshal WorkFlow results
-func (awf *Workflow) Marshal() []byte {
-	wf := awf.std
-	if len(wf.items) == 0 {
-		warnRes, err := awf.warn.Marshal()
-		if err != nil {
-			return []byte("")
-		}
-		return warnRes
+func (w *Workflow) Marshal() []byte {
+	if len(w.std.items) == 0 {
+		return w.warn.Marshal()
 	}
 
-	res, err := wf.Marshal()
-	if err != nil {
-		awf.error(fmt.Sprintf("An Error Occurs: %s", err.Error()), fmt.Sprintf("items length: %d, items: %v", len(wf.items), wf.items))
-		errRes, err := awf.err.Marshal()
-		if err != nil {
-			return []byte("")
-		}
-		return errRes
-	}
-
-	return res
+	return w.std.Marshal()
 }
 
 // Fatal output error to io stream
-func (awf *Workflow) Fatal(title, subtitle string) {
-	awf.error(title, subtitle)
-	res, _ := awf.err.Marshal()
-	fmt.Fprintln(awf.streams.err, string(res))
+func (w *Workflow) Fatal(title, subtitle string) {
+	w.error(title, subtitle)
+	res := w.err.Marshal()
+	fmt.Fprintln(w.streams.err, string(res))
 }
 
 // Output to io stream
-func (awf *Workflow) Output() {
-	res := awf.Marshal()
-	fmt.Fprintln(awf.streams.out, string(res))
+func (w *Workflow) Output() {
+	res := w.Marshal()
+	fmt.Fprintln(w.streams.out, string(res))
 }

@@ -32,7 +32,6 @@ func TestNewScriptFilter(t *testing.T) {
 func TestScriptFilterMarshal(t *testing.T) {
 	tests := []struct {
 		description string
-		expectErr   bool
 		filepath    string
 		items       Items
 	}{
@@ -69,15 +68,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 				wf.Append(item)
 			}
 
-			got, err := wf.Marshal()
-			if tt.expectErr && err == nil {
-				t.Errorf("expect error happens, but got response")
-			}
-
-			if !tt.expectErr && err != nil {
-				t.Errorf("unexpected error want: got: %+v", err.Error())
-			}
-
+			got := wf.Marshal()
 			if !EqualJSON(want, got) {
 				t.Errorf("unexpected response: want: \n%+v, got: \n%+v", string(want), string(got))
 			}
