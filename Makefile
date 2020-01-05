@@ -1,43 +1,24 @@
-
+GOLANGCI_LINT_VERSION := v1.22.2
 export GO111MODULE=on
 
-
-## Setup
-setup:
-	#installing golint
-	@(if ! type golint >/dev/null 2>&1; then go get -u golang.org/x/lint/golint ;fi)
-	#installing golangci-lint
-	@(if ! type golangci-lint >/dev/null 2>&1; then go get -u github.com/golangci/golangci-lint/cmd/golangci-lint ;fi)
-	#installing goimports
-	@(if ! type goimports >/dev/null 2>&1; then go get -u golang.org/x/tools/cmd/goimports ;fi)
-	#installing ghr
-	@(if ! type ghr >/dev/null 2>&1; then go get -u github.com/tcnksm/ghr ;fi)
-	#installing make2help
-	@(if ! type make2help >/dev/null 2>&1; then go get -u github.com/Songmu/make2help/cmd/make2help ;fi)
-
 ## Format source codes
-fmt: setup
+fmt:
+	@(if ! type goimports >/dev/null 2>&1; then go get -u golang.org/x/tools/cmd/goimports ;fi)
 	goimports -w $$(go list -f {{.Dir}} ./... | grep -v /vendor/)
 
 ## Lint
-lint: setup
+lint:
+	@(if ! type golangci-lint >/dev/null 2>&1; then curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin ${GOLANGCI_LINT_VERSION} ;fi)
 	golangci-lint run ./...
 
 
 ## Run tests for my project
-test: setup
+test:
 	go test -v ./...
-
-
-## Initialize directory
-init:
-	@(if [ ! -e ${SRC_DIR} ]; then mkdir ${SRC_DIR}; fi)
-	@(if [ ! -e ${BIN_DIR} ]; then mkdir ${BIN_DIR}; fi)
-	@(if [ ! -e go.mod ]; then go mod init; fi)
-
 
 ## Show help
 help:
+	@(if ! type make2help >/dev/null 2>&1; then go get -u github.com/Songmu/make2help/cmd/make2help ;fi)
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: build setup test lint fmt linux init clean help
+.PHONY: setup test lint fmt help
