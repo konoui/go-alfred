@@ -21,7 +21,7 @@ func TestNewScriptFilter(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			got := NewScriptFilter()
 			if !reflect.DeepEqual(tt.want, got) {
-				t.Errorf("unexpected response: want: %+v, got: %+v", tt.want, got)
+				t.Errorf("want: %+v, got: %+v", tt.want, got)
 			}
 
 		})
@@ -63,7 +63,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 
 			got := wf.Marshal()
 			if diff := DiffScriptFilter(want, got); diff != "" {
-				t.Errorf("unexpected response: (+want -got)\n%+v", diff)
+				t.Errorf("+want -got\n%+v", diff)
 			}
 		})
 	}
@@ -91,7 +91,7 @@ func TestNewWorkflow(t *testing.T) {
 		t.Run(tt.description, func(t *testing.T) {
 			got := NewWorkflow()
 			if !reflect.DeepEqual(tt.want, got) {
-				t.Errorf("unexpected response: want: %+v, got: %+v", tt.want, got)
+				t.Errorf("want: %+v, got: %+v", tt.want, got)
 			}
 
 		})
@@ -154,7 +154,7 @@ func TestWorfkflowMarshal(t *testing.T) {
 
 			got := awf.Marshal()
 			if diff := DiffScriptFilter(want, got); diff != "" {
-				t.Errorf("unexpected response: (+want -got)\n%+v", diff)
+				t.Errorf("+want -got\n%+v", diff)
 			}
 		})
 	}
