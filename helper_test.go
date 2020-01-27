@@ -6,33 +6,33 @@ import (
 )
 
 var item01 = Items{
-	Item{
+	&Item{
 		Title:    "title1",
 		Subtitle: "subtitle1",
 	},
-	Item{
+	&Item{
 		Title:    "title2",
 		Subtitle: "subtitle2",
 	},
 }
 
 var item02 = Items{
-	Item{
+	&Item{
 		Title:    "title2",
 		Subtitle: "subtitle2",
 	},
-	Item{
+	&Item{
 		Title:    "title1",
 		Subtitle: "subtitle1",
 	},
 }
 
 var item03 = Items{
-	Item{
+	&Item{
 		Title:    "title3",
 		Subtitle: "subtitle3",
 	},
-	Item{
+	&Item{
 		Title:    "title1",
 		Subtitle: "subtitle1",
 	},

@@ -67,7 +67,7 @@ type Rerun float64
 type Variables map[string]string
 
 // Items array of `item`
-type Items []Item
+type Items []*Item
 
 // ScriptFilter JSON Format
 type ScriptFilter struct {
@@ -82,7 +82,7 @@ type out struct {
 	Items     Items     `json:"items"`
 }
 
-const fatalErrorJSON = `{"items": [{"title": "Fatal Error: %s","subtitle": "",}]}`
+const fatalErrorJSON = `{"items": [{"title": "Fatal Error","subtitle": "%s",}]}`
 
 // NewScriptFilter creates a new ScriptFilter
 func NewScriptFilter() ScriptFilter {
@@ -90,7 +90,7 @@ func NewScriptFilter() ScriptFilter {
 }
 
 // Append a new Item to Items
-func (s *ScriptFilter) Append(item Item) {
+func (s *ScriptFilter) Append(item *Item) {
 	s.items = append(s.items, item)
 }
 
@@ -143,7 +143,7 @@ func NewWorkflow() *Workflow {
 }
 
 // Append a new Item to standard ScriptFilter
-func (w *Workflow) Append(item Item) {
+func (w *Workflow) Append(item *Item) {
 	w.std.Append(item)
 }
 
@@ -151,7 +151,7 @@ func (w *Workflow) Append(item Item) {
 func (w *Workflow) EmptyWarning(title, subtitle string) {
 	w.warn = NewScriptFilter()
 	w.warn.Append(
-		Item{
+		&Item{
 			Title:    title,
 			Subtitle: subtitle,
 		})
@@ -161,7 +161,7 @@ func (w *Workflow) EmptyWarning(title, subtitle string) {
 func (w *Workflow) error(title, subtitle string) {
 	w.err = NewScriptFilter()
 	w.err.Append(
-		Item{
+		&Item{
 			Title:    title,
 			Subtitle: subtitle,
 		})

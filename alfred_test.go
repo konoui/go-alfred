@@ -38,11 +38,11 @@ func TestScriptFilterMarshal(t *testing.T) {
 			description: "create new scriptfilter",
 			filepath:    "./test_scriptfilter_marshal.json",
 			items: Items{
-				Item{
+				&Item{
 					Title:    "title1",
 					Subtitle: "subtitle1",
 				},
-				Item{
+				&Item{
 					Title:    "title2",
 					Subtitle: "subtitle2",
 				},
@@ -109,11 +109,11 @@ func TestWorfkflowMarshal(t *testing.T) {
 			description: "output standard items",
 			filepath:    "./test_scriptfilter_marshal.json",
 			items: Items{
-				Item{
+				&Item{
 					Title:    "title1",
 					Subtitle: "subtitle1",
 				},
-				Item{
+				&Item{
 					Title:    "title2",
 					Subtitle: "subtitle2",
 				},
