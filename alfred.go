@@ -188,3 +188,9 @@ func (w *Workflow) Output() {
 	res := w.Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
 }
+
+// Filter fuzzy search from current items
+func (w *Workflow) Filter(query string) *Workflow {
+	w.std.items = w.std.items.Filter(query)
+	return w
+}
