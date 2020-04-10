@@ -7,6 +7,22 @@ import (
 	"testing"
 )
 
+var testItems = Items{
+	&Item{
+		Title:    "title1",
+		Subtitle: "subtitle1",
+	},
+	&Item{
+		Title:    "title2",
+		Subtitle: "subtitle2",
+	},
+}
+
+var testEmptyItem = Item{
+	Title:    "emptyTitle1",
+	Subtitle: "emptySubtitle1",
+}
+
 func TestNewScriptFilter(t *testing.T) {
 	tests := []struct {
 		description string
@@ -37,16 +53,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 		{
 			description: "create new scriptfilter",
 			filepath:    "./test_scriptfilter_marshal.json",
-			items: Items{
-				&Item{
-					Title:    "title1",
-					Subtitle: "subtitle1",
-				},
-				&Item{
-					Title:    "title2",
-					Subtitle: "subtitle2",
-				},
-			},
+			items:       testItems,
 		},
 	}
 	for _, tt := range tests {
@@ -82,7 +89,6 @@ func TestNewWorkflow(t *testing.T) {
 				err:  NewScriptFilter(),
 				streams: streams{
 					out: os.Stdout,
-					err: os.Stdout,
 				},
 			},
 		},
@@ -108,29 +114,14 @@ func TestWorfkflowMarshal(t *testing.T) {
 		{
 			description: "output standard items",
 			filepath:    "./test_scriptfilter_marshal.json",
-			items: Items{
-				&Item{
-					Title:    "title1",
-					Subtitle: "subtitle1",
-				},
-				&Item{
-					Title:    "title2",
-					Subtitle: "subtitle2",
-				},
-			},
-			emptyItem: Item{
-				Title:    "emptyTitle1",
-				Subtitle: "emptySubtitle",
-			},
+			items:       testItems,
+			emptyItem:   testEmptyItem,
 		},
 		{
 			description: "output empty warning",
 			filepath:    "./test_scriptfilter_empty_warning_marshal.json",
 			items:       Items{},
-			emptyItem: Item{
-				Title:    "emptyTitle1",
-				Subtitle: "emptySubtitle1",
-			},
+			emptyItem:   testEmptyItem,
 		},
 	}
 	for _, tt := range tests {

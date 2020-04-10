@@ -3,6 +3,7 @@
 ## go-alfred
 go-alfred provides simple api to operate alfred workflow.
 
-Following repositories uses go-alfred.
+Following repositories use go-alfred.
 - [alfred-bookmarks](https://github.com/konoui/alfred-bookmarks)
 - [tldr](https://github.com/konoui/tldr)
+- [alfred-k8s](https://github.com/konoui/alfred-k8s)
