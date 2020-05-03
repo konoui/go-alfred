@@ -1,6 +1,7 @@
 package alfred
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -130,7 +131,7 @@ func TestCache_LoadStoreItems(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if tt.expectErr && !IsExpired(err) {
+			if tt.expectErr && !errors.Is(err, ErrCacheExpired) {
 				t.Errorf("want: expired cache error, got: %#v\n", err)
 			}
 

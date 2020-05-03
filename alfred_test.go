@@ -89,6 +89,7 @@ func TestNewWorkflow(t *testing.T) {
 				err:  NewScriptFilter(),
 				streams: streams{
 					out: os.Stdout,
+					err: ioutil.Discard,
 				},
 			},
 		},

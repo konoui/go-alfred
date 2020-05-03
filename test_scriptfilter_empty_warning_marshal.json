@@ -2,7 +2,8 @@
 	"items": [
 		{
 			"title": "emptyTitle1",
-			"subtitle": "emptySubtitle1"
+			"subtitle": "emptySubtitle1",
+			"Valid": true
 		}
 	]
 }

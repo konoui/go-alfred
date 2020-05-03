@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Cacher implements a simple store/load API, saving data to specified directory.
+// Cacher implements a simple store/load API
 type Cacher interface {
 	Load(interface{}) error
 	Store(interface{}) error
@@ -19,14 +19,14 @@ type Cacher interface {
 	Expired(time.Duration) bool
 }
 
-// Cache is directory level cache
+// Cache is file level cache
 type Cache struct {
 	Dir  string
 	File string
 	sync.Mutex
 }
 
-// New create a new cache Instance
+// New create a new cache instance
 func New(dir, file string) (Cacher, error) {
 	if !pathExists(dir) {
 		return &Cache{}, fmt.Errorf("%s directory does not exist", dir)

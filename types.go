@@ -51,7 +51,7 @@ type Item struct {
 	Icon         *Icon             `json:"icon,omitempty"`
 	Autocomplete string            `json:"autocomplete,omitempty"`
 	Type         string            `json:"type,omitempty"`
-	Valid        bool              `json:"valid"`
+	Valid        bool              `json:"valid,omitempty"`
 	Match        string            `json:"match,omitempty"`
 	Mods         map[ModKey]Mod    `json:"mods,omitempty"`
 	Text         *Text             `json:"text,omitempty"`
@@ -81,8 +81,10 @@ type Workflow struct {
 	err     ScriptFilter
 	caches  sync.Map
 	streams streams
+	done    bool
 }
 
 type streams struct {
 	out io.Writer
+	err io.Writer
 }

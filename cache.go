@@ -1,6 +1,7 @@
 package alfred
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -21,21 +22,8 @@ type Cache struct {
 	err      error
 }
 
-type expiredError struct {
-	err error
-}
-
-func (e *expiredError) Error() string {
-	return e.err.Error()
-}
-
-// IsExpired return true if err equals cache expired error
-func IsExpired(err error) bool {
-	if _, ok := err.(*expiredError); ok {
-		return true
-	}
-	return false
-}
+// ErrCacheExpired represent ttl is expired
+var ErrCacheExpired = errors.New("cache expired")
 
 // SetCacheDir overrides default cache directory
 func (w *Workflow) SetCacheDir(dir string) (err error) {
@@ -61,6 +49,7 @@ func (w *Workflow) Cache(key string) *Cache {
 	cr, err := cache.New(cacheDefaultDir, filename)
 	if err != nil {
 		err = fmt.Errorf("failed to create cache due to %v. try to work using nil cacher", err)
+		fmt.Fprintln(w.streams.err, err.Error())
 		cr = cache.NewNilCache()
 	}
 
@@ -94,7 +83,9 @@ func (c *Cache) LoadItems() *Cache {
 		return c
 	}
 	if c.Expired(c.ttl) {
-		c.err = &expiredError{err: fmt.Errorf("cache expired")}
+		err := fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
+		c.err = err
+		fmt.Fprintln(c.wf.streams.err, err.Error())
 		return c
 	}
 
@@ -114,7 +105,10 @@ func (c *Cache) StoreItems() *Cache {
 		return c
 	}
 
-	c.err = c.Store(items)
+	if err := c.Store(items); err != nil {
+		c.err = err
+		fmt.Fprintln(c.wf.streams.err, err.Error())
+	}
 	return c
 }
 
@@ -126,6 +120,9 @@ func (c *Cache) MaxAge(ttl time.Duration) *Cache {
 
 // Delete cache data
 func (c *Cache) Delete() *Cache {
-	c.err = c.Clear()
+	if err := c.Clear(); err != nil {
+		c.err = err
+		fmt.Fprintln(c.wf.streams.err, err.Error())
+	}
 	return c
 }

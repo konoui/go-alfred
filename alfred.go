@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -29,9 +30,14 @@ func (s *ScriptFilter) Marshal() []byte {
 	return res
 }
 
-// SetOut redirect stdout and stderr to s
+// SetOut redirect stdout
 func (w *Workflow) SetOut(out io.Writer) {
 	w.streams.out = out
+}
+
+// SetErr redirect stderr for debug util of the library.
+func (w *Workflow) SetErr(stderr io.Writer) {
+	w.streams.err = stderr
 }
 
 // NewWorkflow has simple ScriptFilter api
@@ -42,6 +48,7 @@ func NewWorkflow() *Workflow {
 		err:  NewScriptFilter(),
 		streams: streams{
 			out: os.Stdout,
+			err: ioutil.Discard,
 		},
 	}
 
@@ -86,6 +93,7 @@ func (w *Workflow) EmptyWarning(title, subtitle string) {
 		&Item{
 			Title:    title,
 			Subtitle: subtitle,
+			Valid:    true,
 		})
 }
 
@@ -96,6 +104,7 @@ func (w *Workflow) error(title, subtitle string) {
 		&Item{
 			Title:    title,
 			Subtitle: subtitle,
+			Valid:    true,
 		})
 }
 
@@ -110,13 +119,23 @@ func (w *Workflow) Marshal() []byte {
 
 // Fatal output error to io stream
 func (w *Workflow) Fatal(title, subtitle string) {
+	if w.done {
+		fmt.Fprintf(w.streams.err, "the workflow already sent")
+		return
+	}
 	w.error(title, subtitle)
 	res := w.err.Marshal()
+	w.done = true
 	fmt.Fprintln(w.streams.out, string(res))
 }
 
 // Output to io stream
 func (w *Workflow) Output() {
+	if w.done {
+		fmt.Fprintf(w.streams.err, "the workflow already sent")
+		return
+	}
 	res := w.Marshal()
+	w.done = true
 	fmt.Fprintln(w.streams.out, string(res))
 }
