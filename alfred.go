@@ -54,6 +54,18 @@ func (w *Workflow) Append(item *Item) *Workflow {
 	return w
 }
 
+// Delete a item by the uid
+func (w *Workflow) Delete(uid string) *Workflow {
+	items := w.std.Items
+	for i := range items {
+		if items[i].UID != uid {
+			continue
+		}
+		items[i].Valid = false
+	}
+	return w
+}
+
 // Rerun set rerun variable
 func (w *Workflow) Rerun(i Rerun) *Workflow {
 	w.std.Rerun = i

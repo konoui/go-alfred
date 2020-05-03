@@ -29,7 +29,7 @@ const (
 // Mod element gives you control over how the modifier keys react
 type Mod struct {
 	Variables map[string]string `json:"variables,omitempty"`
-	Valid     *bool             `json:"valid,omitempty"`
+	Valid     bool              `json:"valid,omitempty"`
 	Arg       string            `json:"arg,omitempty"`
 	Subtitle  string            `json:"subtitle,omitempty"`
 	Icon      *Icon             `json:"icon,omitempty"`
@@ -51,7 +51,7 @@ type Item struct {
 	Icon         *Icon             `json:"icon,omitempty"`
 	Autocomplete string            `json:"autocomplete,omitempty"`
 	Type         string            `json:"type,omitempty"`
-	Valid        *bool             `json:"valid,omitempty"`
+	Valid        bool              `json:"valid"`
 	Match        string            `json:"match,omitempty"`
 	Mods         map[ModKey]Mod    `json:"mods,omitempty"`
 	Text         *Text             `json:"text,omitempty"`
