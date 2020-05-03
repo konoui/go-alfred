@@ -135,8 +135,8 @@ func TestCache_LoadStoreItems(t *testing.T) {
 			}
 
 			// compare new workflow data to soted workflow data
-			want := prepared.std.items
-			got := tt.wf.std.items
+			want := prepared.std.Items
+			got := tt.wf.std.Items
 			if !tt.expectErr && !reflect.DeepEqual(want, got) {
 				t.Errorf("got %v\n got %v", want, got)
 			}

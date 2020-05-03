@@ -69,12 +69,6 @@ type Items []*Item
 
 // ScriptFilter JSON Format
 type ScriptFilter struct {
-	rerun     Rerun
-	variables Variables
-	items     Items
-}
-
-type out struct {
 	Rerun     Rerun     `json:"rerun,omitempty"`
 	Variables Variables `json:"variables,omitempty"`
 	Items     Items     `json:"items"`

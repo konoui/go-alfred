@@ -150,3 +150,46 @@ func TestWorfkflowMarshal(t *testing.T) {
 		})
 	}
 }
+
+func TestWorkflow_Rerun(t *testing.T) {
+	type fields struct {
+		std ScriptFilter
+	}
+	type args struct {
+		i Rerun
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   *Workflow
+	}{
+		{
+			name: "set return 1",
+			fields: fields{
+				std: NewScriptFilter(),
+			},
+			args: args{
+				i: 1,
+			},
+			want: &Workflow{
+				std: ScriptFilter{
+					Rerun: 1,
+				},
+				warn: ScriptFilter{
+					Rerun: 1,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &Workflow{
+				std: tt.fields.std,
+			}
+			if got := w.Rerun(tt.args.i); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Workflow.Rerun() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

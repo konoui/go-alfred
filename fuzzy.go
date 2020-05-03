@@ -6,7 +6,7 @@ import (
 
 // Filter searches from current items
 func (w *Workflow) Filter(query string) *Workflow {
-	w.std.items = w.std.items.Filter(query)
+	w.std.Items = w.std.Items.Filter(query)
 	return w
 }
 

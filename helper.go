@@ -11,8 +11,8 @@ import (
 // DiffScriptFilter is a helper function that compare unsorted ScriptFilter Output
 // return "" if `gotData` is equal to `wantData` regardless of sorted or unsorted
 func DiffScriptFilter(wantData, gotData []byte) string {
-	want := &out{}
-	got := &out{}
+	want := &ScriptFilter{}
+	got := &ScriptFilter{}
 	if err := json.Unmarshal(wantData, want); err != nil {
 		return fmt.Sprintf("Unmarshal Error in wantData: %+v\n, string(wantData): %s\n, string(gotData): %s\n", err, string(wantData), string(gotData))
 	}

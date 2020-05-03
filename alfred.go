@@ -16,18 +16,12 @@ func NewScriptFilter() ScriptFilter {
 
 // Append a new Item to Items
 func (s *ScriptFilter) Append(item *Item) {
-	s.items = append(s.items, item)
+	s.Items = append(s.Items, item)
 }
 
 // Marshal ScriptFilter as Json
 func (s *ScriptFilter) Marshal() []byte {
-	res, err := json.Marshal(
-		out{
-			Rerun:     s.rerun,
-			Variables: s.variables,
-			Items:     s.items,
-		},
-	)
+	res, err := json.Marshal(s)
 	if err != nil {
 		return []byte(fmt.Sprintf(fatalErrorJSON, err.Error()))
 	}
@@ -60,6 +54,19 @@ func (w *Workflow) Append(item *Item) *Workflow {
 	return w
 }
 
+// Rerun set rerun variable
+func (w *Workflow) Rerun(i Rerun) *Workflow {
+	w.std.Rerun = i
+	w.warn.Rerun = i
+	return w
+}
+
+// Variables set variables
+func (w *Workflow) Variables(v Variables) *Workflow {
+	w.std.Variables = v
+	return w
+}
+
 // EmptyWarning create a new Item to Marshal　when there are no standard items
 func (w *Workflow) EmptyWarning(title, subtitle string) {
 	w.warn = NewScriptFilter()
@@ -82,7 +89,7 @@ func (w *Workflow) error(title, subtitle string) {
 
 // Marshal WorkFlow results
 func (w *Workflow) Marshal() []byte {
-	if len(w.std.items) == 0 {
+	if len(w.std.Items) == 0 {
 		return w.warn.Marshal()
 	}
 

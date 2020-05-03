@@ -100,7 +100,7 @@ func (c *Cache) LoadItems() *Cache {
 
 	// update
 	c.err = nil
-	c.wf.std.items = items
+	c.wf.std.Items = items
 	return c
 }
 
@@ -108,7 +108,7 @@ func (c *Cache) LoadItems() *Cache {
 func (c *Cache) StoreItems() *Cache {
 	// Note: If there is no item, we avoid to save data into cache.
 	// We define it is no error case
-	items := c.wf.std.items
+	items := c.wf.std.Items
 	if len(items) == 0 {
 		c.err = nil
 		return c
