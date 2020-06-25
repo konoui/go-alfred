@@ -1,4 +1,4 @@
-GOLANGCI_LINT_VERSION := v1.22.2
+GOLANGCI_LINT_VERSION := v1.24.0
 export GO111MODULE=on
 
 ## Format source codes
@@ -21,4 +21,4 @@ help:
 	@(if ! type make2help >/dev/null 2>&1; then go get -u github.com/Songmu/make2help/cmd/make2help ;fi)
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup test lint fmt help
+.PHONY: test lint fmt help

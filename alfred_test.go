@@ -151,29 +151,23 @@ func TestWorkflow_Rerun(t *testing.T) {
 	}
 }
 
-func TestWorkflow_Delete(t *testing.T) {
+func TestWorkflow_Clear(t *testing.T) {
 	tests := []struct {
 		name string
 		item *Item
 		want []byte
 	}{
 		{
-			name: "delete item",
+			name: "clear items",
 			item: &Item{
-				Title: "loading",
-				UID:   "loading",
-				Valid: true,
+				Title: "test",
 			},
-			want: NewWorkflow().Append(&Item{
-				Title: "loading",
-				UID:   "loading",
-				Valid: false,
-			}).Marshal(),
+			want: NewWorkflow().Marshal(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewWorkflow().Append(tt.item).Delete(tt.item.UID).Marshal()
+			got := NewWorkflow().Append(tt.item).Clear().Marshal()
 			if diff := DiffScriptFilter(tt.want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}

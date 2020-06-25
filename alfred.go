@@ -68,15 +68,9 @@ func (w *Workflow) Append(item *Item) *Workflow {
 	return w
 }
 
-// Delete a item by the uid
-func (w *Workflow) Delete(uid string) *Workflow {
-	items := w.std.Items
-	for i := range items {
-		if items[i].UID != uid {
-			continue
-		}
-		items[i].Valid = false
-	}
+// Clear items of standard ScriptFilter
+func (w *Workflow) Clear() *Workflow {
+	w.std.Items = Items{}
 	return w
 }
 
@@ -124,7 +118,7 @@ func (w *Workflow) Marshal() []byte {
 	return w.std.Marshal()
 }
 
-// Fatal output error to io stream
+// Fatal output error to io stream and call os.Exit(1)
 func (w *Workflow) Fatal(title, subtitle string) {
 	if w.done {
 		w.logger.Println(sentMessage)
@@ -134,6 +128,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 	res := w.err.Marshal()
 	w.done = true
 	fmt.Fprintln(w.streams.out, string(res))
+	os.Exit(1)
 }
 
 // Output to io stream
