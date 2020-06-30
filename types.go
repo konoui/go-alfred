@@ -2,6 +2,7 @@ package alfred
 
 import (
 	"io"
+	"log"
 	"sync"
 )
 
@@ -82,6 +83,7 @@ type Workflow struct {
 	caches  sync.Map
 	streams streams
 	done    bool
+	logger  *log.Logger
 }
 
 type streams struct {

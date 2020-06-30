@@ -5,6 +5,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/konoui/go-alfred/logger"
 )
 
 var testItems = Items{
@@ -91,6 +93,7 @@ func TestNewWorkflow(t *testing.T) {
 					out: os.Stdout,
 					err: ioutil.Discard,
 				},
+				logger: logger.New(ioutil.Discard),
 			},
 		},
 	}

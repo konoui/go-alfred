@@ -6,9 +6,14 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/konoui/go-alfred/logger"
 )
 
-const fatalErrorJSON = `{"items": [{"title": "Fatal Error","subtitle": "%s",}]}`
+const (
+	fatalErrorJSON = `{"items": [{"title": "Fatal Error","subtitle": "%s",}]}`
+	sentMessage    = "The workflow has already sent"
+)
 
 // NewScriptFilter creates a new ScriptFilter
 func NewScriptFilter() ScriptFilter {
@@ -38,6 +43,7 @@ func (w *Workflow) SetOut(out io.Writer) {
 // SetErr redirect stderr for debug util of the library.
 func (w *Workflow) SetErr(stderr io.Writer) {
 	w.streams.err = stderr
+	w.logger = logger.New(w.streams.err)
 }
 
 // NewWorkflow has simple ScriptFilter api
@@ -50,6 +56,7 @@ func NewWorkflow() *Workflow {
 			out: os.Stdout,
 			err: ioutil.Discard,
 		},
+		logger: logger.New(ioutil.Discard),
 	}
 
 	return wf
@@ -120,7 +127,7 @@ func (w *Workflow) Marshal() []byte {
 // Fatal output error to io stream
 func (w *Workflow) Fatal(title, subtitle string) {
 	if w.done {
-		fmt.Fprintf(w.streams.err, "the workflow already sent")
+		w.logger.Println(sentMessage)
 		return
 	}
 	w.error(title, subtitle)
@@ -132,7 +139,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 // Output to io stream
 func (w *Workflow) Output() {
 	if w.done {
-		fmt.Fprintf(w.streams.err, "the workflow already sent")
+		w.logger.Println(sentMessage)
 		return
 	}
 	res := w.Marshal()

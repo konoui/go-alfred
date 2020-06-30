@@ -48,8 +48,8 @@ func (w *Workflow) Cache(key string) *Cache {
 
 	cr, err := cache.New(cacheDefaultDir, filename)
 	if err != nil {
-		err = fmt.Errorf("failed to create cache due to %v. try to work using nil cacher", err)
-		fmt.Fprintln(w.streams.err, err.Error())
+		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
+		w.logger.Println(err)
 		cr = cache.NewNilCache()
 	}
 
@@ -85,7 +85,7 @@ func (c *Cache) LoadItems() *Cache {
 	if c.Expired(c.ttl) {
 		err := fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.err = err
-		fmt.Fprintln(c.wf.streams.err, err.Error())
+		c.wf.logger.Println(err)
 		return c
 	}
 
@@ -107,7 +107,7 @@ func (c *Cache) StoreItems() *Cache {
 
 	if err := c.Store(items); err != nil {
 		c.err = err
-		fmt.Fprintln(c.wf.streams.err, err.Error())
+		c.wf.logger.Println(err)
 	}
 	return c
 }
@@ -122,7 +122,7 @@ func (c *Cache) MaxAge(ttl time.Duration) *Cache {
 func (c *Cache) Delete() *Cache {
 	if err := c.Clear(); err != nil {
 		c.err = err
-		fmt.Fprintln(c.wf.streams.err, err.Error())
+		c.wf.logger.Println(err)
 	}
 	return c
 }
