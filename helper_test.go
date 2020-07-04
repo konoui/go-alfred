@@ -47,17 +47,17 @@ func TestDiffScriptFilter(t *testing.T) {
 	}{
 		{
 			description: "in the same order",
-			filepath:    "./test_scriptfilter_marshal.json",
+			filepath:    "./test/test_scriptfilter_marshal.json",
 			items:       item01,
 		},
 		{
 			description: "in the different order",
-			filepath:    "./test_scriptfilter_marshal.json",
+			filepath:    "./test/test_scriptfilter_marshal.json",
 			items:       item02,
 		},
 		{
 			description: "different values",
-			filepath:    "./test_scriptfilter_marshal.json",
+			filepath:    "./test/test_scriptfilter_marshal.json",
 			items:       item03,
 			expectedErr: true,
 		},

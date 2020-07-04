@@ -54,7 +54,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 	}{
 		{
 			description: "create new scriptfilter",
-			filepath:    "./test_scriptfilter_marshal.json",
+			filepath:    "./test/test_scriptfilter_marshal.json",
 			items:       testItems,
 		},
 	}
@@ -190,13 +190,13 @@ func TestWorfkflowMarshal(t *testing.T) {
 	}{
 		{
 			description: "output standard items",
-			filepath:    "./test_scriptfilter_marshal.json",
+			filepath:    "./test/test_scriptfilter_marshal.json",
 			items:       testItems,
 			emptyItem:   testEmptyItem,
 		},
 		{
 			description: "output empty warning",
-			filepath:    "./test_scriptfilter_empty_warning_marshal.json",
+			filepath:    "./test/test_scriptfilter_empty_warning_marshal.json",
 			items:       Items{},
 			emptyItem:   testEmptyItem,
 		},
