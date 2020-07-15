@@ -72,6 +72,7 @@ func (w *Workflow) SetJobDir(dir string) (err error) {
 	if _, err = os.Stat(dir); err != nil {
 		return
 	}
+	jobDir = dir
 	return
 }
 
