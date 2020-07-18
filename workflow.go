@@ -1,38 +1,30 @@
 package alfred
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/konoui/go-alfred/logger"
 )
 
-const (
-	fatalErrorJSON = `{"items": [{"title": "Fatal Error","subtitle": "%s",}]}`
-	sentMessage    = "The workflow has already sent"
-)
-
-// NewScriptFilter creates a new ScriptFilter
-func NewScriptFilter() ScriptFilter {
-	return ScriptFilter{}
+// Workflow is map of ScriptFilters
+type Workflow struct {
+	std     ScriptFilter
+	warn    ScriptFilter
+	err     ScriptFilter
+	cache   caches
+	streams streams
+	done    bool
+	logger  *log.Logger
+	dirs    map[string]string
 }
 
-// Append a new Item to Items
-func (s *ScriptFilter) Append(item *Item) {
-	s.Items = append(s.Items, item)
-}
-
-// Marshal ScriptFilter as Json
-func (s *ScriptFilter) Marshal() []byte {
-	res, err := json.Marshal(s)
-	if err != nil {
-		return []byte(fmt.Sprintf(fatalErrorJSON, err.Error()))
-	}
-
-	return res
+type streams struct {
+	out io.Writer
+	err io.Writer
 }
 
 // SetOut redirect stdout
@@ -57,6 +49,7 @@ func NewWorkflow() *Workflow {
 			err: ioutil.Discard,
 		},
 		logger: logger.New(ioutil.Discard),
+		dirs:   make(map[string]string),
 	}
 
 	return wf
@@ -126,8 +119,8 @@ func (w *Workflow) Fatal(title, subtitle string) {
 	}
 	w.error(title, subtitle)
 	res := w.err.Marshal()
-	w.done = true
 	fmt.Fprintln(w.streams.out, string(res))
+	w.done = true
 	os.Exit(1)
 }
 
@@ -138,6 +131,6 @@ func (w *Workflow) Output() {
 		return
 	}
 	res := w.Marshal()
-	w.done = true
 	fmt.Fprintln(w.streams.out, string(res))
+	w.done = true
 }

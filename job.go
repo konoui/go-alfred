@@ -9,9 +9,7 @@ import (
 	"github.com/konoui/go-alfred/daemon"
 )
 
-// JobProcess is a type of job
-type JobProcess int
-
+const jobDirKey = "job-dir"
 const (
 	// ForegroundParentJob presents running process in forground that means parent process
 	ForegroundParentJob JobProcess = JobProcess(daemon.ParentProcess)
@@ -20,6 +18,9 @@ const (
 	// FailedJob presents failed to start Job
 	FailedJob JobProcess = JobProcess(daemon.FailedProcess)
 )
+
+// JobProcess is a type of job
+type JobProcess int
 
 func (j JobProcess) String() string {
 	switch j {
@@ -41,20 +42,6 @@ type Job struct {
 	logging   bool
 }
 
-var jobDir string
-
-func getJobDir() string {
-	if jobDir != "" {
-		return jobDir
-	}
-	return getDataDir()
-}
-
-func getDataDir() string {
-	// TODO implement abs path
-	return "./"
-}
-
 // Job creates new job. name parameter means pid file
 func (w *Workflow) Job(name string) *Job {
 	c := new(daemon.Context)
@@ -63,8 +50,16 @@ func (w *Workflow) Job(name string) *Job {
 		name:      name,
 		daemonCtx: c,
 		wf:        w,
-		dir:       getJobDir(),
+		dir:       w.getJobDir(),
 	}
+}
+
+func (w *Workflow) getJobDir() string {
+	dir, ok := w.dirs[jobDirKey]
+	if ok {
+		return dir
+	}
+	return "./"
 }
 
 // SetJobDir set job data directory
@@ -72,14 +67,14 @@ func (w *Workflow) SetJobDir(dir string) (err error) {
 	if _, err = os.Stat(dir); err != nil {
 		return
 	}
-	jobDir = dir
+	w.dirs[jobDirKey] = dir
 	return
 }
 
 // ListJobs return jobs managed by workflow
 func (w *Workflow) ListJobs() []*Job {
 	const ext = ".pid"
-	dir := getJobDir()
+	dir := w.getJobDir()
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		w.logger.Printf("Invalid directory %s\n", dir)

@@ -16,6 +16,9 @@ lint:
 test:
 	go test -v ./...
 
+build-examples:
+	_examples/build-test.sh
+
 ## Show help
 help:
 	@(if ! type make2help >/dev/null 2>&1; then go get -u github.com/Songmu/make2help/cmd/make2help ;fi)

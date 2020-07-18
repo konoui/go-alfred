@@ -41,23 +41,23 @@ func main() {
 
 	job := awf.Job(jobName)
 	if !job.IsJob() && job.IsRunning() {
-		awf.Rerun(0.5).Append(&alfred.Item{
-			Title: "a background job is running",
-		}).Output()
+		awf.Rerun(0.5).Append(
+			alfred.NewItem().SetTitle("a background job is running"),
+		)
+		awf.Output()
 		return
 	}
 
-	awf.Rerun(0.5).Append(&alfred.Item{
-		Title: "start a backgroup job",
-	}).Job(jobName).StartWithExit(os.Args[0], os.Args[1:]...)
-
+	awf.Append(
+		alfred.NewItem().SetTitle("start a backgroup job"),
+	).Rerun(0.5).Job(jobName).StartWithExit(os.Args[0], os.Args[1:]...)
 	// clear existing(above) items as here is running as daemon
 	awf.Clear()
 	for i := 0; i < 5; i++ {
 		time.Sleep(5 * time.Second)
-		awf.Append(&alfred.Item{
-			Title: fmt.Sprintf("%d", i),
-		})
+		awf.Append(
+			alfred.NewItem().SetTitle(fmt.Sprintf("%d", i)),
+		)
 	}
 	awf.Cache(key).StoreItems().Workflow().Output()
 	return

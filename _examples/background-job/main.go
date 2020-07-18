@@ -75,9 +75,9 @@ func listJobs() error {
 	awf.EmptyWarning("no jobs", "")
 	jobs := awf.ListJobs()
 	for _, job := range jobs {
-		awf.Append(&alfred.Item{
-			Title: job.Name(),
-		})
+		awf.Append(
+			alfred.NewItem().SetTitle(job.Name()),
+		)
 	}
 	awf.Output()
 	return nil

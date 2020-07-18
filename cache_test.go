@@ -2,6 +2,7 @@ package alfred
 
 import (
 	"errors"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -19,7 +20,7 @@ func TestWorkflow_Cache(t *testing.T) {
 		args args
 	}{
 		{
-			name: "Cache behave singleton. return same address",
+			name: "Cache behaves singleton. return same address",
 			wf:   NewWorkflow(),
 			args: args{
 				key: "test1",
@@ -28,8 +29,8 @@ func TestWorkflow_Cache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filename := tt.args.key + cacheDefaultSuffix
-			c, err := cache.New(cacheDefaultDir, filename)
+			filename := tt.args.key + tt.wf.getCacheSuffix()
+			c, err := cache.New(os.TempDir(), filename)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -119,7 +120,7 @@ func TestCache_LoadStoreItems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Input test data
-			prepared := NewWorkflow().Append(testItems[0])
+			prepared := NewWorkflow().Append(item01[0])
 			err := prepared.Cache("test1").StoreItems().Err()
 			if err != nil {
 				t.Fatal(err)

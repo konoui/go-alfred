@@ -2,8 +2,14 @@ package alfred
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 )
+
+var emptyItem = Item{
+	Title:    "emptyTitle1",
+	Subtitle: "emptySubtitle1",
+}
 
 var item01 = Items{
 	&Item{
@@ -47,17 +53,17 @@ func TestDiffScriptFilter(t *testing.T) {
 	}{
 		{
 			description: "in the same order",
-			filepath:    "./test/test_scriptfilter_marshal.json",
+			filepath:    testFilePath("test_scriptfilter_marshal.json"),
 			items:       item01,
 		},
 		{
 			description: "in the different order",
-			filepath:    "./test/test_scriptfilter_marshal.json",
+			filepath:    testFilePath("test_scriptfilter_marshal.json"),
 			items:       item02,
 		},
 		{
 			description: "different values",
-			filepath:    "./test/test_scriptfilter_marshal.json",
+			filepath:    testFilePath("test_scriptfilter_marshal.json"),
 			items:       item03,
 			expectedErr: true,
 		},
@@ -82,4 +88,8 @@ func TestDiffScriptFilter(t *testing.T) {
 
 		})
 	}
+}
+
+func testFilePath(f string) string {
+	return filepath.Join("testdata", f)
 }

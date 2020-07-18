@@ -24,3 +24,4 @@ jobs:
         make fmt
         make lint
         make test
+        make build-examples

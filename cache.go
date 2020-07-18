@@ -4,13 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/konoui/go-alfred/cache"
 )
 
-var cacheDefaultDir = os.TempDir()
-var cacheDefaultSuffix = "-alfred.cache"
+const (
+	cacheDirKey = "cache-dir"
+)
+
+// ErrCacheExpired represent ttl is expired
+var ErrCacheExpired = errors.New("cache expired")
+
+type caches struct {
+	suffix string
+	caches sync.Map
+}
 
 // Cache wrapes cache.Cacher
 // If cache load/store error occurs, workflow will continue to work
@@ -22,31 +32,43 @@ type Cache struct {
 	err      error
 }
 
-// ErrCacheExpired represent ttl is expired
-var ErrCacheExpired = errors.New("cache expired")
+func (w *Workflow) getCacheDir() string {
+	dir, ok := w.dirs[cacheDirKey]
+	if ok {
+		return dir
+	}
+	return os.TempDir()
+}
 
 // SetCacheDir overrides default cache directory
 func (w *Workflow) SetCacheDir(dir string) (err error) {
 	if _, err = os.Stat(dir); err != nil {
 		return
 	}
-	cacheDefaultDir = dir
+	w.dirs[cacheDirKey] = dir
 	return
+}
+
+func (w *Workflow) getCacheSuffix() string {
+	if w.cache.suffix == "" {
+		return "-alfred.cache"
+	}
+	return w.cache.suffix
 }
 
 // SetCacheSuffix overrides suffix of default cache file
 func (w *Workflow) SetCacheSuffix(suffix string) {
-	cacheDefaultSuffix = suffix
+	w.cache.suffix = suffix
 }
 
 // Cache creates singleton instance
 func (w *Workflow) Cache(key string) *Cache {
-	filename := key + cacheDefaultSuffix
-	if v, ok := w.caches.Load(filename); ok {
+	filename := key + w.getCacheSuffix()
+	if v, ok := w.cache.caches.Load(filename); ok {
 		return v.(*Cache)
 	}
 
-	cr, err := cache.New(cacheDefaultDir, filename)
+	cr, err := cache.New(w.getCacheDir(), filename)
 	if err != nil {
 		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
 		w.logger.Println(err)
@@ -60,7 +82,7 @@ func (w *Workflow) Cache(key string) *Cache {
 		filename: filename,
 		ttl:      0 * time.Second,
 	}
-	w.caches.Store(filename, c)
+	w.cache.caches.Store(filename, c)
 
 	return c
 }

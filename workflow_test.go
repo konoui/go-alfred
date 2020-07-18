@@ -9,75 +9,6 @@ import (
 	"github.com/konoui/go-alfred/logger"
 )
 
-var testItems = Items{
-	&Item{
-		Title:    "title1",
-		Subtitle: "subtitle1",
-	},
-	&Item{
-		Title:    "title2",
-		Subtitle: "subtitle2",
-	},
-}
-
-var testEmptyItem = Item{
-	Title:    "emptyTitle1",
-	Subtitle: "emptySubtitle1",
-}
-
-func TestNewScriptFilter(t *testing.T) {
-	tests := []struct {
-		description string
-		want        ScriptFilter
-	}{
-		{
-			description: "create new workflow",
-			want:        ScriptFilter{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			got := NewScriptFilter()
-			if !reflect.DeepEqual(tt.want, got) {
-				t.Errorf("want: %+v, got: %+v", tt.want, got)
-			}
-
-		})
-	}
-}
-
-func TestScriptFilterMarshal(t *testing.T) {
-	tests := []struct {
-		description string
-		filepath    string
-		items       Items
-	}{
-		{
-			description: "create new scriptfilter",
-			filepath:    "./test/test_scriptfilter_marshal.json",
-			items:       testItems,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			want, err := ioutil.ReadFile(tt.filepath)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			wf := NewScriptFilter()
-			for _, item := range tt.items {
-				wf.Append(item)
-			}
-
-			got := wf.Marshal()
-			if diff := DiffScriptFilter(want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
-			}
-		})
-	}
-}
-
 func TestNewWorkflow(t *testing.T) {
 	tests := []struct {
 		description string
@@ -94,6 +25,7 @@ func TestNewWorkflow(t *testing.T) {
 					err: ioutil.Discard,
 				},
 				logger: logger.New(ioutil.Discard),
+				dirs:   make(map[string]string),
 			},
 		},
 	}
@@ -184,15 +116,15 @@ func TestWorfkflowMarshal(t *testing.T) {
 	}{
 		{
 			description: "output standard items",
-			filepath:    "./test/test_scriptfilter_marshal.json",
-			items:       testItems,
-			emptyItem:   testEmptyItem,
+			filepath:    testFilePath("test_scriptfilter_marshal.json"),
+			items:       item01,
+			emptyItem:   emptyItem,
 		},
 		{
 			description: "output empty warning",
-			filepath:    "./test/test_scriptfilter_empty_warning_marshal.json",
+			filepath:    testFilePath("test_scriptfilter_empty_warning_marshal.json"),
 			items:       Items{},
-			emptyItem:   testEmptyItem,
+			emptyItem:   emptyItem,
 		},
 	}
 	for _, tt := range tests {
