@@ -77,8 +77,17 @@ func (c *Context) Daemonize() (ProcessStatus, error) {
 		}
 		// overwride sid
 		attr.Sys.Setsid = true
+
+		// update command name to abs path as working directory of child may be changed
+		asbPath, err := filepath.Abs(c.Name)
+		if err != nil {
+			return FailedProcess, err
+		}
+		c.Name = asbPath
+
 		// must set a program name as first argument
 		args := append([]string{c.Name}, c.Args...)
+
 		child, err := os.StartProcess(c.Name, args, attr)
 		if err != nil {
 			return FailedProcess, err

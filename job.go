@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/konoui/go-alfred/daemon"
@@ -139,7 +140,8 @@ func (j *Job) files() []*os.File {
 		return nil
 	}
 
-	f, err := os.OpenFile(j.name+".log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	p := filepath.Join(j.dir, j.name+".log")
+	f, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return nil
 	}
