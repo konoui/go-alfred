@@ -140,8 +140,12 @@ func (j *Job) files() []*os.File {
 		return nil
 	}
 
-	p := filepath.Join(j.dir, j.name+".log")
-	f, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	absPath, err := filepath.Abs(filepath.Join(j.dir, j.name+".log"))
+	if err != nil {
+		return nil
+	}
+
+	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return nil
 	}
