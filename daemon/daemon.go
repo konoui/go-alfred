@@ -36,6 +36,7 @@ var (
 type Context struct {
 	Name        string
 	Args        []string
+	PidDir      string
 	Dir         string
 	Files       []*os.File
 	Env         []string
@@ -94,7 +95,7 @@ func (c *Context) Daemonize() (ProcessStatus, error) {
 		}
 
 		// create pid file
-		err = createPidFile(child.Pid, c.PidFileName, c.Dir)
+		err = createPidFile(child.Pid, c.PidFileName, c.PidDir)
 		if err != nil {
 			_ = child.Kill()
 			return FailedProcess, err
@@ -115,7 +116,7 @@ func (c *Context) Daemonize() (ProcessStatus, error) {
 
 // IsRunning returns true if the daemon is running
 func (c *Context) IsRunning() bool {
-	_, err := readPidFile(c.PidFileName, c.Dir)
+	_, err := readPidFile(c.PidFileName, c.PidDir)
 	return err == nil
 }
 
@@ -126,7 +127,7 @@ func (c *Context) IsChildProcess() bool {
 
 // Terminate kills the child process
 func (c *Context) Terminate() error {
-	pid, err := readPidFile(c.PidFileName, c.Dir)
+	pid, err := readPidFile(c.PidFileName, c.PidDir)
 	if err != nil {
 		return nil
 	}
@@ -154,7 +155,7 @@ func createPidFile(pid int, filename, dir string) error {
 	tmpPidfile := filepath.Join(dir, tmpfile)
 	pidfile := filepath.Join(dir, filename)
 	data := []byte(fmt.Sprintf("%d", pid))
-	err := ioutil.WriteFile(tmpPidfile, data, 0664)
+	err := ioutil.WriteFile(tmpPidfile, data, 0600)
 	if err != nil {
 		return err
 	}

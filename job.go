@@ -37,7 +37,6 @@ func (j JobProcess) String() string {
 // Job is context
 type Job struct {
 	name      string
-	dir       string
 	daemonCtx *daemon.Context
 	wf        *Workflow
 	logging   bool
@@ -47,11 +46,11 @@ type Job struct {
 func (w *Workflow) Job(name string) *Job {
 	c := new(daemon.Context)
 	c.PidFileName = name + ".pid"
+	c.PidDir = w.getJobDir()
 	return &Job{
 		name:      name,
 		daemonCtx: c,
 		wf:        w,
-		dir:       w.getJobDir(),
 	}
 }
 
@@ -64,12 +63,18 @@ func (w *Workflow) getJobDir() string {
 }
 
 // SetJobDir set job data directory
-func (w *Workflow) SetJobDir(dir string) (err error) {
-	if _, err = os.Stat(dir); err != nil {
-		return
+func (w *Workflow) SetJobDir(dir string) error {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return err
 	}
-	w.dirs[jobDirKey] = dir
-	return
+
+	if _, err := os.Stat(abs); err != nil {
+		return err
+	}
+
+	w.dirs[jobDirKey] = abs
+	return nil
 }
 
 // ListJobs return jobs managed by workflow
@@ -124,7 +129,6 @@ func (j *Job) Start(cmdName string, args ...string) (JobProcess, error) {
 	}
 	j.daemonCtx.Name = absPath
 	j.daemonCtx.Args = args
-	j.daemonCtx.Dir = j.dir
 	j.daemonCtx.Files = j.files()
 	j.daemonCtx.Env = os.Environ()
 
@@ -140,7 +144,7 @@ func (j *Job) files() []*os.File {
 		return nil
 	}
 
-	absPath, err := filepath.Abs(filepath.Join(j.dir, j.name+".log"))
+	absPath, err := filepath.Abs(filepath.Join(j.daemonCtx.PidDir, j.name+".log"))
 	if err != nil {
 		return nil
 	}

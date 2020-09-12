@@ -13,7 +13,7 @@ var (
 )
 
 const (
-	dataDir = "./"
+	dataDir = "./data"
 )
 
 func init() {
