@@ -81,7 +81,7 @@ func (w *Workflow) Variables(v Variables) *Workflow {
 }
 
 // EmptyWarning create a new Item to Marshal　when there are no standard items
-func (w *Workflow) EmptyWarning(title, subtitle string) {
+func (w *Workflow) EmptyWarning(title, subtitle string) *Workflow {
 	w.warn = NewScriptFilter()
 	w.warn.Append(
 		&Item{
@@ -89,10 +89,11 @@ func (w *Workflow) EmptyWarning(title, subtitle string) {
 			Subtitle: subtitle,
 			Valid:    true,
 		})
+	return w
 }
 
 // error append a new Item to error ScriptFilter
-func (w *Workflow) error(title, subtitle string) {
+func (w *Workflow) error(title, subtitle string) *Workflow {
 	w.err = NewScriptFilter()
 	w.err.Append(
 		&Item{
@@ -100,6 +101,7 @@ func (w *Workflow) error(title, subtitle string) {
 			Subtitle: subtitle,
 			Valid:    true,
 		})
+	return w
 }
 
 // Marshal WorkFlow results
@@ -125,12 +127,13 @@ func (w *Workflow) Fatal(title, subtitle string) {
 }
 
 // Output to io stream
-func (w *Workflow) Output() {
+func (w *Workflow) Output() *Workflow {
 	if w.done {
 		w.logger.Println(sentMessage)
-		return
+		return w
 	}
 	res := w.Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
 	w.done = true
+	return w
 }
