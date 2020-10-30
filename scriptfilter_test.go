@@ -9,11 +9,11 @@ import (
 func TestNewScriptFilter(t *testing.T) {
 	tests := []struct {
 		description string
-		want        ScriptFilter
+		want        *ScriptFilter
 	}{
 		{
-			description: "create new workflow",
-			want:        ScriptFilter{},
+			description: "create new scriptfilter",
+			want:        &ScriptFilter{},
 		},
 	}
 	for _, tt := range tests {

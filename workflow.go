@@ -12,9 +12,9 @@ import (
 
 // Workflow is map of ScriptFilters
 type Workflow struct {
-	std     ScriptFilter
-	warn    ScriptFilter
-	err     ScriptFilter
+	std     *ScriptFilter
+	warn    *ScriptFilter
+	err     *ScriptFilter
 	cache   caches
 	streams streams
 	done    bool
@@ -67,16 +67,23 @@ func (w *Workflow) Clear() *Workflow {
 	return w
 }
 
-// Rerun set rerun variable
-func (w *Workflow) Rerun(i Rerun) *Workflow {
-	w.std.Rerun = i
-	w.warn.Rerun = i
+// SetRerun set rerun variable
+func (w *Workflow) SetRerun(i Rerun) *Workflow {
+	w.std.SetRerun(i)
+	w.warn.SetRerun(i)
+	w.err.SetRerun(i)
 	return w
 }
 
-// Variables set variables
-func (w *Workflow) Variables(v Variables) *Workflow {
-	w.std.Variables = v
+// SetVariables set variables for ScriptFilter
+func (w *Workflow) SetVariables(v Variables) *Workflow {
+	w.std.SetVariables(v)
+	return w
+}
+
+// SetVariable set variable for ScriptFilter
+func (w *Workflow) SetVariable(key, value string) *Workflow {
+	w.std.SetVariable(key, value)
 	return w
 }
 
@@ -84,11 +91,12 @@ func (w *Workflow) Variables(v Variables) *Workflow {
 func (w *Workflow) EmptyWarning(title, subtitle string) *Workflow {
 	w.warn = NewScriptFilter()
 	w.warn.Append(
-		&Item{
-			Title:    title,
-			Subtitle: subtitle,
-			Valid:    true,
-		})
+		NewItem().
+			SetTitle(title).
+			SetSubtitle(subtitle).
+			SetValid(true).
+			SetIcon(IconAlertNote),
+	)
 	return w
 }
 
@@ -96,17 +104,18 @@ func (w *Workflow) EmptyWarning(title, subtitle string) *Workflow {
 func (w *Workflow) error(title, subtitle string) *Workflow {
 	w.err = NewScriptFilter()
 	w.err.Append(
-		&Item{
-			Title:    title,
-			Subtitle: subtitle,
-			Valid:    true,
-		})
+		NewItem().
+			SetTitle(title).
+			SetSubtitle(subtitle).
+			SetValid(true).
+			SetIcon(IconCaution),
+	)
 	return w
 }
 
 // Marshal WorkFlow results
 func (w *Workflow) Marshal() []byte {
-	if len(w.std.Items) == 0 {
+	if w.std.IsEmpty() {
 		return w.warn.Marshal()
 	}
 

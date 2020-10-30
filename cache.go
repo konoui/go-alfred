@@ -50,10 +50,16 @@ func (w *Workflow) SetCacheDir(dir string) (err error) {
 }
 
 func (w *Workflow) getCacheSuffix() string {
-	if w.cache.suffix == "" {
-		return "-alfred.cache"
+	if w.cache.suffix != "" {
+		return w.cache.suffix
 	}
-	return w.cache.suffix
+
+	bundleID := os.Getenv("alfred_workflow_bundleid")
+	if bundleID != "" {
+		return bundleID
+	}
+
+	return "-alfred.cache"
 }
 
 // SetCacheSuffix overrides suffix of default cache file
@@ -83,7 +89,6 @@ func (w *Workflow) Cache(key string) *Cache {
 		ttl:      0 * time.Second,
 	}
 	w.cache.caches.Store(filename, c)
-
 	return c
 }
 
@@ -99,36 +104,40 @@ func (c *Cache) Err() error {
 
 // LoadItems reads data from cache file
 func (c *Cache) LoadItems() *Cache {
-	var items Items
-	if err := c.Load(&items); err != nil {
+	var err error
+	defer func() {
 		c.err = err
+	}()
+
+	var items Items
+	if err = c.Load(&items); err != nil {
 		return c
 	}
 	if c.Expired(c.ttl) {
-		err := fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
-		c.err = err
+		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.wf.logger.Println(err)
 		return c
 	}
 
-	// update
-	c.err = nil
 	c.wf.std.Items = items
 	return c
 }
 
 // StoreItems saves data into cache file
 func (c *Cache) StoreItems() *Cache {
+	var err error
+	defer func() {
+		c.err = err
+	}()
+
 	// Note: If there is no item, we avoid to save data into cache.
 	// We define it is no error case
 	items := c.wf.std.Items
 	if len(items) == 0 {
-		c.err = nil
 		return c
 	}
 
-	if err := c.Store(items); err != nil {
-		c.err = err
+	if err = c.Store(items); err != nil {
 		c.wf.logger.Println(err)
 	}
 	return c
@@ -136,14 +145,21 @@ func (c *Cache) StoreItems() *Cache {
 
 // MaxAge sets cache TTL
 func (c *Cache) MaxAge(ttl time.Duration) *Cache {
+	defer func() {
+		c.err = nil
+	}()
 	c.ttl = ttl
 	return c
 }
 
 // Delete cache data
 func (c *Cache) Delete() *Cache {
-	if err := c.Clear(); err != nil {
+	var err error
+	defer func() {
 		c.err = err
+	}()
+
+	if err = c.Clear(); err != nil {
 		c.wf.logger.Println(err)
 	}
 	return c

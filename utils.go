@@ -25,3 +25,11 @@ func GetDataDir() (string, error) {
 	}
 	return abs, nil
 }
+
+var (
+	iconPath      = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
+	IconTrash     = NewIcon().SetPath(filepath.Join(iconPath, "TrashIcon.icns"))
+	IconAlertNote = NewIcon().SetPath(filepath.Join(iconPath, "AlertNoteIcon.icns"))
+	IconCaution   = NewIcon().SetPath(filepath.Join(iconPath, "AlertCautionIcon.icns"))
+	IconAlertStop = NewIcon().SetPath(filepath.Join(iconPath, "AlertStopIcon.icns"))
+)
