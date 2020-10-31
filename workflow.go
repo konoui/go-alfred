@@ -24,7 +24,6 @@ type Workflow struct {
 
 type streams struct {
 	out io.Writer
-	err io.Writer
 }
 
 // SetOut redirect stdout
@@ -34,8 +33,7 @@ func (w *Workflow) SetOut(out io.Writer) {
 
 // SetErr redirect stderr for debug util of the library.
 func (w *Workflow) SetErr(stderr io.Writer) {
-	w.streams.err = stderr
-	w.logger = logger.New(w.streams.err)
+	w.logger = logger.New(stderr)
 }
 
 // NewWorkflow has simple ScriptFilter api
@@ -46,7 +44,6 @@ func NewWorkflow() *Workflow {
 		err:  NewScriptFilter(),
 		streams: streams{
 			out: os.Stdout,
-			err: ioutil.Discard,
 		},
 		logger: logger.New(ioutil.Discard),
 		dirs:   make(map[string]string),
@@ -144,5 +141,11 @@ func (w *Workflow) Output() *Workflow {
 	res := w.Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
 	w.done = true
+	return w
+}
+
+// Logf print messages to debug console in workflow
+func (w *Workflow) Logf(format string, v ...interface{}) *Workflow {
+	w.logger.Printf(format, v...)
 	return w
 }

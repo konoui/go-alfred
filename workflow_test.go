@@ -22,7 +22,6 @@ func TestNewWorkflow(t *testing.T) {
 				err:  NewScriptFilter(),
 				streams: streams{
 					out: os.Stdout,
-					err: ioutil.Discard,
 				},
 				logger: logger.New(ioutil.Discard),
 				dirs:   make(map[string]string),

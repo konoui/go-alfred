@@ -59,7 +59,7 @@ func (w *Workflow) getJobDir() string {
 	if ok {
 		return dir
 	}
-	return "./"
+	return os.TempDir()
 }
 
 // SetJobDir set job data directory
