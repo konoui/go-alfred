@@ -152,8 +152,8 @@ func (c *Cache) MaxAge(ttl time.Duration) *Cache {
 	return c
 }
 
-// Delete cache data
-func (c *Cache) Delete() *Cache {
+// ClearItems clear cache data
+func (c *Cache) ClearItems() *Cache {
 	var err error
 	defer func() {
 		c.err = err

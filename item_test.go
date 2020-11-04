@@ -1,6 +1,7 @@
 package alfred
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -38,6 +39,10 @@ func TestItemAPI(t *testing.T) {
 					Copy:      "copy",
 					LargeType: "largetype",
 				},
+				Match:        "match-value",
+				QuicklookURL: "quick-url",
+				UID:          "uid",
+				Valid:        false,
 			},
 		},
 	}
@@ -46,7 +51,10 @@ func TestItemAPI(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			input := tt.want
 			item := NewItem().SetTitle(input.Title).SetSubtitle(input.Subtitle).
-				SetArg(input.Arg).SetAutocomplete(input.Autocomplete)
+				SetArg(input.Arg).SetAutocomplete(input.Autocomplete).
+				SetMatch(input.Match).SetQuicklookURL(input.QuicklookURL).
+				SetUID(input.UID).SetValid(input.Valid).
+				SetMods(input.Mods).SetMod(ModCtrl, input.Mods[ModCtrl])
 
 			for k, v := range input.Variables {
 				item.SetVariable(k, v)
@@ -71,4 +79,23 @@ func TestItemAPI(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_SetVariableVariables(t *testing.T) {
+	name := "set a variable and variables"
+	vals := Variables{"key1": "val1", "key2": "val2"}
+	want := &Item{
+		Variables: Variables{
+			"key0": "val0",
+			"key1": "val1",
+			"key2": "val2",
+			"key3": "val3",
+		},
+	}
+	t.Run(name, func(t *testing.T) {
+		got := NewItem().SetVariable("key0", "val0").SetVariables(vals).SetVariable("key3", "val3")
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("want: %+v, got: %+v", want, got)
+		}
+	})
 }

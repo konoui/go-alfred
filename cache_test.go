@@ -97,7 +97,7 @@ func TestCache_MaxAge(t *testing.T) {
 	}
 }
 
-func TestCache_LoadStoreItems(t *testing.T) {
+func TestCache_LoadStoreClearItems(t *testing.T) {
 	tests := []struct {
 		name      string
 		wf        *Workflow
@@ -119,15 +119,21 @@ func TestCache_LoadStoreItems(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			cacheKey := "test1"
+			defer func() {
+				if err := tt.wf.Cache(cacheKey).ClearItems().Err(); err != nil {
+					t.Error(err)
+				}
+			}()
 			// Input test data
 			prepared := NewWorkflow().Append(item01[0])
-			err := prepared.Cache("test1").StoreItems().Err()
+			err := prepared.Cache(cacheKey).StoreItems().Err()
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			// load cache from new workflow
-			err = tt.wf.Cache("test1").MaxAge(tt.age).LoadItems().Err()
+			err = tt.wf.Cache(cacheKey).MaxAge(tt.age).LoadItems().Err()
 			if !tt.expectErr && err != nil {
 				t.Fatal(err)
 			}
@@ -140,8 +146,57 @@ func TestCache_LoadStoreItems(t *testing.T) {
 			want := prepared.std.Items
 			got := tt.wf.std.Items
 			if !tt.expectErr && !reflect.DeepEqual(want, got) {
-				t.Errorf("got %v\n got %v", want, got)
+				t.Errorf("want %v\n got %v", want, got)
 			}
 		})
 	}
+}
+
+func Test_SetGetCacheDir(t *testing.T) {
+	name := "set/get cache direvtory"
+	t.Run(name, func(t *testing.T) {
+		if err := NewWorkflow().SetCacheDir("invalid-directory-name"); err == nil {
+			t.Errorf("unexpected results")
+		}
+
+		awf := NewWorkflow()
+		want := os.TempDir()
+		got := awf.getCacheDir()
+		if want != got {
+			t.Errorf("want %s got %s", want, got)
+		}
+
+		want, err := os.UserHomeDir()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := awf.SetCacheDir(want); err != nil {
+			t.Errorf(err.Error())
+		}
+		got = awf.getCacheDir()
+
+		if want != got {
+			t.Errorf("want %s got %s", want, got)
+		}
+	})
+}
+
+func Test_SetGetCacheSuffix(t *testing.T) {
+	name := "set/get cache suffix"
+	t.Run(name, func(t *testing.T) {
+		got := NewWorkflow().getCacheSuffix()
+		want := "-alfred.cache"
+		if want != got {
+			t.Errorf("want %s got %s", want, got)
+		}
+
+		awf := NewWorkflow()
+		want = "test"
+		awf.SetCacheSuffix(want)
+		got = awf.getCacheSuffix()
+		if want != got {
+			t.Errorf("want %s got %s", want, got)
+		}
+	})
 }
