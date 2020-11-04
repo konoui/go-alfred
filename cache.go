@@ -25,7 +25,7 @@ type caches struct {
 // Cache wrapes cache.Cacher
 // If cache load/store error occurs, workflow will continue to work
 type Cache struct {
-	cache.Cacher
+	iCache   cache.Cacher
 	filename string
 	ttl      time.Duration
 	wf       *Workflow
@@ -84,7 +84,7 @@ func (w *Workflow) Cache(key string) *Cache {
 	c := &Cache{
 		err:      err,
 		wf:       w,
-		Cacher:   cr,
+		iCache:   cr,
 		filename: filename,
 		ttl:      0 * time.Second,
 	}
@@ -110,10 +110,10 @@ func (c *Cache) LoadItems() *Cache {
 	}()
 
 	var items Items
-	if err = c.Load(&items); err != nil {
+	if err = c.iCache.Load(&items); err != nil {
 		return c
 	}
-	if c.Expired(c.ttl) {
+	if c.iCache.Expired(c.ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.wf.logger.Println(err)
 		return c
@@ -137,7 +137,7 @@ func (c *Cache) StoreItems() *Cache {
 		return c
 	}
 
-	if err = c.Store(items); err != nil {
+	if err = c.iCache.Store(items); err != nil {
 		c.wf.logger.Println(err)
 	}
 	return c
@@ -159,7 +159,7 @@ func (c *Cache) ClearItems() *Cache {
 		c.err = err
 	}()
 
-	if err = c.Clear(); err != nil {
+	if err = c.iCache.Clear(); err != nil {
 		c.wf.logger.Println(err)
 	}
 	return c

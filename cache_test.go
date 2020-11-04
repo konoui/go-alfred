@@ -37,7 +37,7 @@ func TestWorkflow_Cache(t *testing.T) {
 			want := &Cache{
 				err:      nil,
 				wf:       tt.wf,
-				Cacher:   c,
+				iCache:   c,
 				filename: filename,
 				ttl:      0 * time.Second,
 			}
