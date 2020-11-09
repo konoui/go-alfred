@@ -27,7 +27,6 @@ type caches struct {
 type Cache struct {
 	iCache   cache.Cacher
 	filename string
-	ttl      time.Duration
 	wf       *Workflow
 	err      error
 }
@@ -49,17 +48,24 @@ func (w *Workflow) SetCacheDir(dir string) (err error) {
 	return
 }
 
-func (w *Workflow) getCacheSuffix() string {
-	if w.cache.suffix != "" {
-		return w.cache.suffix
+func (w *Workflow) getCacheSuffix() (suffix string) {
+	suffix = w.cache.suffix
+	if suffix != "" {
+		return
 	}
 
-	bundleID := os.Getenv("alfred_workflow_bundleid")
-	if bundleID != "" {
-		return bundleID
+	defer func() {
+		// Note set env or default value to cache for cache role
+		w.cache.suffix = suffix
+	}()
+
+	suffix = os.Getenv("alfred_workflow_bundleid")
+	if suffix != "" {
+		return
 	}
 
-	return "-alfred.cache"
+	suffix = "-alfred.cache"
+	return
 }
 
 // SetCacheSuffix overrides suffix of default cache file
@@ -86,7 +92,6 @@ func (w *Workflow) Cache(key string) *Cache {
 		wf:       w,
 		iCache:   cr,
 		filename: filename,
-		ttl:      0 * time.Second,
 	}
 	w.cache.caches.Store(filename, c)
 	return c
@@ -103,7 +108,7 @@ func (c *Cache) Err() error {
 }
 
 // LoadItems reads data from cache file
-func (c *Cache) LoadItems() *Cache {
+func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 	var err error
 	defer func() {
 		c.err = err
@@ -113,7 +118,7 @@ func (c *Cache) LoadItems() *Cache {
 	if err = c.iCache.Load(&items); err != nil {
 		return c
 	}
-	if c.iCache.Expired(c.ttl) {
+	if c.iCache.Expired(ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.wf.logger.Println(err)
 		return c
@@ -132,23 +137,14 @@ func (c *Cache) StoreItems() *Cache {
 
 	// Note: If there is no item, we avoid to save data into cache.
 	// We define it is no error case
-	items := c.wf.std.Items
-	if len(items) == 0 {
+	if c.wf.std.IsEmpty() {
 		return c
 	}
 
+	items := c.wf.std.Items
 	if err = c.iCache.Store(items); err != nil {
 		c.wf.logger.Println(err)
 	}
-	return c
-}
-
-// MaxAge sets cache TTL
-func (c *Cache) MaxAge(ttl time.Duration) *Cache {
-	defer func() {
-		c.err = nil
-	}()
-	c.ttl = ttl
 	return c
 }
 

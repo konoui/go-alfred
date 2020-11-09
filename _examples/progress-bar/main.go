@@ -34,7 +34,7 @@ func init() {
 func main() {
 	key := "test"
 	jobName := "progress-bar"
-	if awf.Cache(key).MaxAge(60*time.Second).LoadItems().Err() == nil {
+	if awf.Cache(key).LoadItems(60*time.Second).Err() == nil {
 		awf.Output()
 		return
 	}

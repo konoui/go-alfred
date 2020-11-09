@@ -39,7 +39,6 @@ func TestWorkflow_Cache(t *testing.T) {
 				wf:       tt.wf,
 				iCache:   c,
 				filename: filename,
-				ttl:      0 * time.Second,
 			}
 
 			got := tt.wf.Cache(tt.args.key)
@@ -75,45 +74,23 @@ func TestCache_Workflow(t *testing.T) {
 	}
 }
 
-func TestCache_MaxAge(t *testing.T) {
-	tests := []struct {
-		name string
-		c    *Cache
-		want time.Duration
-	}{
-		{
-			name: "set maxage",
-			c:    NewWorkflow().Cache("test"),
-			want: 90 * time.Second,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.c.MaxAge(tt.want).ttl
-			if got != tt.want {
-				t.Errorf("Cache.MaxAge() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestCache_LoadStoreClearItems(t *testing.T) {
 	tests := []struct {
 		name      string
 		wf        *Workflow
-		age       time.Duration
+		ttl       time.Duration
 		expectErr bool
 	}{
 		{
 			name:      "equal address and data stored and loaded instance",
 			wf:        NewWorkflow(),
-			age:       1 * time.Minute,
+			ttl:       1 * time.Minute,
 			expectErr: false,
 		},
 		{
 			name:      "cache expired error",
 			wf:        NewWorkflow(),
-			age:       0 * time.Minute,
+			ttl:       0 * time.Minute,
 			expectErr: true,
 		},
 	}
@@ -133,7 +110,7 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 			}
 
 			// load cache from new workflow
-			err = tt.wf.Cache(cacheKey).MaxAge(tt.age).LoadItems().Err()
+			err = tt.wf.Cache(cacheKey).LoadItems(tt.ttl).Err()
 			if !tt.expectErr && err != nil {
 				t.Fatal(err)
 			}
@@ -185,13 +162,19 @@ func Test_SetGetCacheDir(t *testing.T) {
 func Test_SetGetCacheSuffix(t *testing.T) {
 	name := "set/get cache suffix"
 	t.Run(name, func(t *testing.T) {
-		got := NewWorkflow().getCacheSuffix()
+		awf := NewWorkflow()
+		got := awf.getCacheSuffix()
 		want := "-alfred.cache"
 		if want != got {
 			t.Errorf("want %s got %s", want, got)
 		}
 
-		awf := NewWorkflow()
+		got = awf.cache.suffix
+		if want != got {
+			t.Errorf("want %s got %s", want, got)
+		}
+
+		awf = NewWorkflow()
 		want = "test"
 		awf.SetCacheSuffix(want)
 		got = awf.getCacheSuffix()
