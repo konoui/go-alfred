@@ -103,7 +103,7 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 				}
 			}()
 			// Input test data
-			prepared := NewWorkflow().Append(item01[0])
+			prepared := NewWorkflow().Append(items01[0])
 			err := prepared.Cache(cacheKey).StoreItems().Err()
 			if err != nil {
 				t.Fatal(err)
@@ -120,10 +120,10 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 			}
 
 			// compare new workflow data to soted workflow data
-			want := prepared.std.Items
-			got := tt.wf.std.Items
+			want := prepared.std.items
+			got := tt.wf.std.items
 			if !tt.expectErr && !reflect.DeepEqual(want, got) {
-				t.Errorf("want %v\n got %v", want, got)
+				t.Errorf("want %#v\n got %#v", want, got)
 			}
 		})
 	}

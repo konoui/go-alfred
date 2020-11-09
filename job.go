@@ -54,12 +54,15 @@ func (w *Workflow) Job(name string) *Job {
 	}
 }
 
-func (w *Workflow) getJobDir() string {
+func (w *Workflow) getJobDir() (dir string) {
 	dir, ok := w.dirs[jobDirKey]
 	if ok {
-		return dir
+		return
 	}
-	return os.TempDir()
+
+	dir = os.TempDir()
+	w.dirs[jobDirKey] = dir
+	return
 }
 
 // SetJobDir set job data directory

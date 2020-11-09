@@ -2,6 +2,10 @@
 // see https://www.alfredapp.com/help/workflows/inputs/script-filter/json/
 package alfred
 
+import (
+	"encoding/json"
+)
+
 // Rerun re-run automatically after an interval
 type Rerun float64
 
@@ -13,6 +17,121 @@ type Items []*Item
 
 // Item a workflow object
 type Item struct {
+	variables    Variables
+	uid          string
+	title        string
+	subtitle     string
+	arg          string
+	icon         *Icon
+	autocomplete string
+	typ          string
+	valid        bool
+	match        string
+	mods         map[ModKey]*Mod
+	text         *Text
+	quicklookURL string
+}
+
+// NewItem generates new item
+func NewItem() *Item {
+	return new(Item)
+}
+
+// Variables adds variables
+func (i *Item) Variables(vars Variables) *Item {
+	for k, v := range vars {
+		i.Variable(k, v)
+	}
+	return i
+}
+
+// Variable adds single key/value pair
+func (i *Item) Variable(k, v string) *Item {
+	if i.variables == nil {
+		i.variables = make(Variables)
+	}
+	i.variables[k] = v
+	return i
+}
+
+// UID adds uid
+func (i *Item) UID(s string) *Item {
+	i.uid = s
+	return i
+}
+
+// Title adds title
+func (i *Item) Title(s string) *Item {
+	i.title = s
+	return i
+}
+
+// Subtitle adds subtitle
+func (i *Item) Subtitle(s string) *Item {
+	i.subtitle = s
+	return i
+}
+
+// Arg adds arg
+func (i *Item) Arg(arg string) *Item {
+	i.arg = arg
+	return i
+}
+
+// Icon adds icon
+func (i *Item) Icon(icon *Icon) *Item {
+	i.icon = icon
+	return i
+}
+
+// Autocomplete adds autocomplete
+func (i *Item) Autocomplete(s string) *Item {
+	i.autocomplete = s
+	return i
+}
+
+// Valid adds valid
+func (i *Item) Valid(b bool) *Item {
+	i.valid = b
+	return i
+}
+
+// Match adds match
+func (i *Item) Match(s string) *Item {
+	i.match = s
+	return i
+}
+
+// Mods adds mods
+func (i *Item) Mods(mods map[ModKey]*Mod) *Item {
+	for k, v := range mods {
+		i.Mod(k, v)
+	}
+	return i
+}
+
+// Mod adds single mod
+func (i *Item) Mod(key ModKey, mod *Mod) *Item {
+	if i.mods == nil {
+		i.mods = make(map[ModKey]*Mod)
+	}
+	i.mods[key] = mod
+	return i
+}
+
+// Text adds text
+func (i *Item) Text(t *Text) *Item {
+	i.text = t
+	return i
+}
+
+// QuicklookURL adds quicklookURL
+func (i *Item) QuicklookURL(u string) *Item {
+	i.quicklookURL = u
+	return i
+}
+
+type iItem struct {
 	Variables    Variables       `json:"variables,omitempty"`
 	UID          string          `json:"uid,omitempty"`
 	Title        string          `json:"title"`
@@ -28,215 +147,46 @@ type Item struct {
 	QuicklookURL string          `json:"quicklookurl,omitempty"`
 }
 
-// NewItem generates new item
-func NewItem() *Item {
-	return new(Item)
-}
-
-// SetVariables sets variables
-func (i *Item) SetVariables(vars Variables) *Item {
-	for k, v := range vars {
-		i.SetVariable(k, v)
+func (i *Item) MarshalJSON() ([]byte, error) {
+	out := &iItem{
+		Variables:    i.variables,
+		UID:          i.uid,
+		Title:        i.title,
+		Subtitle:     i.subtitle,
+		Arg:          i.arg,
+		Icon:         i.icon,
+		Autocomplete: i.autocomplete,
+		Type:         i.typ,
+		Valid:        i.valid,
+		Match:        i.match,
+		Mods:         i.mods,
+		Text:         i.text,
+		QuicklookURL: i.quicklookURL,
 	}
-	return i
+	return json.Marshal(out)
 }
 
-// SetVariable sets single key/value pair
-func (i *Item) SetVariable(k, v string) *Item {
-	if i.Variables == nil {
-		i.Variables = make(Variables)
+func (i *Item) UnmarshalJSON(data []byte) error {
+	in := &iItem{}
+	err := json.Unmarshal(data, in)
+	if err != nil {
+		return err
 	}
-	i.Variables[k] = v
-	return i
-}
 
-// SetUID sets uid
-func (i *Item) SetUID(s string) *Item {
-	i.UID = s
-	return i
-}
-
-// SetTitle sets title
-func (i *Item) SetTitle(s string) *Item {
-	i.Title = s
-	return i
-}
-
-// SetSubtitle sets subtitle
-func (i *Item) SetSubtitle(s string) *Item {
-	i.Subtitle = s
-	return i
-}
-
-// SetArg sets arg
-func (i *Item) SetArg(arg string) *Item {
-	i.Arg = arg
-	return i
-}
-
-// SetIcon sets icon
-func (i *Item) SetIcon(icon *Icon) *Item {
-	i.Icon = icon
-	return i
-}
-
-// SetAutocomplete sets autocomplete
-func (i *Item) SetAutocomplete(s string) *Item {
-	i.Autocomplete = s
-	return i
-}
-
-// SetValid sets valid
-func (i *Item) SetValid(b bool) *Item {
-	i.Valid = b
-	return i
-}
-
-// SetMatch sets match
-func (i *Item) SetMatch(s string) *Item {
-	i.Match = s
-	return i
-}
-
-// SetMods sets mods
-func (i *Item) SetMods(mods map[ModKey]*Mod) *Item {
-	for k, v := range mods {
-		i.SetMod(k, v)
+	*i = Item{
+		variables:    in.Variables,
+		uid:          in.UID,
+		title:        in.Title,
+		subtitle:     in.Subtitle,
+		arg:          in.Arg,
+		icon:         in.Icon,
+		autocomplete: in.Autocomplete,
+		typ:          in.Type,
+		valid:        in.Valid,
+		match:        in.Match,
+		mods:         in.Mods,
+		text:         in.Text,
+		quicklookURL: in.QuicklookURL,
 	}
-	return i
-}
-
-// SetMod sets single mod
-func (i *Item) SetMod(key ModKey, mod *Mod) *Item {
-	if i.Mods == nil {
-		i.Mods = make(map[ModKey]*Mod)
-	}
-	i.Mods[key] = mod
-	return i
-}
-
-// SetText sets text
-func (i *Item) SetText(t *Text) *Item {
-	i.Text = t
-	return i
-}
-
-// SetQuicklookURL sets quicklookURL
-func (i *Item) SetQuicklookURL(u string) *Item {
-	i.QuicklookURL = u
-	return i
-}
-
-// ModKey is a mod key pressed by the user to run an alternate
-type ModKey string
-
-// Valid attribute to mark if the result is valid based on the modifier selection and set a different arg to be passed out if actioned with the modifier.
-const (
-	ModCmd   ModKey = "cmd"   // Alternate action for ⌘↩
-	ModAlt   ModKey = "alt"   // Alternate action for ⌥↩
-	ModOpt   ModKey = "alt"   // Synonym for ModAlt
-	ModCtrl  ModKey = "ctrl"  // Alternate action for ^↩
-	ModShift ModKey = "shift" // Alternate action for ⇧↩
-	ModFn    ModKey = "fn"    // Alternate action for fn↩
-)
-
-// Mod element gives you control over how the modifier keys react
-type Mod struct {
-	Variables Variables `json:"variables,omitempty"`
-	Valid     bool      `json:"valid,omitempty"`
-	Arg       string    `json:"arg,omitempty"`
-	Subtitle  string    `json:"subtitle,omitempty"`
-	Icon      *Icon     `json:"icon,omitempty"`
-}
-
-// NewMod generates new mod
-func NewMod() *Mod {
-	return new(Mod)
-}
-
-// SetVariables sets mod variables
-func (m *Mod) SetVariables(vars Variables) *Mod {
-	for k, v := range vars {
-		m.SetVariable(k, v)
-	}
-	return m
-}
-
-// SetVariable sets mod single key/value pair
-func (m *Mod) SetVariable(k, v string) *Mod {
-	if m.Variables == nil {
-		m.Variables = make(Variables)
-	}
-	m.Variables[k] = v
-	return m
-}
-
-// SetValid sets mod valid or not
-func (m *Mod) SetValid(b bool) *Mod {
-	m.Valid = b
-	return m
-}
-
-// SetArg sets mod argument
-func (m *Mod) SetArg(s string) *Mod {
-	m.Arg = s
-	return m
-}
-
-// SetSubtitle sets mod subtitle
-func (m *Mod) SetSubtitle(s string) *Mod {
-	m.Subtitle = s
-	return m
-}
-
-// SetIcon sets mod icon
-func (m *Mod) SetIcon(icon *Icon) *Mod {
-	m.Icon = icon
-	return m
-}
-
-// Icon displayed in the result row
-type Icon struct {
-	Type string `json:"type,omitempty"`
-	Path string `json:"path,omitempty"`
-}
-
-// NewIcon generates new icon
-func NewIcon() *Icon {
-	return new(Icon)
-}
-
-// SetType sets icon type
-func (i *Icon) SetType(s string) *Icon {
-	i.Type = s
-	return i
-}
-
-// SetPath sets icon abs path
-func (i *Icon) SetPath(s string) *Icon {
-	i.Path = s
-	return i
-}
-
-// Text element defines the text the user will get when copying the selected result row
-type Text struct {
-	Copy      string `json:"copy,omitempty"`
-	LargeType string `json:"largetype,omitempty"`
-}
-
-// NewText generates new text
-func NewText() *Text {
-	return new(Text)
-}
-
-// SetCopy sets text copy value
-func (t *Text) SetCopy(s string) *Text {
-	t.Copy = s
-	return t
-}
-
-// SetLargeType sets text large type
-func (t *Text) SetLargeType(s string) *Text {
-	t.LargeType = s
-	return t
+	return nil
 }

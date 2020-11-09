@@ -8,17 +8,17 @@ import (
 
 var (
 	iconPath      = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
-	IconTrash     = NewIcon().SetPath(filepath.Join(iconPath, "TrashIcon.icns"))
-	IconAlertNote = NewIcon().SetPath(filepath.Join(iconPath, "AlertNoteIcon.icns"))
-	IconCaution   = NewIcon().SetPath(filepath.Join(iconPath, "AlertCautionIcon.icns"))
-	IconAlertStop = NewIcon().SetPath(filepath.Join(iconPath, "AlertStopIcon.icns"))
+	IconTrash     = NewIcon().Path(filepath.Join(iconPath, "TrashIcon.icns"))
+	IconAlertNote = NewIcon().Path(filepath.Join(iconPath, "AlertNoteIcon.icns"))
+	IconCaution   = NewIcon().Path(filepath.Join(iconPath, "AlertCautionIcon.icns"))
+	IconAlertStop = NewIcon().Path(filepath.Join(iconPath, "AlertStopIcon.icns"))
 )
 
 // GetDataDir returns alfred data directory if data dir does not exist, creates it
 func GetDataDir() (string, error) {
 	dir := os.Getenv("alfred_workflow_data")
 	if dir == "" {
-		return "", errors.New("alfred_workflow_data is empty")
+		return "", errors.New("alfred_workflow_data env is empty")
 	}
 
 	abs, err := filepath.Abs(dir)

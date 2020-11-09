@@ -1,0 +1,33 @@
+{
+    "items": [
+      {
+        "variables": {
+          "key": "value"
+        },
+        "uid": "uid",
+        "title": "title",
+        "subtitle": "subtitle",
+        "arg": "arg",
+        "icon": {
+          "type": "image",
+          "path": "./"
+        },
+        "autocomplete": "autocomplete",
+        "match": "match-value",
+        "mods": {
+          "ctrl": {
+            "variables": {
+              "key": "value"
+            },
+            "arg": "arg",
+            "subtitle": "modctrl"
+          }
+        },
+        "text": {
+          "copy": "copy",
+          "largetype": "largetype"
+        },
+        "quicklookurl": "quick-url"
+      }
+    ]
+  }

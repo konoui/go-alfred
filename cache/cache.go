@@ -1,14 +1,12 @@
 package cache
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 // Cacher implements a simple store/load API
@@ -49,8 +47,8 @@ func (c *Cache) Load(v interface{}) error {
 	}
 	defer f.Close()
 
-	if err = gob.NewDecoder(f).Decode(v); err != nil {
-		return errors.Wrapf(err, "failed to load data from cache (%s).", p)
+	if err = json.NewDecoder(f).Decode(v); err != nil {
+		return fmt.Errorf("failed to load data from cache (%s): %w", p, err)
 	}
 
 	return nil
@@ -66,8 +64,10 @@ func (c *Cache) Store(v interface{}) error {
 		return err
 	}
 	defer f.Close()
-	if err = gob.NewEncoder(f).Encode(v); err != nil {
-		return errors.Wrapf(err, "failed to save data into cache (%s)", p)
+
+	err = json.NewEncoder(f).Encode(v)
+	if err != nil {
+		return fmt.Errorf("failed to save data into cache (%s): %w", p, err)
 	}
 
 	return nil
@@ -100,7 +100,7 @@ func (c *Cache) age() (time.Duration, error) {
 	p := c.path()
 	fi, err := os.Stat(p)
 	if err != nil {
-		return time.Duration(0), err
+		return 0, err
 	}
 
 	return time.Since(fi.ModTime()), nil

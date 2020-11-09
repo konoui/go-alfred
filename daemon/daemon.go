@@ -184,7 +184,7 @@ func readPidFile(filename, dir string) (int, error) {
 	pid, err := strconv.Atoi(string(v))
 	if err != nil {
 		_ = os.Remove(pidfile)
-		return invalidPid, fmt.Errorf("pid is invalid format : %w", err)
+		return invalidPid, fmt.Errorf("pid is invalid format: %w", err)
 	}
 
 	err = syscall.Kill(pid, syscall.Signal(0))

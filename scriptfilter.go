@@ -12,9 +12,9 @@ const (
 
 // ScriptFilter JSON Format
 type ScriptFilter struct {
-	Rerun     Rerun     `json:"rerun,omitempty"`
-	Variables Variables `json:"variables,omitempty"`
-	Items     Items     `json:"items"`
+	rerun     Rerun
+	variables Variables
+	items     Items
 }
 
 // NewScriptFilter creates a new ScriptFilter
@@ -22,29 +22,34 @@ func NewScriptFilter() *ScriptFilter {
 	return &ScriptFilter{}
 }
 
-// Append a new Item to Items
-func (s *ScriptFilter) Append(item *Item) {
-	s.Items = append(s.Items, item)
-}
-
-// SetVariables sets ScriptFilter variables
-func (s *ScriptFilter) SetVariables(vars Variables) {
+// Variables sets ScriptFilter variables
+func (s *ScriptFilter) Variables(vars Variables) {
 	for k, v := range vars {
-		s.SetVariable(k, v)
+		s.Variable(k, v)
 	}
 }
 
-// SetVariable sets ScriptFilter variable
-func (s *ScriptFilter) SetVariable(k, v string) {
-	if s.Variables == nil {
-		s.Variables = make(Variables)
+// Variable sets ScriptFilter variable
+func (s *ScriptFilter) Variable(k, v string) {
+	if s.variables == nil {
+		s.variables = make(Variables)
 	}
-	s.Variables[k] = v
+	s.variables[k] = v
 }
 
-// SetRerun sets rerun variable
-func (s *ScriptFilter) SetRerun(i Rerun) {
-	s.Rerun = i
+// Rerun adds rerun variable
+func (s *ScriptFilter) Rerun(i Rerun) {
+	s.rerun = i
+}
+
+// Append adds item
+func (s *ScriptFilter) Append(i ...*Item) {
+	s.items = append(s.items, i...)
+}
+
+// Clear remove all items
+func (s *ScriptFilter) Clear() {
+	s.items = Items{}
 }
 
 // Marshal ScriptFilter as Json
@@ -59,5 +64,35 @@ func (s *ScriptFilter) Marshal() []byte {
 
 // IsEmpty return true if the items is empty
 func (s *ScriptFilter) IsEmpty() bool {
-	return len(s.Items) == 0
+	return len(s.items) == 0
+}
+
+type iScriptFilter struct {
+	Rerun     Rerun     `json:"rerun,omitempty"`
+	Variables Variables `json:"variables,omitempty"`
+	Items     Items     `json:"items"`
+}
+
+func (s *ScriptFilter) MarshalJSON() ([]byte, error) {
+	out := &iScriptFilter{
+		Rerun:     s.rerun,
+		Variables: s.variables,
+		Items:     s.items,
+	}
+	return json.Marshal(out)
+}
+
+func (s *ScriptFilter) UnmarshalJSON(data []byte) error {
+	in := &iScriptFilter{}
+	err := json.Unmarshal(data, in)
+	if err != nil {
+		return err
+	}
+
+	*s = ScriptFilter{
+		rerun:     in.Rerun,
+		variables: in.Variables,
+		items:     in.Items,
+	}
+	return nil
 }

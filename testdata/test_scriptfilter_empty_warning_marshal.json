@@ -3,9 +3,9 @@
 		{
 			"title": "emptyTitle1",
 			"subtitle": "emptySubtitle1",
-			"Valid": true,
-			"Icon": {
-				"Path": "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+			"valid": true,
+			"icon": {
+				"path": "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
 			}
 		}
 	]

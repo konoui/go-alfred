@@ -17,20 +17,20 @@ func TestFilter(t *testing.T) {
 	}{
 		{
 			name:  "return all items if empty query",
-			input: item01,
-			want:  item01,
+			input: items01,
+			want:  items01,
 			args: args{
 				query: "",
 			},
 		},
 		{
 			name:  "perfect matching",
-			input: item01,
+			input: items01,
 			want: Items{
-				item01[0],
+				items01[0],
 			},
 			args: args{
-				query: item01[0].Title,
+				query: items01[0].title,
 			},
 		},
 	}

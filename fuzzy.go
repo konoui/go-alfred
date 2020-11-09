@@ -6,13 +6,13 @@ import (
 
 // Filter searches from current items
 func (w *Workflow) Filter(query string) *Workflow {
-	w.std.Items = w.std.Items.Filter(query)
+	w.std.items = w.std.items.Filter(query)
 	return w
 }
 
 // String retruns a title of Item for fuzzy interface
 func (i Items) String(idx int) string {
-	return i[idx].Title
+	return i[idx].title
 }
 
 // Len returns length of Items for fuzzy interface

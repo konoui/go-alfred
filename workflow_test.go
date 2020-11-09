@@ -1,9 +1,11 @@
 package alfred
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/konoui/go-alfred/logger"
@@ -52,7 +54,7 @@ func TestWorkflow_Rerun(t *testing.T) {
 		want   *Workflow
 	}{
 		{
-			name: "set return 2",
+			name: "Add return 2",
 			fields: fields{
 				s: NewScriptFilter(),
 			},
@@ -61,13 +63,13 @@ func TestWorkflow_Rerun(t *testing.T) {
 			},
 			want: &Workflow{
 				std: &ScriptFilter{
-					Rerun: 2,
+					rerun: 2,
 				},
 				warn: &ScriptFilter{
-					Rerun: 2,
+					rerun: 2,
 				},
 				err: &ScriptFilter{
-					Rerun: 2,
+					rerun: 2,
 				},
 			},
 		},
@@ -79,7 +81,7 @@ func TestWorkflow_Rerun(t *testing.T) {
 				warn: tt.fields.s,
 				err:  tt.fields.s,
 			}
-			if got := w.SetRerun(tt.args.i); !reflect.DeepEqual(got, tt.want) {
+			if got := w.Rerun(tt.args.i); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Workflow.Rerun() = %v, want %v", got, tt.want)
 			}
 		})
@@ -95,7 +97,7 @@ func TestWorkflow_Clear(t *testing.T) {
 		{
 			name: "clear items",
 			item: &Item{
-				Title: "test",
+				title: "test",
 			},
 			want: NewWorkflow().Marshal(),
 		},
@@ -119,8 +121,8 @@ func TestWorfkflowMarshal(t *testing.T) {
 	}{
 		{
 			description: "output standard items",
-			filepath:    testFilePath("test_scriptfilter_marshal.json"),
-			items:       item01,
+			filepath:    testFilePath("test_scriptfilter_items01.json"),
+			items:       items01,
 			emptyItem:   emptyItem,
 		},
 		{
@@ -144,14 +146,79 @@ func TestWorfkflowMarshal(t *testing.T) {
 			}
 
 			awf := NewWorkflow()
-			awf.EmptyWarning(tt.emptyItem.Title, tt.emptyItem.Subtitle)
-			for _, item := range tt.items {
-				awf.Append(item)
-			}
+			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
+			awf.Append(tt.items...)
 
 			got := awf.Marshal()
 			if diff := DiffScriptFilter(want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
+			}
+		})
+	}
+}
+
+func TestOutput(t *testing.T) {
+	tests := []struct {
+		description     string
+		filepath        string
+		scriptfilter    *ScriptFilter
+		emptyItem       Item
+		additionalKey   string
+		additionalValue string
+	}{
+		{
+			description:     "output standard items",
+			filepath:        testFilePath("test_scriptfilter01_additional_env.json"),
+			scriptfilter:    scriptfilter01,
+			emptyItem:       emptyItem,
+			additionalKey:   additionalKey,
+			additionalValue: additionalValue,
+		},
+		{
+			description:  "output empty warning",
+			filepath:     testFilePath("test_scriptfilter_empty_warning_marshal.json"),
+			scriptfilter: &ScriptFilter{},
+			emptyItem:    emptyItem,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.description, func(t *testing.T) {
+			f, err := os.Open(tt.filepath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
+
+			wantData, err := ioutil.ReadAll(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			awf := NewWorkflow()
+			outBuf, errBuf := new(bytes.Buffer), new(bytes.Buffer)
+			awf.SetOut(outBuf)
+			awf.SetErr(errBuf)
+			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
+			awf.Append(tt.scriptfilter.items...).
+				Variables(tt.scriptfilter.variables).
+				Variable(tt.additionalKey, tt.additionalValue)
+
+			awf.Output()
+			gotData := outBuf.Bytes()
+			if diff := DiffScriptFilter(wantData, gotData); diff != "" {
+				t.Errorf("+want -got\n%+v", diff)
+			}
+
+			gotString := errBuf.String()
+			if gotString != "" {
+				t.Error("gotString should be empty")
+			}
+
+			awf.Output()
+			gotString = errBuf.String()
+			wantString := sentMessage
+			if strings.Contains(wantString, gotString) {
+				t.Errorf("\nwant: %s\ngot: %s\n", wantString, gotString)
 			}
 		})
 	}

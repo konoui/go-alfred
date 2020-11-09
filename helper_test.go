@@ -7,40 +7,74 @@ import (
 )
 
 var emptyItem = Item{
-	Title:    "emptyTitle1",
-	Subtitle: "emptySubtitle1",
+	title:    "emptyTitle1",
+	subtitle: "emptySubtitle1",
 }
 
-var item01 = Items{
+var items01 = Items{
 	&Item{
-		Title:    "title1",
-		Subtitle: "subtitle1",
+		title:    "title1",
+		subtitle: "subtitle1",
 	},
 	&Item{
-		Title:    "title2",
-		Subtitle: "subtitle2",
-	},
-}
-
-var item02 = Items{
-	&Item{
-		Title:    "title2",
-		Subtitle: "subtitle2",
-	},
-	&Item{
-		Title:    "title1",
-		Subtitle: "subtitle1",
+		title:    "title2",
+		subtitle: "subtitle2",
 	},
 }
 
-var item03 = Items{
+var items02 = Items{
 	&Item{
-		Title:    "title3",
-		Subtitle: "subtitle3",
+		title:    "title2",
+		subtitle: "subtitle2",
 	},
 	&Item{
-		Title:    "title1",
-		Subtitle: "subtitle1",
+		title:    "title1",
+		subtitle: "subtitle1",
+	},
+}
+
+var items03 = Items{
+	&Item{
+		title:    "title3",
+		subtitle: "subtitle3",
+	},
+	&Item{
+		title:    "title1",
+		subtitle: "subtitle1",
+	},
+}
+
+var items04 = Items{
+	&Item{
+		title:        "title",
+		subtitle:     "subtitle",
+		arg:          "arg",
+		autocomplete: "autocomplete",
+		variables: map[string]string{
+			"key": "value",
+		},
+		icon: &Icon{
+			typ:  "image",
+			path: "./",
+		},
+		mods: map[ModKey]*Mod{
+			ModCtrl: {
+				subtitle: "modctrl",
+				arg:      "arg",
+				variables: map[string]string{
+					"key": "value",
+				},
+				valid: false,
+			},
+		},
+		text: &Text{
+			copy:      "copy",
+			largeType: "largetype",
+		},
+		match:        "match-value",
+		quicklookURL: "quick-url",
+		uid:          "uid",
+		valid:        false,
 	},
 }
 
@@ -53,18 +87,18 @@ func TestDiffScriptFilter(t *testing.T) {
 	}{
 		{
 			description: "in the same order",
-			filepath:    testFilePath("test_scriptfilter_marshal.json"),
-			items:       item01,
+			filepath:    testFilePath("test_scriptfilter_items01.json"),
+			items:       items01,
 		},
 		{
 			description: "in the different order",
-			filepath:    testFilePath("test_scriptfilter_marshal.json"),
-			items:       item02,
+			filepath:    testFilePath("test_scriptfilter_items01.json"),
+			items:       items02,
 		},
 		{
 			description: "different values",
-			filepath:    testFilePath("test_scriptfilter_marshal.json"),
-			items:       item03,
+			filepath:    testFilePath("test_scriptfilter_items01.json"),
+			items:       items03,
 			expectedErr: true,
 		},
 	}
@@ -76,9 +110,7 @@ func TestDiffScriptFilter(t *testing.T) {
 			}
 
 			sf := NewScriptFilter()
-			for _, item := range tt.items {
-				sf.Append(item)
-			}
+			sf.Append(tt.items...)
 
 			gotData := sf.Marshal()
 			diff := DiffScriptFilter(wantData, gotData)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -31,20 +32,29 @@ type Cache struct {
 	err      error
 }
 
-func (w *Workflow) getCacheDir() string {
+func (w *Workflow) getCacheDir() (dir string) {
 	dir, ok := w.dirs[cacheDirKey]
 	if ok {
-		return dir
+		return
 	}
-	return os.TempDir()
+
+	dir = os.TempDir()
+	w.dirs[cacheDirKey] = dir
+	return
 }
 
 // SetCacheDir overrides default cache directory
 func (w *Workflow) SetCacheDir(dir string) (err error) {
-	if _, err = os.Stat(dir); err != nil {
-		return
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return err
 	}
-	w.dirs[cacheDirKey] = dir
+
+	if _, err := os.Stat(abs); err != nil {
+		return err
+	}
+
+	w.dirs[cacheDirKey] = abs
 	return
 }
 
@@ -55,7 +65,7 @@ func (w *Workflow) getCacheSuffix() (suffix string) {
 	}
 
 	defer func() {
-		// Note set env or default value to cache for cache role
+		// Note set env or default value to workflow to reduce Getenv call
 		w.cache.suffix = suffix
 	}()
 
@@ -118,13 +128,14 @@ func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 	if err = c.iCache.Load(&items); err != nil {
 		return c
 	}
+
 	if c.iCache.Expired(ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.wf.logger.Println(err)
 		return c
 	}
 
-	c.wf.std.Items = items
+	c.wf.std.items = items
 	return c
 }
 
@@ -137,12 +148,12 @@ func (c *Cache) StoreItems() *Cache {
 
 	// Note: If there is no item, we avoid to save data into cache.
 	// We define it is no error case
-	if c.wf.std.IsEmpty() {
+	if c.wf.IsEmpty() {
 		return c
 	}
 
-	items := c.wf.std.Items
-	if err = c.iCache.Store(items); err != nil {
+	items := c.wf.std.items
+	if err = c.iCache.Store(&items); err != nil {
 		c.wf.logger.Println(err)
 	}
 	return c

@@ -1,4 +1,4 @@
-GOLANGCI_LINT_VERSION := v1.24.0
+GOLANGCI_LINT_VERSION := v1.30.0
 export GO111MODULE=on
 
 ## Format source codes
@@ -17,7 +17,11 @@ test:
 	go test -v ./...
 
 build-examples:
-	_examples/build-test.sh
+	examples/build-test.sh
+
+cover:
+	go test -coverprofile=cover.out ./...
+	go tool cover -html=cover.out -o cover.html
 
 ## Show help
 help:

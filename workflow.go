@@ -52,70 +52,67 @@ func NewWorkflow() *Workflow {
 	return wf
 }
 
-// Append a new Item to standard ScriptFilter
-func (w *Workflow) Append(item *Item) *Workflow {
-	w.std.Append(item)
+// Append new items to ScriptFilter
+func (w *Workflow) Append(item ...*Item) *Workflow {
+	w.std.Append(item...)
 	return w
 }
 
-// Clear items of standard ScriptFilter
+// Clear items of ScriptFilter
 func (w *Workflow) Clear() *Workflow {
-	w.std.Items = Items{}
+	w.std.Clear()
 	return w
 }
 
-// SetRerun set rerun variable
-func (w *Workflow) SetRerun(i Rerun) *Workflow {
-	w.std.SetRerun(i)
-	w.warn.SetRerun(i)
-	w.err.SetRerun(i)
+// AddRerun add rerun variable
+func (w *Workflow) Rerun(i Rerun) *Workflow {
+	w.std.Rerun(i)
+	w.warn.Rerun(i)
+	w.err.Rerun(i)
 	return w
 }
 
-// SetVariables set variables for ScriptFilter
-func (w *Workflow) SetVariables(v Variables) *Workflow {
-	w.std.SetVariables(v)
+// Variables add variables for ScriptFilter
+func (w *Workflow) Variables(v Variables) *Workflow {
+	w.std.Variables(v)
 	return w
 }
 
-// SetVariable set variable for ScriptFilter
-func (w *Workflow) SetVariable(key, value string) *Workflow {
-	w.std.SetVariable(key, value)
+// Variable add variable for ScriptFilter
+func (w *Workflow) Variable(key, value string) *Workflow {
+	w.std.Variable(key, value)
 	return w
 }
 
-// EmptyWarning create a new Item to Marshal　when there are no standard items
-func (w *Workflow) EmptyWarning(title, subtitle string) *Workflow {
-	w.warn = NewScriptFilter()
+// SetEmptyWarning message which will be showed if items is empty
+func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
+	w.warn.Clear()
 	w.warn.Append(
 		NewItem().
-			SetTitle(title).
-			SetSubtitle(subtitle).
-			SetValid(true).
-			SetIcon(IconAlertNote),
+			Title(title).
+			Subtitle(subtitle).
+			Valid(true).
+			Icon(IconAlertNote),
 	)
 	return w
 }
 
-// error append a new Item to error ScriptFilter
 func (w *Workflow) error(title, subtitle string) *Workflow {
-	w.err = NewScriptFilter()
 	w.err.Append(
 		NewItem().
-			SetTitle(title).
-			SetSubtitle(subtitle).
-			SetValid(true).
-			SetIcon(IconCaution),
+			Title(title).
+			Subtitle(subtitle).
+			Valid(true).
+			Icon(IconCaution),
 	)
 	return w
 }
 
 // Marshal WorkFlow results
 func (w *Workflow) Marshal() []byte {
-	if w.std.IsEmpty() {
+	if w.IsEmpty() {
 		return w.warn.Marshal()
 	}
-
 	return w.std.Marshal()
 }
 
@@ -125,10 +122,8 @@ func (w *Workflow) Fatal(title, subtitle string) {
 		w.logger.Println(sentMessage)
 		return
 	}
-	w.error(title, subtitle)
-	res := w.err.Marshal()
+	res := w.error(title, subtitle).err.Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
-	w.done = true
 	os.Exit(1)
 }
 
@@ -138,9 +133,9 @@ func (w *Workflow) Output() *Workflow {
 		w.logger.Println(sentMessage)
 		return w
 	}
+	defer w.markDone()
 	res := w.Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
-	w.done = true
 	return w
 }
 
@@ -148,4 +143,13 @@ func (w *Workflow) Output() *Workflow {
 func (w *Workflow) Logf(format string, v ...interface{}) *Workflow {
 	w.logger.Printf(format, v...)
 	return w
+}
+
+// IsEmpty return true if the items is empty
+func (w *Workflow) IsEmpty() bool {
+	return w.std.IsEmpty()
+}
+
+func (w *Workflow) markDone() {
+	w.done = true
 }

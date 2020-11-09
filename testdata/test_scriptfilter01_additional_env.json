@@ -1,0 +1,17 @@
+{
+    "variables": {
+        "key1": "value1",
+        "key2": "value2",
+        "key3": "value3"
+    },
+    "items": [
+        {
+            "title": "title1",
+            "subtitle": "subtitle1"
+        },
+        {
+            "title": "title2",
+            "subtitle": "subtitle2"
+        }
+    ]
+}
