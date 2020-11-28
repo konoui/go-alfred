@@ -86,7 +86,7 @@ func (w *Workflow) ListJobs() []*Job {
 	dir := w.getJobDir()
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		w.logger.Printf("Invalid directory %s\n", dir)
+		w.logger.Infof("Invalid directory %s\n", dir)
 		return nil
 	}
 
@@ -107,7 +107,7 @@ func (w *Workflow) ListJobs() []*Job {
 			continue
 		}
 		// valid process
-		w.logger.Printf("Found a job %v\n", job)
+		w.logger.Infof("Found a job %v\n", job)
 		jobs = append(jobs, job)
 	}
 	return jobs

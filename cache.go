@@ -93,7 +93,7 @@ func (w *Workflow) Cache(key string) *Cache {
 	cr, err := cache.New(w.getCacheDir(), filename)
 	if err != nil {
 		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
-		w.logger.Println(err)
+		w.logger.Warnln(err)
 		cr = cache.NewNilCache()
 	}
 
@@ -131,7 +131,7 @@ func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 
 	if c.iCache.Expired(ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
-		c.wf.logger.Println(err)
+		c.wf.logger.Infoln(err)
 		return c
 	}
 
@@ -154,7 +154,7 @@ func (c *Cache) StoreItems() *Cache {
 
 	items := c.wf.std.items
 	if err = c.iCache.Store(&items); err != nil {
-		c.wf.logger.Println(err)
+		c.wf.logger.Warnln(err)
 	}
 	return c
 }
@@ -167,7 +167,7 @@ func (c *Cache) ClearItems() *Cache {
 	}()
 
 	if err = c.iCache.Clear(); err != nil {
-		c.wf.logger.Println(err)
+		c.wf.logger.Warnln(err)
 	}
 	return c
 }

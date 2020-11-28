@@ -21,7 +21,7 @@ const (
 func init() {
 	awf = alfred.NewWorkflow()
 	awf.SetOut(os.Stdout)
-	awf.SetErr(os.Stderr)
+	awf.SetLogger(os.Stderr)
 	awf.SetCacheSuffix(cacheSuffix)
 	if err := awf.SetCacheDir(cacheDir); err != nil {
 		panic(err)

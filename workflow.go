@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/konoui/go-alfred/logger"
@@ -18,7 +17,7 @@ type Workflow struct {
 	cache   caches
 	streams streams
 	done    bool
-	logger  *log.Logger
+	logger  logger.Logger
 	dirs    map[string]string
 }
 
@@ -31,9 +30,13 @@ func (w *Workflow) SetOut(out io.Writer) {
 	w.streams.out = out
 }
 
-// SetErr redirect stderr for debug util of the library.
-func (w *Workflow) SetErr(stderr io.Writer) {
-	w.logger = logger.New(stderr)
+// SetLogger is debug util of the library.
+func (w *Workflow) SetLogger(strem io.Writer) {
+	level := logger.LevelInfo
+	if v := os.Getenv("GO_ALFRED_LOGLEVEL"); v != "" {
+		level = v
+	}
+	w.logger = logger.New(strem, level)
 }
 
 // NewWorkflow has simple ScriptFilter api
@@ -45,11 +48,15 @@ func NewWorkflow() *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger: logger.New(ioutil.Discard),
+		logger: logger.New(ioutil.Discard, logger.LevelInfo),
 		dirs:   make(map[string]string),
 	}
 
 	return wf
+}
+
+func (w *Workflow) Logger() logger.Logger {
+	return w.logger
 }
 
 // Append new items to ScriptFilter
@@ -64,7 +71,7 @@ func (w *Workflow) Clear() *Workflow {
 	return w
 }
 
-// AddRerun add rerun variable
+// Rerun add rerun variable
 func (w *Workflow) Rerun(i Rerun) *Workflow {
 	w.std.Rerun(i)
 	w.warn.Rerun(i)
@@ -119,7 +126,7 @@ func (w *Workflow) Marshal() []byte {
 // Fatal output error to io stream and call os.Exit(1)
 func (w *Workflow) Fatal(title, subtitle string) {
 	if w.done {
-		w.logger.Println(sentMessage)
+		w.logger.Infoln(sentMessage)
 		return
 	}
 	res := w.error(title, subtitle).err.Marshal()
@@ -130,18 +137,12 @@ func (w *Workflow) Fatal(title, subtitle string) {
 // Output to io stream
 func (w *Workflow) Output() *Workflow {
 	if w.done {
-		w.logger.Println(sentMessage)
+		w.logger.Infoln(sentMessage)
 		return w
 	}
 	defer w.markDone()
 	res := w.Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
-	return w
-}
-
-// Logf print messages to debug console in workflow
-func (w *Workflow) Logf(format string, v ...interface{}) *Workflow {
-	w.logger.Printf(format, v...)
 	return w
 }
 

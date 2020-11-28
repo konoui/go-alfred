@@ -25,7 +25,7 @@ func TestNewWorkflow(t *testing.T) {
 				streams: streams{
 					out: os.Stdout,
 				},
-				logger: logger.New(ioutil.Discard),
+				logger: logger.New(ioutil.Discard, logger.LevelInfo),
 				dirs:   make(map[string]string),
 			},
 		},
@@ -197,7 +197,7 @@ func TestOutput(t *testing.T) {
 			awf := NewWorkflow()
 			outBuf, errBuf := new(bytes.Buffer), new(bytes.Buffer)
 			awf.SetOut(outBuf)
-			awf.SetErr(errBuf)
+			awf.SetLogger(errBuf)
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
 			awf.Append(tt.scriptfilter.items...).
 				Variables(tt.scriptfilter.variables).
