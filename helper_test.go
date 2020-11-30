@@ -117,7 +117,6 @@ func TestDiffScriptFilter(t *testing.T) {
 			if !tt.expectedErr && diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
-
 		})
 	}
 }

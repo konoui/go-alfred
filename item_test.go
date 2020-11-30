@@ -1,6 +1,8 @@
 package alfred
 
 import (
+	"encoding/json"
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -89,9 +91,15 @@ func Test_AddVariableVariables(t *testing.T) {
 }
 
 func diffItemObject(want, got interface{}) string {
-	wantData, gotData, err := encodeObjects(want, got)
+	out1Data, err := json.Marshal(want)
 	if err != nil {
-		return err.Error()
+		return fmt.Sprintf("failed to marshal want due to %v", err)
 	}
-	return cmp.Diff(string(wantData), string(gotData))
+
+	out2Data, err := json.Marshal(got)
+	if err != nil {
+		return fmt.Sprintf("failed to marshal got due to %v", err)
+	}
+
+	return cmp.Diff(string(out1Data), string(out2Data))
 }
