@@ -68,7 +68,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 			sf.Variable(tt.key, tt.value)
 
 			got := sf.Marshal()
-			if diff := DiffScriptFilter(want, got); diff != "" {
+			if diff := DiffOutput(want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 		})
@@ -105,7 +105,7 @@ func TestUnmarshalJSON(t *testing.T) {
 
 			got := gotSf.Marshal()
 			want := wantSf.Marshal()
-			if diff := DiffScriptFilter(want, got); diff != "" {
+			if diff := DiffOutput(want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 		})

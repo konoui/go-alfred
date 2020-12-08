@@ -1,12 +1,7 @@
 package alfred
 
 import (
-	"encoding/json"
-	"fmt"
-	"reflect"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestItemAPI(t *testing.T) {
@@ -45,7 +40,7 @@ func TestItemAPI(t *testing.T) {
 
 			// TODO
 			got := item.Mods(input.mods).Variables(input.variables)
-			if diff := diffItemObject(tt.want, got); diff != "" {
+			if diff := Diff(tt.want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 
@@ -64,7 +59,7 @@ func TestItemAPI(t *testing.T) {
 			}
 
 			got = item
-			if diff := diffItemObject(tt.want, got); diff != "" {
+			if diff := Diff(tt.want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 		})
@@ -84,22 +79,8 @@ func Test_AddVariableVariables(t *testing.T) {
 	}
 	t.Run(name, func(t *testing.T) {
 		got := NewItem().Variable("key0", "val0").Variables(vals).Variable("key3", "val3")
-		if !reflect.DeepEqual(want, got) {
-			t.Errorf("want: %+v, got: %+v", want, got)
+		if diff := Diff(want, got); diff != "" {
+			t.Errorf(diff)
 		}
 	})
-}
-
-func diffItemObject(want, got interface{}) string {
-	out1Data, err := json.Marshal(want)
-	if err != nil {
-		return fmt.Sprintf("failed to marshal want due to %v", err)
-	}
-
-	out2Data, err := json.Marshal(got)
-	if err != nil {
-		return fmt.Sprintf("failed to marshal got due to %v", err)
-	}
-
-	return cmp.Diff(string(out1Data), string(out2Data))
 }

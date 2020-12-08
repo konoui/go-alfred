@@ -105,7 +105,7 @@ func TestWorkflow_Clear(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewWorkflow().Append(tt.item).Clear().Marshal()
-			if diff := DiffScriptFilter(tt.want, got); diff != "" {
+			if diff := DiffOutput(tt.want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 		})
@@ -150,7 +150,7 @@ func TestWorfkflowMarshal(t *testing.T) {
 			awf.Append(tt.items...)
 
 			got := awf.Marshal()
-			if diff := DiffScriptFilter(want, got); diff != "" {
+			if diff := DiffOutput(want, got); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 		})
@@ -205,7 +205,7 @@ func TestOutput(t *testing.T) {
 
 			awf.Output()
 			gotData := outBuf.Bytes()
-			if diff := DiffScriptFilter(wantData, gotData); diff != "" {
+			if diff := DiffOutput(wantData, gotData); diff != "" {
 				t.Errorf("+want -got\n%+v", diff)
 			}
 

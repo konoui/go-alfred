@@ -27,16 +27,8 @@ func (t *Text) LargeType(s string) *Text {
 	return t
 }
 
-type iText struct {
-	Copy      string `json:"copy,omitempty"`
-	LargeType string `json:"largetype,omitempty"`
-}
-
 func (t *Text) MarshalJSON() ([]byte, error) {
-	out := &iText{
-		Copy:      t.copy,
-		LargeType: t.largeType,
-	}
+	out := t.internal()
 	return json.Marshal(out)
 }
 
@@ -47,9 +39,31 @@ func (t *Text) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*t = Text{
-		copy:      in.Copy,
-		largeType: in.LargeType,
-	}
+	*t = *in.external()
 	return nil
+}
+
+type iText struct {
+	Copy      string `json:"copy,omitempty"`
+	LargeType string `json:"largetype,omitempty"`
+}
+
+func (t *Text) internal() *iText {
+	if t == nil {
+		return nil
+	}
+	return &iText{
+		Copy:      t.copy,
+		LargeType: t.largeType,
+	}
+}
+
+func (t *iText) external() *Text {
+	if t == nil {
+		return nil
+	}
+	return &Text{
+		copy:      t.Copy,
+		largeType: t.LargeType,
+	}
 }

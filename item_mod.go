@@ -15,6 +15,8 @@ const (
 	ModFn    ModKey = "fn"    // Alternate action for fn↩
 )
 
+type Mods map[ModKey]*Mod
+
 // Mod element gives you control over how the modifier keys react
 type Mod struct {
 	variables Variables
@@ -70,22 +72,8 @@ func (m *Mod) Icon(icon *Icon) *Mod {
 	return m
 }
 
-type iMod struct {
-	Variables Variables `json:"variables,omitempty"`
-	Valid     bool      `json:"valid,omitempty"`
-	Arg       string    `json:"arg,omitempty"`
-	Subtitle  string    `json:"subtitle,omitempty"`
-	Icon      *Icon     `json:"icon,omitempty"`
-}
-
 func (m *Mod) MarshalJSON() ([]byte, error) {
-	out := &iMod{
-		Variables: m.variables,
-		Valid:     m.valid,
-		Arg:       m.arg,
-		Subtitle:  m.subtitle,
-		Icon:      m.icon,
-	}
+	out := m.internal()
 	return json.Marshal(out)
 }
 
@@ -96,12 +84,58 @@ func (m *Mod) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*m = Mod{
-		variables: in.Variables,
-		valid:     in.Valid,
-		arg:       in.Arg,
-		subtitle:  in.Subtitle,
-		icon:      in.Icon,
-	}
+	*m = *in.external()
 	return nil
+}
+
+type iMods map[ModKey]*iMod
+
+type iMod struct {
+	Variables Variables `json:"variables,omitempty"`
+	Valid     bool      `json:"valid,omitempty"`
+	Arg       string    `json:"arg,omitempty"`
+	Subtitle  string    `json:"subtitle,omitempty"`
+	Icon      *iIcon    `json:"icon,omitempty"`
+}
+
+func (m Mods) internal() iMods {
+	mods := make(map[ModKey]*iMod)
+	for k, v := range m {
+		mods[k] = v.internal()
+	}
+	return mods
+}
+
+func (m iMods) external() Mods {
+	mods := make(map[ModKey]*Mod)
+	for k, v := range m {
+		mods[k] = v.external()
+	}
+	return mods
+}
+
+func (m *Mod) internal() *iMod {
+	if m == nil {
+		return nil
+	}
+	return &iMod{
+		Variables: m.variables,
+		Valid:     m.valid,
+		Arg:       m.arg,
+		Subtitle:  m.subtitle,
+		Icon:      m.icon.internal(),
+	}
+}
+
+func (m *iMod) external() *Mod {
+	if m == nil {
+		return nil
+	}
+	return &Mod{
+		variables: m.Variables,
+		valid:     m.Valid,
+		arg:       m.Arg,
+		subtitle:  m.Subtitle,
+		icon:      m.Icon.external(),
+	}
 }

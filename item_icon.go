@@ -25,16 +25,8 @@ func (i *Icon) Path(s string) *Icon {
 	return i
 }
 
-type iIcon struct {
-	Type string `json:"type,omitempty"`
-	Path string `json:"path,omitempty"`
-}
-
 func (i *Icon) MarshalJSON() ([]byte, error) {
-	out := &iIcon{
-		Type: i.typ,
-		Path: i.path,
-	}
+	out := i.internal()
 	return json.Marshal(out)
 }
 
@@ -45,9 +37,31 @@ func (i *Icon) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*i = Icon{
-		typ:  in.Type,
-		path: in.Path,
-	}
+	*i = *in.external()
 	return nil
+}
+
+type iIcon struct {
+	Type string `json:"type,omitempty"`
+	Path string `json:"path,omitempty"`
+}
+
+func (i *Icon) internal() *iIcon {
+	if i == nil {
+		return nil
+	}
+	return &iIcon{
+		Type: i.typ,
+		Path: i.path,
+	}
+}
+
+func (i *iIcon) external() *Icon {
+	if i == nil {
+		return nil
+	}
+	return &Icon{
+		typ:  i.Type,
+		path: i.Path,
+	}
 }

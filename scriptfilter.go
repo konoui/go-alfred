@@ -70,15 +70,11 @@ func (s *ScriptFilter) IsEmpty() bool {
 type iScriptFilter struct {
 	Rerun     Rerun     `json:"rerun,omitempty"`
 	Variables Variables `json:"variables,omitempty"`
-	Items     Items     `json:"items"`
+	Items     iItems    `json:"items"`
 }
 
 func (s *ScriptFilter) MarshalJSON() ([]byte, error) {
-	out := &iScriptFilter{
-		Rerun:     s.rerun,
-		Variables: s.variables,
-		Items:     s.items,
-	}
+	out := s.internal()
 	return json.Marshal(out)
 }
 
@@ -89,10 +85,22 @@ func (s *ScriptFilter) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*s = ScriptFilter{
-		rerun:     in.Rerun,
-		variables: in.Variables,
-		items:     in.Items,
-	}
+	*s = *in.external()
 	return nil
+}
+
+func (s *ScriptFilter) internal() *iScriptFilter {
+	return &iScriptFilter{
+		Rerun:     s.rerun,
+		Variables: s.variables,
+		Items:     s.items.internal(),
+	}
+}
+
+func (s iScriptFilter) external() *ScriptFilter {
+	return &ScriptFilter{
+		rerun:     s.Rerun,
+		variables: s.Variables,
+		items:     s.Items.external(),
+	}
 }

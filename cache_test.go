@@ -122,8 +122,8 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 			// compare new workflow data to soted workflow data
 			want := prepared.std.items
 			got := tt.wf.std.items
-			if !tt.expectErr && !reflect.DeepEqual(want, got) {
-				t.Errorf("want %#v\n got %#v", want, got)
+			if diff := Diff(want, got); !tt.expectErr && diff != "" {
+				t.Errorf(diff)
 			}
 		})
 	}

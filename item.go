@@ -27,7 +27,7 @@ type Item struct {
 	typ          string
 	valid        bool
 	match        string
-	mods         map[ModKey]*Mod
+	mods         Mods
 	text         *Text
 	quicklookURL string
 }
@@ -131,38 +131,8 @@ func (i *Item) QuicklookURL(u string) *Item {
 	return i
 }
 
-type iItem struct {
-	Variables    Variables       `json:"variables,omitempty"`
-	UID          string          `json:"uid,omitempty"`
-	Title        string          `json:"title"`
-	Subtitle     string          `json:"subtitle,omitempty"`
-	Arg          string          `json:"arg,omitempty"`
-	Icon         *Icon           `json:"icon,omitempty"`
-	Autocomplete string          `json:"autocomplete,omitempty"`
-	Type         string          `json:"type,omitempty"`
-	Valid        bool            `json:"valid,omitempty"`
-	Match        string          `json:"match,omitempty"`
-	Mods         map[ModKey]*Mod `json:"mods,omitempty"`
-	Text         *Text           `json:"text,omitempty"`
-	QuicklookURL string          `json:"quicklookurl,omitempty"`
-}
-
 func (i *Item) MarshalJSON() ([]byte, error) {
-	out := &iItem{
-		Variables:    i.variables,
-		UID:          i.uid,
-		Title:        i.title,
-		Subtitle:     i.subtitle,
-		Arg:          i.arg,
-		Icon:         i.icon,
-		Autocomplete: i.autocomplete,
-		Type:         i.typ,
-		Valid:        i.valid,
-		Match:        i.match,
-		Mods:         i.mods,
-		Text:         i.text,
-		QuicklookURL: i.quicklookURL,
-	}
+	out := i.internal()
 	return json.Marshal(out)
 }
 
@@ -173,20 +143,76 @@ func (i *Item) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	*i = Item{
-		variables:    in.Variables,
-		uid:          in.UID,
-		title:        in.Title,
-		subtitle:     in.Subtitle,
-		arg:          in.Arg,
-		icon:         in.Icon,
-		autocomplete: in.Autocomplete,
-		typ:          in.Type,
-		valid:        in.Valid,
-		match:        in.Match,
-		mods:         in.Mods,
-		text:         in.Text,
-		quicklookURL: in.QuicklookURL,
-	}
+	*i = *in.external()
 	return nil
+}
+
+type iItems []*iItem
+
+type iItem struct {
+	Variables    Variables `json:"variables,omitempty"`
+	UID          string    `json:"uid,omitempty"`
+	Title        string    `json:"title"`
+	Subtitle     string    `json:"subtitle,omitempty"`
+	Arg          string    `json:"arg,omitempty"`
+	Icon         *iIcon    `json:"icon,omitempty"`
+	Autocomplete string    `json:"autocomplete,omitempty"`
+	Type         string    `json:"type,omitempty"`
+	Valid        bool      `json:"valid,omitempty"`
+	Match        string    `json:"match,omitempty"`
+	Mods         iMods     `json:"mods,omitempty"`
+	Text         *iText    `json:"text,omitempty"`
+	QuicklookURL string    `json:"quicklookurl,omitempty"`
+}
+
+func (i Items) internal() iItems {
+	items := make(iItems, len(i))
+	for idx, itm := range i {
+		items[idx] = itm.internal()
+	}
+	return items
+}
+
+func (i iItems) external() Items {
+	items := make(Items, len(i))
+	for idx, itm := range i {
+		items[idx] = itm.external()
+	}
+	return items
+}
+
+func (i *Item) internal() *iItem {
+	return &iItem{
+		Variables:    i.variables,
+		UID:          i.uid,
+		Title:        i.title,
+		Subtitle:     i.subtitle,
+		Arg:          i.arg,
+		Icon:         i.icon.internal(),
+		Autocomplete: i.autocomplete,
+		Type:         i.typ,
+		Valid:        i.valid,
+		Match:        i.match,
+		Mods:         i.mods.internal(),
+		Text:         i.text.internal(),
+		QuicklookURL: i.quicklookURL,
+	}
+}
+
+func (i *iItem) external() *Item {
+	return &Item{
+		variables:    i.Variables,
+		uid:          i.UID,
+		title:        i.Title,
+		subtitle:     i.Subtitle,
+		arg:          i.Arg,
+		icon:         i.Icon.external(),
+		autocomplete: i.Autocomplete,
+		typ:          i.Type,
+		valid:        i.Valid,
+		match:        i.Match,
+		mods:         i.Mods.external(),
+		text:         i.Text.external(),
+		quicklookURL: i.QuicklookURL,
+	}
 }
