@@ -164,7 +164,7 @@ func Test_SetGetCacheSuffix(t *testing.T) {
 	t.Run(name, func(t *testing.T) {
 		awf := NewWorkflow()
 		got := awf.getCacheSuffix()
-		want := "-alfred.cache"
+		want := ""
 		if want != got {
 			t.Errorf("want %s got %s", want, got)
 		}

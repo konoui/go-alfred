@@ -74,8 +74,8 @@ func (w *Workflow) getCacheSuffix() (suffix string) {
 		return
 	}
 
-	suffix = "-alfred.cache"
-	return
+	// Note default is empty
+	return ""
 }
 
 // SetCacheSuffix overrides suffix of default cache file
