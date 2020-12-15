@@ -8,6 +8,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+var tmpDir = os.TempDir()
+
 type example struct {
 	A string
 	B string
@@ -33,7 +35,7 @@ func TestNewCache(t *testing.T) {
 	}{
 		{
 			name:      "valid directory",
-			dir:       os.TempDir(),
+			dir:       tmpDir,
 			file:      "test1",
 			expectErr: false,
 		},
@@ -68,7 +70,7 @@ func TestStore(t *testing.T) {
 	}{
 		{
 			name:      "create cache file on temp dir",
-			dir:       os.TempDir(),
+			dir:       tmpDir,
 			file:      "test1",
 			expectErr: false,
 		},
@@ -107,7 +109,7 @@ func TestLoad(t *testing.T) {
 	}{
 		{
 			name:      "load cache file on temp dir",
-			dir:       os.TempDir(),
+			dir:       tmpDir,
 			file:      "test1",
 			expectErr: false,
 		},
@@ -141,7 +143,7 @@ func TestLoad(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(storedValue, loadedValue); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 		})
 	}
@@ -158,14 +160,14 @@ func TestExpired(t *testing.T) {
 	}{
 		{
 			name:        "not expired cache test",
-			dir:         os.TempDir(),
+			dir:         tmpDir,
 			file:        "test1",
 			expiredTime: 3 * time.Minute,
 			want:        false,
 		},
 		{
 			name:        "expired cache test",
-			dir:         os.TempDir(),
+			dir:         tmpDir,
 			file:        "test1",
 			expiredTime: 0 * time.Minute,
 			want:        true,

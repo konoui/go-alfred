@@ -106,7 +106,7 @@ func TestWorkflow_Clear(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewWorkflow().Append(tt.item).Clear().Marshal()
 			if diff := DiffOutput(tt.want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 		})
 	}
@@ -118,6 +118,7 @@ func TestWorfkflowMarshal(t *testing.T) {
 		filepath    string
 		items       Items
 		emptyItem   Item
+		opts        []Option
 	}{
 		{
 			description: "output standard items",
@@ -130,6 +131,15 @@ func TestWorfkflowMarshal(t *testing.T) {
 			filepath:    testFilePath("test_scriptfilter_empty_warning_marshal.json"),
 			items:       Items{},
 			emptyItem:   emptyItem,
+		},
+		{
+			description: "limit standard items",
+			filepath:    testFilePath("test_limit_output_item01.json"),
+			items:       items01,
+			emptyItem:   emptyItem,
+			opts: []Option{
+				WithMaxResults(1),
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -145,13 +155,17 @@ func TestWorfkflowMarshal(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			awf := NewWorkflow()
+			awf := NewWorkflow(tt.opts...)
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
 			awf.Append(tt.items...)
 
 			got := awf.Marshal()
 			if diff := DiffOutput(want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
+			}
+
+			if diff := Diff(tt.items, awf.std.items); diff != "" {
+				t.Errorf("limit does not work -want +got\n%+v", diff)
 			}
 		})
 	}
@@ -206,7 +220,7 @@ func TestOutput(t *testing.T) {
 			awf.Output()
 			gotData := outBuf.Bytes()
 			if diff := DiffOutput(wantData, gotData); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 
 			gotString := errBuf.String()

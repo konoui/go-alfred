@@ -69,7 +69,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 
 			got := sf.Marshal()
 			if diff := DiffOutput(want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 		})
 	}
@@ -106,7 +106,7 @@ func TestUnmarshalJSON(t *testing.T) {
 			got := gotSf.Marshal()
 			want := wantSf.Marshal()
 			if diff := DiffOutput(want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 		})
 	}

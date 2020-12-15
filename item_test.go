@@ -41,7 +41,7 @@ func TestItemAPI(t *testing.T) {
 			// TODO
 			got := item.Mods(input.mods).Variables(input.variables)
 			if diff := Diff(tt.want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 
 			// overwrite same variables with single method e.g AddVariable
@@ -60,7 +60,7 @@ func TestItemAPI(t *testing.T) {
 
 			got = item
 			if diff := Diff(tt.want, got); diff != "" {
-				t.Errorf("+want -got\n%+v", diff)
+				t.Errorf("-want +got\n%+v", diff)
 			}
 		})
 	}

@@ -30,7 +30,7 @@ func TestWorkflow_Cache(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			filename := tt.args.key + tt.wf.getCacheSuffix()
-			c, err := cache.New(os.TempDir(), filename)
+			c, err := cache.New(tmpDir, filename)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -137,7 +137,7 @@ func Test_SetGetCacheDir(t *testing.T) {
 		}
 
 		awf := NewWorkflow()
-		want := os.TempDir()
+		want := tmpDir
 		got := awf.getCacheDir()
 		if want != got {
 			t.Errorf("want %s got %s", want, got)

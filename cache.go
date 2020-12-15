@@ -38,7 +38,7 @@ func (w *Workflow) getCacheDir() (dir string) {
 		return
 	}
 
-	dir = os.TempDir()
+	dir = tmpDir
 	w.dirs[cacheDirKey] = dir
 	return
 }

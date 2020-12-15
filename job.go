@@ -60,7 +60,7 @@ func (w *Workflow) getJobDir() (dir string) {
 		return
 	}
 
-	dir = os.TempDir()
+	dir = tmpDir
 	w.dirs[jobDirKey] = dir
 	return
 }

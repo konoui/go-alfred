@@ -9,21 +9,26 @@ import (
 	"github.com/konoui/go-alfred/logger"
 )
 
+var tmpDir = os.TempDir()
+
 // Workflow is map of ScriptFilters
 type Workflow struct {
-	std     *ScriptFilter
-	warn    *ScriptFilter
-	err     *ScriptFilter
-	cache   caches
-	streams streams
-	done    bool
-	logger  logger.Logger
-	dirs    map[string]string
+	std        *ScriptFilter
+	warn       *ScriptFilter
+	err        *ScriptFilter
+	cache      caches
+	streams    streams
+	done       bool
+	logger     logger.Logger
+	dirs       map[string]string
+	maxResults int
 }
 
 type streams struct {
 	out io.Writer
 }
+
+type Option func(*Workflow)
 
 // SetOut redirect stdout
 func (w *Workflow) SetOut(out io.Writer) {
@@ -40,7 +45,7 @@ func (w *Workflow) SetLogger(strem io.Writer) {
 }
 
 // NewWorkflow has simple ScriptFilter api
-func NewWorkflow() *Workflow {
+func NewWorkflow(opts ...Option) *Workflow {
 	wf := &Workflow{
 		std:  NewScriptFilter(),
 		warn: NewScriptFilter(),
@@ -48,11 +53,27 @@ func NewWorkflow() *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger: logger.New(ioutil.Discard, logger.LevelInfo),
-		dirs:   make(map[string]string),
+		logger:     logger.New(ioutil.Discard, logger.LevelInfo),
+		dirs:       make(map[string]string),
+		maxResults: 0,
+	}
+
+	for _, opt := range opts {
+		opt(wf)
 	}
 
 	return wf
+}
+
+func WithMaxResults(n int) Option {
+	return func(wf *Workflow) {
+		if n < 0 {
+			return
+		}
+		if n > 0 {
+			wf.maxResults = n
+		}
+	}
 }
 
 func (w *Workflow) Logger() logger.Logger {
@@ -119,6 +140,14 @@ func (w *Workflow) error(title, subtitle string) *Workflow {
 func (w *Workflow) Marshal() []byte {
 	if w.IsEmpty() {
 		return w.warn.Marshal()
+	}
+
+	if limit := w.maxResults; limit > 0 && len(w.std.items) > limit {
+		tmp := w.std.items
+		w.std.items = w.std.items[:limit]
+		defer func() {
+			w.std.items = tmp
+		}()
 	}
 	return w.std.Marshal()
 }
