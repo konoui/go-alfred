@@ -52,9 +52,9 @@ func (s *ScriptFilter) Clear() {
 	s.items = Items{}
 }
 
-// Marshal ScriptFilter as Json
+// Marshal ScriptFilter as Json if err, return err JSON
 func (s *ScriptFilter) Marshal() []byte {
-	res, err := json.Marshal(s)
+	res, err := s.MarshalJSON()
 	if err != nil {
 		return []byte(fmt.Sprintf(fatalErrorJSON, err.Error()))
 	}

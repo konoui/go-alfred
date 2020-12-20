@@ -5,8 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-
-	"github.com/konoui/go-alfred/logger"
 )
 
 var tmpDir = os.TempDir()
@@ -19,7 +17,7 @@ type Workflow struct {
 	cache      caches
 	streams    streams
 	done       bool
-	logger     logger.Logger
+	logger     Logger
 	dirs       map[string]string
 	maxResults int
 }
@@ -39,7 +37,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger:     logger.New(ioutil.Discard, logger.LevelInfo),
+		logger:     newLogger(ioutil.Discard, LogLevelInfo),
 		dirs:       make(map[string]string),
 		maxResults: 0,
 	}
@@ -70,19 +68,21 @@ func WithOutStream(out io.Writer) Option {
 
 func WithLogStream(out io.Writer) Option {
 	return func(wf *Workflow) {
-		level := logger.LevelInfo
-		isDebug := parseBool(
-			os.Getenv("alfred_debug"),
-		)
-		if isDebug {
-			level = logger.LevelDebug
+		level := wf.logger.logLevel()
+		if isEnabledDebug() {
+			level = LogLevelDebug
 		}
-		wf.logger = logger.New(out, level)
+		wf.logger = newLogger(out, level)
 	}
 }
 
-func (w *Workflow) Logger() logger.Logger {
-	return w.logger
+func WithLogLevel(level LogLevel) Option {
+	return func(wf *Workflow) {
+		if isEnabledDebug() {
+			level = LogLevelDebug
+		}
+		wf.logger = newLogger(wf.logger.Writer(), level)
+	}
 }
 
 // Append new items to ScriptFilter

@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/konoui/go-alfred/logger"
 )
 
 func TestNewWorkflow(t *testing.T) {
@@ -25,7 +23,7 @@ func TestNewWorkflow(t *testing.T) {
 				streams: streams{
 					out: os.Stdout,
 				},
-				logger: logger.New(ioutil.Discard, logger.LevelInfo),
+				logger: newLogger(ioutil.Discard, LogLevelInfo),
 				dirs:   make(map[string]string),
 			},
 		},

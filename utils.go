@@ -35,6 +35,14 @@ func GetDataDir() (string, error) {
 	return abs, nil
 }
 
+func isEnabledDebug() bool {
+	isDebug := parseBool(
+		os.Getenv("alfred_debug"),
+	)
+	// debug env is highest priority
+	return isDebug
+}
+
 func parseBool(v string) bool {
 	i, err := strconv.ParseInt(v, 10, 64)
 	if err == nil {
