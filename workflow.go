@@ -30,20 +30,6 @@ type streams struct {
 
 type Option func(*Workflow)
 
-// SetOut redirect stdout
-func (w *Workflow) SetOut(out io.Writer) {
-	w.streams.out = out
-}
-
-// SetLogger is debug util of the library.
-func (w *Workflow) SetLogger(strem io.Writer) {
-	level := logger.LevelInfo
-	if v := os.Getenv("GO_ALFRED_LOGLEVEL"); v != "" {
-		level = v
-	}
-	w.logger = logger.New(strem, level)
-}
-
 // NewWorkflow has simple ScriptFilter api
 func NewWorkflow(opts ...Option) *Workflow {
 	wf := &Workflow{
@@ -73,6 +59,25 @@ func WithMaxResults(n int) Option {
 		if n > 0 {
 			wf.maxResults = n
 		}
+	}
+}
+
+func WithOutStream(out io.Writer) Option {
+	return func(wf *Workflow) {
+		wf.streams.out = out
+	}
+}
+
+func WithLogStream(out io.Writer) Option {
+	return func(wf *Workflow) {
+		level := logger.LevelInfo
+		isDebug := parseBool(
+			os.Getenv("alfred_debug"),
+		)
+		if isDebug {
+			level = logger.LevelDebug
+		}
+		wf.logger = logger.New(out, level)
 	}
 }
 
@@ -138,6 +143,10 @@ func (w *Workflow) error(title, subtitle string) *Workflow {
 
 // Marshal WorkFlow results
 func (w *Workflow) Marshal() []byte {
+	if len(w.err.items) != 0 {
+		return w.err.Marshal()
+	}
+
 	if w.IsEmpty() {
 		return w.warn.Marshal()
 	}
@@ -158,7 +167,8 @@ func (w *Workflow) Fatal(title, subtitle string) {
 		w.logger.Infoln(sentMessage)
 		return
 	}
-	res := w.error(title, subtitle).err.Marshal()
+
+	res := w.error(title, subtitle).Marshal()
 	fmt.Fprintln(w.streams.out, string(res))
 	os.Exit(1)
 }

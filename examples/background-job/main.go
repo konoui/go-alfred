@@ -17,8 +17,10 @@ const (
 )
 
 func init() {
-	awf = alfred.NewWorkflow()
-	awf.SetLogger(os.Stderr)
+	awf = alfred.NewWorkflow(
+		alfred.WithOutStream(os.Stdout),
+		alfred.WithLogStream(os.Stderr),
+	)
 	if err := awf.SetJobDir(dataDir); err != nil {
 		panic(err)
 	}

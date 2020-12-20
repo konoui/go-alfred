@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 var (
@@ -32,4 +33,18 @@ func GetDataDir() (string, error) {
 		}
 	}
 	return abs, nil
+}
+
+func parseBool(v string) bool {
+	i, err := strconv.ParseInt(v, 10, 64)
+	if err == nil {
+		return i == 1
+	}
+
+	b, err := strconv.ParseBool(v)
+	if err == nil {
+		return b
+	}
+
+	return false
 }
