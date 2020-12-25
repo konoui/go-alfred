@@ -69,7 +69,7 @@ func WithOutStream(out io.Writer) Option {
 func WithLogStream(out io.Writer) Option {
 	return func(wf *Workflow) {
 		level := wf.logger.logLevel()
-		if isEnabledDebug() {
+		if isDebugEnabled() {
 			level = LogLevelDebug
 		}
 		wf.logger = newLogger(out, level)
@@ -78,7 +78,7 @@ func WithLogStream(out io.Writer) Option {
 
 func WithLogLevel(level LogLevel) Option {
 	return func(wf *Workflow) {
-		if isEnabledDebug() {
+		if isDebugEnabled() {
 			level = LogLevelDebug
 		}
 		wf.logger = newLogger(wf.logger.Writer(), level)

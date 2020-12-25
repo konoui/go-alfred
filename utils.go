@@ -35,7 +35,7 @@ func GetDataDir() (string, error) {
 	return abs, nil
 }
 
-func isEnabledDebug() bool {
+func isDebugEnabled() bool {
 	isDebug := parseBool(
 		os.Getenv("alfred_debug"),
 	)
