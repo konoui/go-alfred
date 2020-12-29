@@ -60,29 +60,24 @@ func WithMaxResults(n int) Option {
 	}
 }
 
-func WithOutStream(out io.Writer) Option {
-	return func(wf *Workflow) {
-		wf.streams.out = out
-	}
+func (w *Workflow) SetOut(out io.Writer) {
+	w.streams.out = out
 }
 
-func WithLogStream(out io.Writer) Option {
-	return func(wf *Workflow) {
-		level := wf.logger.logLevel()
-		if isDebugEnabled() {
-			level = LogLevelDebug
-		}
-		wf.logger = newLogger(out, level)
+func (w *Workflow) SetLog(out io.Writer) {
+	level := w.logger.logLevel()
+	if IsDebugEnabled() {
+		level = LogLevelDebug
 	}
+	w.logger = newLogger(out, level)
+
 }
 
-func WithLogLevel(level LogLevel) Option {
-	return func(wf *Workflow) {
-		if isDebugEnabled() {
-			level = LogLevelDebug
-		}
-		wf.logger = newLogger(wf.logger.Writer(), level)
+func (w *Workflow) SetLogLevel(level LogLevel) {
+	if IsDebugEnabled() {
+		level = LogLevelDebug
 	}
+	w.logger = newLogger(w.logger.Writer(), level)
 }
 
 // Append new items to ScriptFilter

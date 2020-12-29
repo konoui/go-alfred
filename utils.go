@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 var (
@@ -35,7 +37,13 @@ func GetDataDir() (string, error) {
 	return abs, nil
 }
 
-func isDebugEnabled() bool {
+// Normalize return NFC string
+// alfred workflow pass query as NFD
+func Normalize(s string) string {
+	return norm.NFC.String(s)
+}
+
+func IsDebugEnabled() bool {
 	isDebug := parseBool(
 		os.Getenv("alfred_debug"),
 	)
