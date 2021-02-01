@@ -84,7 +84,12 @@ func (w *Workflow) SetCacheSuffix(suffix string) {
 }
 
 // Cache creates singleton instance
+// If key is empty, return Noop cache
 func (w *Workflow) Cache(key string) *Cache {
+	if key == "" {
+		return newNil("", w, nil)
+	}
+
 	filename := key + w.getCacheSuffix()
 	if v, ok := w.cache.caches.Load(filename); ok {
 		return v.(*Cache)
@@ -94,7 +99,7 @@ func (w *Workflow) Cache(key string) *Cache {
 	if err != nil {
 		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
 		w.logger.Warnln(err)
-		cr = cache.NewNilCache()
+		return newNil(filename, w, err)
 	}
 
 	c := &Cache{
@@ -170,4 +175,13 @@ func (c *Cache) ClearItems() *Cache {
 		c.wf.logger.Warnln(err)
 	}
 	return c
+}
+
+func newNil(filename string, wf *Workflow, err error) *Cache {
+	return &Cache{
+		err:      err,
+		iCache:   cache.NewNilCache(),
+		filename: filename,
+		wf:       wf,
+	}
 }
