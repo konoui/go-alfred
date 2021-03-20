@@ -119,7 +119,7 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 		NewItem().
 			Title(title).
 			Subtitle(subtitle).
-			Valid(true).
+			Valid(false).
 			Icon(IconAlertNote),
 	)
 	return w
@@ -130,7 +130,7 @@ func (w *Workflow) error(title, subtitle string) *Workflow {
 		NewItem().
 			Title(title).
 			Subtitle(subtitle).
-			Valid(true).
+			Valid(false).
 			Icon(IconCaution),
 	)
 	return w

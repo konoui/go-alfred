@@ -26,7 +26,7 @@ func TestItemAPI(t *testing.T) {
 				Match(input.match).
 				QuicklookURL(input.quicklookURL).
 				UID(input.uid).
-				Valid(input.valid).
+				Valid(*input.valid).
 				Icon(
 					NewIcon().
 						Type(input.icon.typ).

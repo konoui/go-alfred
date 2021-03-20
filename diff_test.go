@@ -64,7 +64,7 @@ var items04 = Items{
 				variables: map[string]string{
 					"key": "value",
 				},
-				valid: false,
+				valid: boolP(false),
 			},
 		},
 		text: &Text{
@@ -74,7 +74,7 @@ var items04 = Items{
 		match:        "match-value",
 		quicklookURL: "quick-url",
 		uid:          "uid",
-		valid:        false,
+		valid:        boolP(false),
 	},
 }
 
@@ -123,4 +123,8 @@ func TestDiffScriptFilter(t *testing.T) {
 
 func testFilePath(f string) string {
 	return filepath.Join("testdata", f)
+}
+
+func boolP(v bool) *bool {
+	return &v
 }

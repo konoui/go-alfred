@@ -20,7 +20,7 @@ type Mods map[ModKey]*Mod
 // Mod element gives you control over how the modifier keys react
 type Mod struct {
 	variables Variables
-	valid     bool
+	valid     *bool
 	arg       string
 	subtitle  string
 	icon      *Icon
@@ -50,7 +50,7 @@ func (m *Mod) Variable(k, v string) *Mod {
 
 // Valid adds mod valid or not
 func (m *Mod) Valid(b bool) *Mod {
-	m.valid = b
+	m.valid = &b
 	return m
 }
 
@@ -92,7 +92,7 @@ type iMods map[ModKey]*iMod
 
 type iMod struct {
 	Variables Variables `json:"variables,omitempty"`
-	Valid     bool      `json:"valid,omitempty"`
+	Valid     *bool     `json:"valid,omitempty"`
 	Arg       string    `json:"arg,omitempty"`
 	Subtitle  string    `json:"subtitle,omitempty"`
 	Icon      *iIcon    `json:"icon,omitempty"`

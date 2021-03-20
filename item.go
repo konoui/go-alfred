@@ -25,7 +25,7 @@ type Item struct {
 	icon         *Icon
 	autocomplete string
 	typ          string
-	valid        bool
+	valid        *bool
 	match        string
 	mods         Mods
 	text         *Text
@@ -92,7 +92,7 @@ func (i *Item) Autocomplete(s string) *Item {
 
 // Valid adds valid
 func (i *Item) Valid(b bool) *Item {
-	i.valid = b
+	i.valid = &b
 	return i
 }
 
@@ -158,7 +158,7 @@ type iItem struct {
 	Icon         *iIcon    `json:"icon,omitempty"`
 	Autocomplete string    `json:"autocomplete,omitempty"`
 	Type         string    `json:"type,omitempty"`
-	Valid        bool      `json:"valid,omitempty"`
+	Valid        *bool     `json:"valid,omitempty"`
 	Match        string    `json:"match,omitempty"`
 	Mods         iMods     `json:"mods,omitempty"`
 	Text         *iText    `json:"text,omitempty"`

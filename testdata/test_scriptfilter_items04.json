@@ -1,33 +1,35 @@
 {
     "items": [
-      {
-        "variables": {
-          "key": "value"
-        },
-        "uid": "uid",
-        "title": "title",
-        "subtitle": "subtitle",
-        "arg": "arg",
-        "icon": {
-          "type": "image",
-          "path": "./"
-        },
-        "autocomplete": "autocomplete",
-        "match": "match-value",
-        "mods": {
-          "ctrl": {
+        {
             "variables": {
-              "key": "value"
+                "key": "value"
             },
+            "uid": "uid",
+            "title": "title",
+            "subtitle": "subtitle",
             "arg": "arg",
-            "subtitle": "modctrl"
-          }
-        },
-        "text": {
-          "copy": "copy",
-          "largetype": "largetype"
-        },
-        "quicklookurl": "quick-url"
-      }
+            "icon": {
+                "type": "image",
+                "path": "./"
+            },
+            "valid": false,
+            "autocomplete": "autocomplete",
+            "match": "match-value",
+            "mods": {
+                "ctrl": {
+                    "variables": {
+                        "key": "value"
+                    },
+                    "arg": "arg",
+                    "subtitle": "modctrl",
+                    "valid": false
+                }
+            },
+            "text": {
+                "copy": "copy",
+                "largetype": "largetype"
+            },
+            "quicklookurl": "quick-url"
+        }
     ]
-  }
+}
