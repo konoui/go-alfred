@@ -20,6 +20,7 @@ type Workflow struct {
 	logger     Logger
 	dirs       map[string]string
 	maxResults int
+	loglevel   LogLevel
 }
 
 type streams struct {
@@ -37,9 +38,10 @@ func NewWorkflow(opts ...Option) *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger:     newLogger(ioutil.Discard, LogLevelInfo),
+		logger:     newLogger(ioutil.Discard, ""),
 		dirs:       make(map[string]string),
 		maxResults: 0,
+		loglevel:   "",
 	}
 
 	for _, opt := range opts {
@@ -60,24 +62,24 @@ func WithMaxResults(n int) Option {
 	}
 }
 
+func WithLogLevel(l LogLevel) Option {
+	return func(wf *Workflow) {
+		wf.loglevel = l
+	}
+}
+
 func (w *Workflow) SetOut(out io.Writer) {
 	w.streams.out = out
 }
 
 func (w *Workflow) SetLog(out io.Writer) {
-	level := w.logger.logLevel()
+	level := LogLevelInfo
 	if IsDebugEnabled() {
 		level = LogLevelDebug
+	} else if w.loglevel != "" {
+		level = w.loglevel
 	}
 	w.logger = newLogger(out, level)
-
-}
-
-func (w *Workflow) SetLogLevel(level LogLevel) {
-	if IsDebugEnabled() {
-		level = LogLevelDebug
-	}
-	w.logger = newLogger(w.logger.Writer(), level)
 }
 
 // Append new items to ScriptFilter

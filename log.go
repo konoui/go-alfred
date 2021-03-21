@@ -14,13 +14,10 @@ type Logger interface {
 	Debugf(format string, v ...interface{})
 	Debugln(v ...interface{})
 	Warnln(v ...interface{})
-	Writer() io.Writer
-	logLevel() LogLevel
 }
 
 type myLogger struct {
-	l     *log.Logger
-	level LogLevel
+	l *log.Logger
 }
 
 type LogLevel string
@@ -49,8 +46,7 @@ func newLogger(out io.Writer, level LogLevel) Logger {
 	}
 
 	return &myLogger{
-		l:     log.New(filter, "", 0),
-		level: level,
+		l: log.New(filter, "", 0),
 	}
 }
 
@@ -62,14 +58,6 @@ func validate(level LogLevel) LogLevel {
 		return level
 	}
 	return LogLevelInfo
-}
-
-func (l *myLogger) Writer() io.Writer {
-	return l.l.Writer()
-}
-
-func (l *myLogger) logLevel() LogLevel {
-	return l.level
 }
 
 func (l *myLogger) Infof(format string, v ...interface{}) {
