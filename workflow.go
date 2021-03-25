@@ -5,6 +5,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/konoui/go-alfred/update"
 )
 
 var tmpDir = os.TempDir()
@@ -21,6 +23,7 @@ type Workflow struct {
 	dirs       map[string]string
 	maxResults int
 	loglevel   LogLevel
+	updater    update.UpdaterSource
 }
 
 type streams struct {
@@ -65,6 +68,12 @@ func WithMaxResults(n int) Option {
 func WithLogLevel(l LogLevel) Option {
 	return func(wf *Workflow) {
 		wf.loglevel = l
+	}
+}
+
+func WithGitHubUpdater(owner, repo string, opts ...update.Option) Option {
+	return func(wf *Workflow) {
+		wf.updater = update.NewGitHubSource(owner, repo, opts...)
 	}
 }
 
