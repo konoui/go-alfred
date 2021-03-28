@@ -13,8 +13,9 @@ var (
 	iconPath      = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
 	IconTrash     = NewIcon().Path(filepath.Join(iconPath, "TrashIcon.icns"))
 	IconAlertNote = NewIcon().Path(filepath.Join(iconPath, "AlertNoteIcon.icns"))
-	IconCaution   = NewIcon().Path(filepath.Join(iconPath, "AlertCautionIcon.icns"))
+	IconCaution   = NewIcon().Path(filepath.Join(iconPath, "AlertCautionBadgeIcon.icns"))
 	IconAlertStop = NewIcon().Path(filepath.Join(iconPath, "AlertStopIcon.icns"))
+	IconExec      = NewIcon().Path(filepath.Join(iconPath, "ExecutableBinaryIcon.icns"))
 )
 
 // GetDataDir returns alfred data directory if data dir does not exist, creates it
