@@ -8,6 +8,7 @@ import (
 type timer struct {
 	path    string
 	modTime time.Time
+	now     time.Time
 }
 
 func newTimer() (*timer, error) {
@@ -24,11 +25,12 @@ func newTimer() (*timer, error) {
 	return &timer{
 		path:    self,
 		modTime: info.ModTime(),
+		now:     time.Now(),
 	}, nil
 }
 
 func (t *timer) increase(hour time.Duration) error {
-	updated := t.modTime.Add(hour)
+	updated := t.now.Add(hour)
 	if err := os.Chtimes(t.path, updated, updated); err != nil {
 		return err
 	}
