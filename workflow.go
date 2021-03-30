@@ -23,7 +23,7 @@ type Workflow struct {
 	dirs       map[string]string
 	maxResults int
 	loglevel   LogLevel
-	updater    update.UpdaterSource
+	updater    Updater
 }
 
 type streams struct {
@@ -71,9 +71,13 @@ func WithLogLevel(l LogLevel) Option {
 	}
 }
 
-func WithGitHubUpdater(owner, repo string, opts ...update.Option) Option {
+func WithGitHubUpdater(owner, repo, currentVersion string, opts ...update.Option) Option {
 	return func(wf *Workflow) {
-		wf.updater = update.NewGitHubSource(owner, repo, opts...)
+		wf.updater = &updater{
+			source:         update.NewGitHubSource(owner, repo, opts...),
+			currentVersion: currentVersion,
+			wf:             wf,
+		}
 	}
 }
 

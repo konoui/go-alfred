@@ -29,12 +29,18 @@ func newTimer() (*timer, error) {
 	}, nil
 }
 
+func (t *timer) checkout() error {
+	updated := t.now
+	return os.Chtimes(t.path, updated, updated)
+}
+
 func (t *timer) increase(hour time.Duration) error {
-	updated := t.now.Add(hour)
-	if err := os.Chtimes(t.path, updated, updated); err != nil {
-		return err
+	updated := t.modTime.Add(hour)
+	// Note: must not be future time
+	if updated.After(t.now) {
+		updated = t.now
 	}
-	return nil
+	return os.Chtimes(t.path, updated, updated)
 }
 
 func (t *timer) passed(ttl time.Duration) bool {

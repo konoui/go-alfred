@@ -10,23 +10,25 @@ import (
 )
 
 type gitHubUpdater struct {
-	client                *github.Client
+	client                RepositoriesService
 	currentVersion        string
 	owner                 string
 	repo                  string
-	vFormat               bool
 	newerVersionAvailable bool
 	checkInterval         time.Duration
 	fetchURL              string
 }
 
+type RepositoriesService interface {
+	GetLatestRelease(context.Context, string, string) (*github.RepositoryRelease, *github.Response, error)
+}
+
 func NewGitHubSource(owner, repo string, opts ...Option) UpdaterSource {
 	g := &gitHubUpdater{
-		client:        github.NewClient(nil),
+		client:        github.NewClient(nil).Repositories,
 		owner:         owner,
 		repo:          repo,
 		checkInterval: 24 * 7 * 2 * time.Hour,
-		vFormat:       false,
 	}
 
 	for _, opt := range opts {
@@ -37,9 +39,13 @@ func NewGitHubSource(owner, repo string, opts ...Option) UpdaterSource {
 }
 
 func (g *gitHubUpdater) NewerVersionAvailable(currentVersion string) (bool, error) {
-	g.currentVersion = currentVersion
 	ok, _, err := g.newerVersionAvailableContext(context.Background(), currentVersion)
 	return ok, err
+}
+
+func (g *gitHubUpdater) IfNewerVersionAvailable(currentVersion string) Updater {
+	g.currentVersion = currentVersion
+	return g
 }
 
 func (g *gitHubUpdater) Update(ctx context.Context) error {
@@ -55,10 +61,6 @@ func (g *gitHubUpdater) Update(ctx context.Context) error {
 
 func (g *gitHubUpdater) setCheckInterval(interval time.Duration) {
 	g.checkInterval = interval
-}
-
-func (g *gitHubUpdater) enableVFormat() {
-	g.vFormat = true
 }
 
 func (g *gitHubUpdater) newerVersionAvailableContext(ctx context.Context, currentVersion string) (ok bool, url string, err error) {
@@ -86,14 +88,14 @@ func (g *gitHubUpdater) newerVersionAvailableContext(ctx context.Context, curren
 		return false, "", err
 	}
 
-	ok, err = compareVersions(tag, currentVersion, g.vFormat)
+	ok, err = compareVersions(tag, currentVersion)
 	if err != nil {
 		return false, "", fmt.Errorf("version formats are invalid %s, %s: %w",
 			currentVersion, tag, err)
 	}
 	if !ok {
 		// if current is latest, check next time after interval
-		return false, url, t.increase(g.checkInterval)
+		return false, "", t.checkout()
 	}
 	// newer version available
 	d := func() {
@@ -104,8 +106,8 @@ func (g *gitHubUpdater) newerVersionAvailableContext(ctx context.Context, curren
 	return true, url, nil
 }
 
-func getLatestAssetInfo(ctx context.Context, client *github.Client, owner, repo string) (_, _ string, _ error) {
-	latestRelease, _, err := client.Repositories.GetLatestRelease(ctx, owner, repo)
+func getLatestAssetInfo(ctx context.Context, client RepositoriesService, owner, repo string) (_, _ string, _ error) {
+	latestRelease, _, err := client.GetLatestRelease(ctx, owner, repo)
 	if err != nil {
 		return "", "", err
 	}
@@ -122,5 +124,5 @@ func getLatestAssetInfo(ctx context.Context, client *github.Client, owner, repo 
 			return *latestRelease.TagName, asset.GetBrowserDownloadURL(), nil
 		}
 	}
-	return *latestRelease.TagName, "", errors.New("found no alfredworkflow assets")
+	return "", "", errors.New("found no alfredworkflow assets")
 }

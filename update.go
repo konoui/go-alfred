@@ -2,6 +2,7 @@ package alfred
 
 import (
 	"context"
+	"errors"
 
 	"github.com/konoui/go-alfred/update"
 )
@@ -12,49 +13,45 @@ type updater struct {
 	currentVersion string
 }
 
-type UpdaterSource interface {
-	IfNewerVersionAvailable(string) Updater
-}
-
 type Updater interface {
 	Update(context.Context) error
-	AppendItem(...*Item)
+	NewerVersionAvailable() bool
 }
 
-func (w *Workflow) Updater() UpdaterSource {
-	return &updater{
-		wf:     w,
-		source: w.updater,
+func (w *Workflow) Updater() Updater {
+	if w.updater == nil {
+		return &nilUpdater{}
 	}
+	return w.updater
 }
 
-func (u *updater) IfNewerVersionAvailable(currentVersion string) Updater {
-	u.currentVersion = currentVersion
-	return u
-}
-
-func (u *updater) Update(ctx context.Context) error {
+func (u *updater) NewerVersionAvailable() bool {
 	ok, err := u.source.NewerVersionAvailable(u.currentVersion)
 	if err != nil {
 		u.wf.Logger().Warnln("failed to check newer version", err)
-		return err
+		return false
 	}
 	if ok {
-		return u.source.Update(ctx)
+		u.wf.logger.Infoln("newer version available!")
+		return true
+	}
+	u.wf.logger.Infoln("no newer version exists")
+	return false
+}
+
+func (u *updater) Update(ctx context.Context) error {
+	if u.NewerVersionAvailable() {
+		return u.source.IfNewerVersionAvailable(u.currentVersion).Update(ctx)
 	}
 	return nil
 }
 
-func (u *updater) AppendItem(items ...*Item) {
-	ok, err := u.source.NewerVersionAvailable(u.currentVersion)
-	if err != nil {
-		u.wf.Logger().Warnln("failed to check newer version", err)
-		return
-	}
-	if ok {
-		u.wf.Append(items...)
-		u.wf.logger.Infoln("newer version available!")
-		return
-	}
-	u.wf.logger.Infoln("no newer version exists")
+type nilUpdater struct{}
+
+func (u *nilUpdater) Update(ctx context.Context) error {
+	return errors.New("no implemented")
+}
+
+func (u *nilUpdater) NewerVersionAvailable() bool {
+	return false
 }

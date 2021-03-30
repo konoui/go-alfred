@@ -9,11 +9,10 @@ import (
 )
 
 func main() {
-	const current = "v0.0.1"
 	awf := alfred.NewWorkflow(
 		alfred.WithGitHubUpdater(
 			"konoui", "alfred-tldr",
-			update.WithVFormat(),
+			"v0.0.1",
 			update.WithCheckInterval(0),
 		),
 		alfred.WithLogLevel(alfred.LogLevelDebug),
@@ -22,13 +21,15 @@ func main() {
 
 	if len(os.Args) >= 2 {
 		if os.Args[1] == "--update" {
-			_ = awf.Updater().IfNewerVersionAvailable(current).Update(context.Background())
+			_ = awf.Updater().Update(context.Background())
 		}
 	}
 
-	awf.Updater().IfNewerVersionAvailable(current).AppendItem(
-		alfred.NewItem().Title("newer version available!"),
-	)
+	if awf.Updater().NewerVersionAvailable() {
+		awf.Append(
+			alfred.NewItem().Title("newer version available!"),
+		)
+	}
 
 	awf.Append(
 		alfred.NewItem().Title("test"),

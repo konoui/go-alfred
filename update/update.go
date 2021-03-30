@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/go-version"
@@ -17,12 +16,15 @@ var tmpDir = os.TempDir()
 
 type UpdaterSource interface {
 	NewerVersionAvailable(string) (bool, error)
+	IfNewerVersionAvailable(string) Updater
+}
+
+type Updater interface {
 	Update(ctx context.Context) error
 }
 
 type UpdaterSourceOption interface {
 	setCheckInterval(time.Duration)
-	enableVFormat()
 }
 
 type Option func(UpdaterSourceOption)
@@ -33,19 +35,8 @@ func WithCheckInterval(interval time.Duration) Option {
 	}
 }
 
-func WithVFormat() Option {
-	return func(u UpdaterSourceOption) {
-		u.enableVFormat()
-	}
-}
-
 // compareVersions return true if `v2Str` is greater than `v1Str`
-func compareVersions(v2Str, v1Str string, vFormat bool) (bool, error) {
-	if vFormat {
-		v2Str = strings.TrimPrefix(v2Str, "v")
-		v1Str = strings.TrimPrefix(v1Str, "v")
-	}
-
+func compareVersions(v2Str, v1Str string) (bool, error) {
 	v1, err := version.NewVersion(v1Str)
 	if err != nil {
 		return false, err
@@ -62,6 +53,8 @@ func compareVersions(v2Str, v1Str string, vFormat bool) (bool, error) {
 	return false, nil
 }
 
+var openCmd = "open"
+
 func updateContext(ctx context.Context, url string) error {
 	filename := filepath.Base(url)
 	path := filepath.Join(tmpDir, filename)
@@ -69,7 +62,8 @@ func updateContext(ctx context.Context, url string) error {
 		return err
 	}
 
-	cmd := exec.CommandContext(ctx, "open", path)
+	cmd := exec.CommandContext(ctx, openCmd, path)
+
 	if err := cmd.Start(); err != nil {
 		return err
 	}
