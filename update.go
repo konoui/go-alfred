@@ -32,10 +32,10 @@ func (u *updater) NewerVersionAvailable() bool {
 		return false
 	}
 	if ok {
-		u.wf.logger.Infoln("newer version available!")
+		u.wf.Logger().Infoln("newer version available!")
 		return true
 	}
-	u.wf.logger.Infoln("no newer version exists")
+	u.wf.Logger().Infoln("no newer version exists")
 	return false
 }
 

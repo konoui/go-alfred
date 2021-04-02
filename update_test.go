@@ -27,13 +27,9 @@ func (m *MockUpdater) Update(ctx context.Context) error {
 }
 
 func Test_updater_IfNewerVersionAvailable(t *testing.T) {
-	type args struct {
-		currentVersion string
-	}
 	tests := []struct {
 		name    string
 		updater updater
-		args    args
 		want    bool
 	}{
 		{
@@ -41,9 +37,6 @@ func Test_updater_IfNewerVersionAvailable(t *testing.T) {
 			updater: updater{
 				source: newMockUpdater(),
 				wf:     NewWorkflow(),
-			},
-			args: args{
-				currentVersion: "v0.0.1",
 			},
 			want: true,
 		},
