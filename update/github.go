@@ -35,7 +35,6 @@ func NewGitHubSource(owner, repo string, opts ...Option) UpdaterSource {
 		opt(g)
 	}
 	return g
-
 }
 
 func (g *gitHubUpdater) NewerVersionAvailable(currentVersion string) (bool, error) {

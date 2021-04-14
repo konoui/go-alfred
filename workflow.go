@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/konoui/go-alfred/update"
 )
@@ -71,10 +72,26 @@ func WithLogLevel(l LogLevel) Option {
 	}
 }
 
-func WithGitHubUpdater(owner, repo, currentVersion string, opts ...update.Option) Option {
+// WithGitHubUpdater is managed github updater. updater will check newer version per `interval`
+func WithGitHubUpdater(owner, repo, currentVersion string, interval time.Duration) Option {
 	return func(wf *Workflow) {
 		wf.updater = &updater{
-			source:         update.NewGitHubSource(owner, repo, opts...),
+			source: update.NewGitHubSource(
+				owner,
+				repo,
+				update.WithCheckInterval(interval),
+			),
+			currentVersion: currentVersion,
+			wf:             wf,
+		}
+	}
+}
+
+// WithUpdater supports native updater satisfing UpdaterSource interface
+func WithUpdater(source update.UpdaterSource, currentVersion string) Option {
+	return func(wf *Workflow) {
+		wf.updater = &updater{
+			source:         source,
 			currentVersion: currentVersion,
 			wf:             wf,
 		}

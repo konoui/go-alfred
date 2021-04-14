@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/konoui/go-alfred"
-	"github.com/konoui/go-alfred/update"
 )
 
 func main() {
@@ -13,7 +12,7 @@ func main() {
 		alfred.WithGitHubUpdater(
 			"konoui", "alfred-tldr",
 			"v0.0.1",
-			update.WithCheckInterval(0),
+			0,
 		),
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 	)

@@ -11,7 +11,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-github/github"
-	mock "github.com/konoui/go-alfred/update/mock_update"
+	mock "github.com/konoui/go-alfred/update/mock_github"
 )
 
 func repositoryReleaseData(t *testing.T, filepath string) *github.RepositoryRelease {

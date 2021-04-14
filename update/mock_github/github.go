@@ -2,7 +2,7 @@
 // Source: github.go
 
 // Package mock_update is a generated GoMock package.
-package mock_update
+package mock_github
 
 import (
 	context "context"
