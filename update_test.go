@@ -12,31 +12,37 @@ import (
 
 func Test_updater_IfNewerVersionAvailable(t *testing.T) {
 	tests := []struct {
-		name      string
-		want      bool
-		injectErr error
+		name          string
+		want          bool
+		setupMockFunc func(source *mock.MockUpdaterSource)
 	}{
 		{
-			name:      "new version available",
-			want:      true,
-			injectErr: nil,
+			name: "new version available",
+			want: true,
+			setupMockFunc: func(source *mock.MockUpdaterSource) {
+				source.EXPECT().NewerVersionAvailable("").Return(true, nil)
+			},
 		},
 		{
-			name:      "new version unavailable",
-			want:      false,
-			injectErr: nil,
+			name: "new version unavailable",
+			want: false,
+			setupMockFunc: func(source *mock.MockUpdaterSource) {
+				source.EXPECT().NewerVersionAvailable("").Return(false, nil)
+			},
 		},
 		{
-			name:      "return false if error occurs",
-			want:      false,
-			injectErr: errors.New("injected error"),
+			name: "return false if error occurs",
+			setupMockFunc: func(source *mock.MockUpdaterSource) {
+				source.EXPECT().NewerVersionAvailable("").Return(false, errors.New("injected error"))
+			},
+			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			m := mock.NewMockUpdaterSource(ctrl)
-			m.EXPECT().NewerVersionAvailable("").Return(tt.want, tt.injectErr)
+			tt.setupMockFunc(m)
 			updater := &updater{
 				source: m,
 				wf:     NewWorkflow(),
@@ -85,30 +91,32 @@ func TestWorkflow_Updater(t *testing.T) {
 }
 
 func Test_updater_Update(t *testing.T) {
-	type args struct {
-		ctx context.Context
-	}
 	tests := []struct {
-		name      string
-		args      args
-		wantErr   bool
-		injectErr error
+		name          string
+		setupMockFunc func(source *mock.MockUpdaterSource, updater *mock.MockUpdater)
+		wantErr       bool
 	}{
 		{
 			name: "update",
-			args: args{
-				ctx: context.Background(),
+			setupMockFunc: func(source *mock.MockUpdaterSource, updater *mock.MockUpdater) {
+				updater.EXPECT().
+					Update(gomock.Any()).
+					Return(nil)
+				source.EXPECT().NewerVersionAvailable("").Return(true, nil)
+				source.EXPECT().IfNewerVersionAvailable("").Return(updater)
 			},
-			wantErr:   false,
-			injectErr: nil,
+			wantErr: false,
 		},
 		{
 			name: "update but return error",
-			args: args{
-				ctx: context.Background(),
+			setupMockFunc: func(source *mock.MockUpdaterSource, updater *mock.MockUpdater) {
+				updater.EXPECT().
+					Update(gomock.Any()).
+					Return(errors.New("injected error"))
+				source.EXPECT().NewerVersionAvailable("").Return(true, nil)
+				source.EXPECT().IfNewerVersionAvailable("").Return(updater)
 			},
-			wantErr:   true,
-			injectErr: errors.New("injected error"),
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -116,16 +124,14 @@ func Test_updater_Update(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			mockSource := mock.NewMockUpdaterSource(ctrl)
 			mockUpdater := mock.NewMockUpdater(ctrl)
-			mockUpdater.EXPECT().Update(tt.args.ctx).Return(tt.injectErr)
-			mockSource.EXPECT().NewerVersionAvailable("").Return(true, nil)
-			mockSource.EXPECT().IfNewerVersionAvailable("").Return(mockUpdater)
+			tt.setupMockFunc(mockSource, mockUpdater)
 			updater := &updater{
 				source: mockSource,
 				wf:     NewWorkflow(),
 			}
 			defer ctrl.Finish()
 
-			if err := updater.Update(tt.args.ctx); (err != nil) != tt.wantErr {
+			if err := updater.Update(context.TODO()); (err != nil) != tt.wantErr {
 				t.Errorf("updater.Update() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
