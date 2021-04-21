@@ -19,6 +19,9 @@ test:
 build-examples:
 	examples/build-test.sh
 
+generate:
+	go generate ./...
+
 cover:
 	go test -coverprofile=cover.out ./...
 	go tool cover -html=cover.out -o cover.html
