@@ -24,7 +24,7 @@ func main() {
 		}
 	}
 
-	if awf.Updater().NewerVersionAvailable() {
+	if awf.Updater().NewerVersionAvailable(context.Background()) {
 		awf.Append(
 			alfred.NewItem().Title("newer version available!"),
 		)

@@ -24,12 +24,13 @@ type RepositoriesService interface {
 	GetLatestRelease(context.Context, string, string) (*github.RepositoryRelease, *github.Response, error)
 }
 
-func NewGitHubSource(owner, repo string, opts ...Option) UpdaterSource {
+func NewGitHubSource(owner, repo, currentVersion string, opts ...Option) UpdaterSource {
 	g := &gitHubUpdater{
-		client:        github.NewClient(nil).Repositories,
-		owner:         owner,
-		repo:          repo,
-		checkInterval: 24 * 7 * 2 * time.Hour,
+		client:         github.NewClient(nil).Repositories,
+		owner:          owner,
+		repo:           repo,
+		currentVersion: currentVersion,
+		checkInterval:  24 * 7 * 2 * time.Hour,
 	}
 
 	for _, opt := range opts {
@@ -38,13 +39,12 @@ func NewGitHubSource(owner, repo string, opts ...Option) UpdaterSource {
 	return g
 }
 
-func (g *gitHubUpdater) NewerVersionAvailable(currentVersion string) (bool, error) {
-	ok, _, err := g.newerVersionAvailableContext(context.Background(), currentVersion)
+func (g *gitHubUpdater) NewerVersionAvailable(ctx context.Context) (bool, error) {
+	ok, _, err := g.newerVersionAvailableContext(ctx, g.currentVersion)
 	return ok, err
 }
 
-func (g *gitHubUpdater) IfNewerVersionAvailable(currentVersion string) Updater {
-	g.currentVersion = currentVersion
+func (g *gitHubUpdater) IfNewerVersionAvailable() Updater {
 	return g
 }
 
@@ -59,7 +59,7 @@ func (g *gitHubUpdater) Update(ctx context.Context) error {
 	return nil
 }
 
-func (g *gitHubUpdater) setCheckInterval(interval time.Duration) {
+func (g *gitHubUpdater) SetCheckInterval(interval time.Duration) {
 	g.checkInterval = interval
 }
 

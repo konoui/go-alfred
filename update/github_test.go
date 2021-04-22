@@ -188,10 +188,11 @@ func Test_gitHubUpdater_newerVersionAvailableContext(t *testing.T) {
 			m := mock.NewMockRepositoriesService(ctrl)
 			m.EXPECT().GetLatestRelease(tt.args.ctx, "", "").AnyTimes().Return(releaseData, nil, tt.args.injectErr)
 			g := &gitHubUpdater{
-				client:        m,
-				owner:         "",
-				repo:          "",
-				checkInterval: tt.fields.checkInterval,
+				client:         m,
+				owner:          "",
+				repo:           "",
+				currentVersion: tt.args.currentVersion,
+				checkInterval:  tt.fields.checkInterval,
 			}
 			gotOK, gotURL, err := g.newerVersionAvailableContext(tt.args.ctx, tt.args.currentVersion)
 			if (err != nil) != tt.wantErr {
@@ -244,10 +245,11 @@ func Test_gitHubUpdater_NewerVersionAvailable(t *testing.T) {
 			m := mock.NewMockRepositoriesService(ctrl)
 			m.EXPECT().GetLatestRelease(context.TODO(), "", "").AnyTimes().Return(releaseData, nil, nil)
 			g := &gitHubUpdater{
-				client:        m,
-				checkInterval: tt.fields.checkInterval,
+				currentVersion: tt.args.currentVersion,
+				client:         m,
+				checkInterval:  tt.fields.checkInterval,
 			}
-			got, err := g.NewerVersionAvailable(tt.args.currentVersion)
+			got, err := g.NewerVersionAvailable(context.TODO())
 			if (err != nil) != tt.wantErr {
 				t.Errorf("gitHubUpdater.NewerVersionAvailable() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -256,15 +258,6 @@ func Test_gitHubUpdater_NewerVersionAvailable(t *testing.T) {
 				t.Errorf("gitHubUpdater.NewerVersionAvailable() = %v, want %v", got, tt.want)
 			}
 		})
-	}
-}
-
-func Test_gitHubUpdater_IfNewerVersionAvailable(t *testing.T) {
-	u := &gitHubUpdater{}
-	want := "v2.0.0"
-	u.IfNewerVersionAvailable(want)
-	if got := u.currentVersion; want != got {
-		t.Errorf("want: %s, got: %s", want, got)
 	}
 }
 
@@ -314,10 +307,11 @@ func Test_gitHubUpdater_Update(t *testing.T) {
 			m := mock.NewMockRepositoriesService(ctrl)
 			m.EXPECT().GetLatestRelease(tt.args.ctx, "", "").AnyTimes().Return(releaseData, nil, nil)
 			g := &gitHubUpdater{
-				client:        m,
-				checkInterval: tt.fields.checkInterval,
+				client:         m,
+				checkInterval:  tt.fields.checkInterval,
+				currentVersion: tt.args.currentVersion,
 			}
-			err := g.IfNewerVersionAvailable(tt.args.currentVersion).Update(tt.args.ctx)
+			err := g.IfNewerVersionAvailable().Update(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("gitHubUpdater.Update() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -327,9 +321,10 @@ func Test_gitHubUpdater_Update(t *testing.T) {
 
 func TestNewGitHubSource(t *testing.T) {
 	type args struct {
-		owner string
-		repo  string
-		opts  []Option
+		owner          string
+		repo           string
+		currentVersion string
+		opts           []Option
 	}
 	tests := []struct {
 		name string
@@ -339,23 +334,25 @@ func TestNewGitHubSource(t *testing.T) {
 		{
 			name: "case 1",
 			args: args{
-				owner: "owner",
-				repo:  "repo",
+				owner:          "owner",
+				repo:           "repo",
+				currentVersion: "v0.0.1",
 				opts: []Option{
 					WithCheckInterval(0),
 				},
 			},
 			want: &gitHubUpdater{
-				client:        github.NewClient(nil).Repositories,
-				owner:         "owner",
-				repo:          "repo",
-				checkInterval: 0,
+				client:         github.NewClient(nil).Repositories,
+				owner:          "owner",
+				repo:           "repo",
+				currentVersion: "v0.0.1",
+				checkInterval:  0,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewGitHubSource(tt.args.owner, tt.args.repo, tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
+			if got := NewGitHubSource(tt.args.owner, tt.args.repo, tt.args.currentVersion, tt.args.opts...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewGitHubSource() = %v, want %v", got, tt.want)
 			}
 		})

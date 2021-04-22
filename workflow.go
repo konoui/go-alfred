@@ -79,6 +79,7 @@ func WithGitHubUpdater(owner, repo, currentVersion string, interval time.Duratio
 			source: update.NewGitHubSource(
 				owner,
 				repo,
+				currentVersion,
 				update.WithCheckInterval(interval),
 			),
 			currentVersion: currentVersion,

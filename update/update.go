@@ -16,8 +16,8 @@ import (
 var tmpDir = os.TempDir()
 
 type UpdaterSource interface {
-	NewerVersionAvailable(string) (bool, error)
-	IfNewerVersionAvailable(string) Updater
+	NewerVersionAvailable(context.Context) (bool, error)
+	IfNewerVersionAvailable() Updater
 }
 
 type Updater interface {
@@ -25,14 +25,14 @@ type Updater interface {
 }
 
 type UpdaterSourceOption interface {
-	setCheckInterval(time.Duration)
+	SetCheckInterval(time.Duration)
 }
 
 type Option func(UpdaterSourceOption)
 
 func WithCheckInterval(interval time.Duration) Option {
 	return func(u UpdaterSourceOption) {
-		u.setCheckInterval(interval)
+		u.SetCheckInterval(interval)
 	}
 }
 

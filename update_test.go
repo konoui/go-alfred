@@ -20,20 +20,20 @@ func Test_updater_IfNewerVersionAvailable(t *testing.T) {
 			name: "new version available",
 			want: true,
 			setupMockFunc: func(source *mock.MockUpdaterSource) {
-				source.EXPECT().NewerVersionAvailable("").Return(true, nil)
+				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(true, nil)
 			},
 		},
 		{
 			name: "new version unavailable",
 			want: false,
 			setupMockFunc: func(source *mock.MockUpdaterSource) {
-				source.EXPECT().NewerVersionAvailable("").Return(false, nil)
+				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(false, nil)
 			},
 		},
 		{
 			name: "return false if error occurs",
 			setupMockFunc: func(source *mock.MockUpdaterSource) {
-				source.EXPECT().NewerVersionAvailable("").Return(false, errors.New("injected error"))
+				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(false, errors.New("injected error"))
 			},
 			want: false,
 		},
@@ -48,7 +48,7 @@ func Test_updater_IfNewerVersionAvailable(t *testing.T) {
 				wf:     NewWorkflow(),
 			}
 			defer ctrl.Finish()
-			if got := updater.NewerVersionAvailable(); !reflect.DeepEqual(got, tt.want) {
+			if got := updater.NewerVersionAvailable(context.TODO()); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("updater.IfNewerVersionAvailable() = %v, want %v", got, tt.want)
 			}
 		})
@@ -102,8 +102,8 @@ func Test_updater_Update(t *testing.T) {
 				updater.EXPECT().
 					Update(gomock.Any()).
 					Return(nil)
-				source.EXPECT().NewerVersionAvailable("").Return(true, nil)
-				source.EXPECT().IfNewerVersionAvailable("").Return(updater)
+				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(true, nil)
+				source.EXPECT().IfNewerVersionAvailable().Return(updater)
 			},
 			wantErr: false,
 		},
@@ -113,8 +113,8 @@ func Test_updater_Update(t *testing.T) {
 				updater.EXPECT().
 					Update(gomock.Any()).
 					Return(errors.New("injected error"))
-				source.EXPECT().NewerVersionAvailable("").Return(true, nil)
-				source.EXPECT().IfNewerVersionAvailable("").Return(updater)
+				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(true, nil)
+				source.EXPECT().IfNewerVersionAvailable().Return(updater)
 			},
 			wantErr: true,
 		},
