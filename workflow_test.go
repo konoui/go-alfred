@@ -97,12 +97,12 @@ func TestWorkflow_Clear(t *testing.T) {
 			item: &Item{
 				title: "test",
 			},
-			want: NewWorkflow().Marshal(),
+			want: NewWorkflow().Bytes(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewWorkflow().Append(tt.item).Clear().Marshal()
+			got := NewWorkflow().Append(tt.item).Clear().Bytes()
 			if diff := DiffOutput(tt.want, got); diff != "" {
 				t.Errorf("-want +got\n%+v", diff)
 			}
@@ -157,7 +157,7 @@ func TestWorfkflowMarshal(t *testing.T) {
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
 			awf.Append(tt.items...)
 
-			got := awf.Marshal()
+			got := awf.Bytes()
 			if diff := DiffOutput(want, got); diff != "" {
 				t.Errorf("-want +got\n%+v", diff)
 			}

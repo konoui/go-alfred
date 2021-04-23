@@ -169,14 +169,13 @@ func (w *Workflow) error(title, subtitle string) *Workflow {
 	return w
 }
 
-// Marshal WorkFlow results
-func (w *Workflow) Marshal() []byte {
+func (w *Workflow) Bytes() []byte {
 	if len(w.err.items) != 0 {
-		return w.err.Marshal()
+		return w.err.Bytes()
 	}
 
 	if w.IsEmpty() {
-		return w.warn.Marshal()
+		return w.warn.Bytes()
 	}
 
 	if limit := w.maxResults; limit > 0 && len(w.std.items) > limit {
@@ -186,7 +185,11 @@ func (w *Workflow) Marshal() []byte {
 			w.std.items = tmp
 		}()
 	}
-	return w.std.Marshal()
+	return w.std.Bytes()
+}
+
+func (w *Workflow) String() string {
+	return string(w.Bytes())
 }
 
 // Fatal output error to io stream and call os.Exit(1)
@@ -196,7 +199,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 		return
 	}
 
-	res := w.error(title, subtitle).Marshal()
+	res := w.error(title, subtitle).String()
 	fmt.Fprintln(w.streams.out, string(res))
 	os.Exit(1)
 }
@@ -208,7 +211,7 @@ func (w *Workflow) Output() *Workflow {
 		return w
 	}
 	defer w.markDone()
-	res := w.Marshal()
+	res := w.String()
 	fmt.Fprintln(w.streams.out, string(res))
 	return w
 }

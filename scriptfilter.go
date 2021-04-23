@@ -52,14 +52,17 @@ func (s *ScriptFilter) Clear() {
 	s.items = Items{}
 }
 
-// Marshal ScriptFilter as Json if err, return err JSON
-func (s *ScriptFilter) Marshal() []byte {
+func (s *ScriptFilter) Bytes() []byte {
 	res, err := s.MarshalJSON()
 	if err != nil {
 		return []byte(fmt.Sprintf(fatalErrorJSON, err.Error()))
 	}
 
 	return res
+}
+
+func (s *ScriptFilter) String() string {
+	return string(s.Bytes())
 }
 
 // IsEmpty return true if the items is empty

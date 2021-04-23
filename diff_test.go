@@ -112,7 +112,7 @@ func TestDiffScriptFilter(t *testing.T) {
 			sf := NewScriptFilter()
 			sf.Append(tt.items...)
 
-			gotData := sf.Marshal()
+			gotData := sf.Bytes()
 			diff := DiffOutput(wantData, gotData)
 			if !tt.expectedErr && diff != "" {
 				t.Errorf("-want +got\n%+v", diff)
