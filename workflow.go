@@ -1,16 +1,14 @@
 package alfred
 
 import (
+	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/konoui/go-alfred/update"
 )
-
-var tmpDir = os.TempDir()
 
 // Workflow is map of ScriptFilters
 type Workflow struct {
@@ -19,9 +17,8 @@ type Workflow struct {
 	err        *ScriptFilter
 	cache      caches
 	streams    streams
-	done       bool
+	markers    markers
 	logger     Logger
-	dirs       map[string]string
 	maxResults int
 	loglevel   LogLevel
 	updater    Updater
@@ -29,6 +26,11 @@ type Workflow struct {
 
 type streams struct {
 	out io.Writer
+}
+
+type markers struct {
+	done       bool
+	managedRun bool
 }
 
 type Option func(*Workflow)
@@ -42,8 +44,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger:     newLogger(ioutil.Discard, ""),
-		dirs:       make(map[string]string),
+		logger:     newLogger(os.Stderr, LogLevelInfo),
 		maxResults: 0,
 		loglevel:   "",
 	}
@@ -158,17 +159,6 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 	return w
 }
 
-func (w *Workflow) error(title, subtitle string) *Workflow {
-	w.err.Append(
-		NewItem().
-			Title(title).
-			Subtitle(subtitle).
-			Valid(false).
-			Icon(IconCaution),
-	)
-	return w
-}
-
 func (w *Workflow) Bytes() []byte {
 	if len(w.err.items) != 0 {
 		return w.err.Bytes()
@@ -192,27 +182,32 @@ func (w *Workflow) String() string {
 	return string(w.Bytes())
 }
 
+var osExit = os.Exit
+
 // Fatal output error to io stream and call os.Exit(1)
 func (w *Workflow) Fatal(title, subtitle string) {
-	if w.done {
-		w.logger.Infoln(sentMessage)
-		return
-	}
-
-	res := w.error(title, subtitle).String()
-	fmt.Fprintln(w.streams.out, string(res))
-	os.Exit(1)
+	w.err.Append(
+		NewItem().
+			Title(title).
+			Subtitle(subtitle).
+			Valid(false).
+			Icon(IconCaution),
+	)
+	w.Output()
+	osExit(1)
 }
 
 // Output to io stream
 func (w *Workflow) Output() *Workflow {
-	if w.done {
-		w.logger.Infoln(sentMessage)
+	if !w.markers.managedRun {
+		panic(errors.New("the workflow does not use *Workflow.Run()"))
+	}
+	if w.markers.done {
+		w.Logger().Warnln(sentMessage)
 		return w
 	}
 	defer w.markDone()
-	res := w.String()
-	fmt.Fprintln(w.streams.out, string(res))
+	fmt.Fprintln(w.streams.out, w.String())
 	return w
 }
 
@@ -222,5 +217,5 @@ func (w *Workflow) IsEmpty() bool {
 }
 
 func (w *Workflow) markDone() {
-	w.done = true
+	w.markers.done = true
 }

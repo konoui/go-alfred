@@ -18,25 +18,20 @@ const (
 	cacheSuffix = "-alfred-progress-bar.cache"
 )
 
-func init() {
+func main() {
 	awf = alfred.NewWorkflow()
 	awf.SetOut(os.Stdout)
 	awf.SetLog(os.Stderr)
 	awf.SetCacheSuffix(cacheSuffix)
-	if err := awf.SetCacheDir(cacheDir); err != nil {
-		panic(err)
-	}
-	if err := awf.SetJobDir(dataDir); err != nil {
-		panic(err)
-	}
+	awf.Run(run)
 }
 
-func main() {
+func run(awf *alfred.Workflow) error {
 	key := "test"
 	jobName := "progress-bar"
 	if awf.Cache(key).LoadItems(60*time.Second).Err() == nil {
 		awf.Output()
-		return
+		return nil
 	}
 
 	job := awf.Job(jobName)
@@ -45,7 +40,7 @@ func main() {
 			alfred.NewItem().Title("a background job is running"),
 		)
 		awf.Output()
-		return
+		return nil
 	}
 
 	awf.Append(
@@ -60,5 +55,5 @@ func main() {
 		)
 	}
 	awf.Cache(key).StoreItems().Workflow().Output()
-	return
+	return nil
 }

@@ -20,9 +20,6 @@ func init() {
 	awf = alfred.NewWorkflow()
 	awf.SetOut(os.Stdout)
 	awf.SetLog(os.Stderr)
-	if err := awf.SetJobDir(dataDir); err != nil {
-		panic(err)
-	}
 }
 
 func main() {

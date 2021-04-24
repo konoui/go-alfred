@@ -28,7 +28,7 @@ func (w *Workflow) Updater() Updater {
 func (u *updater) NewerVersionAvailable(ctx context.Context) bool {
 	ok, err := u.source.NewerVersionAvailable(ctx)
 	if err != nil {
-		u.wf.Logger().Warnln("failed to check newer version", err)
+		u.wf.Logger().Warnln("failed to check newer version due to", err)
 		return false
 	}
 	if ok {

@@ -23,8 +23,7 @@ func TestNewWorkflow(t *testing.T) {
 				streams: streams{
 					out: os.Stdout,
 				},
-				logger: newLogger(ioutil.Discard, LogLevelInfo),
-				dirs:   make(map[string]string),
+				logger: newLogger(os.Stderr, LogLevelInfo),
 			},
 		},
 	}
@@ -208,6 +207,7 @@ func TestOutput(t *testing.T) {
 
 			outBuf, errBuf := new(bytes.Buffer), new(bytes.Buffer)
 			awf := NewWorkflow()
+			awf.markManagedRun()
 			awf.SetOut(outBuf)
 			awf.SetLog(errBuf)
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)

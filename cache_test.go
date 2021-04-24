@@ -2,12 +2,8 @@ package alfred
 
 import (
 	"errors"
-	"os"
-	"reflect"
 	"testing"
 	"time"
-
-	"github.com/konoui/go-alfred/cache"
 )
 
 func TestWorkflow_Cache(t *testing.T) {
@@ -29,26 +25,13 @@ func TestWorkflow_Cache(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			filename := tt.args.key + tt.wf.getCacheSuffix()
-			c, err := cache.New(tmpDir, filename)
-			if err != nil {
-				t.Fatal(err)
-			}
-			want := &Cache{
-				err:      nil,
-				wf:       tt.wf,
-				iCache:   c,
-				filename: filename,
-			}
-
+			want := tt.wf.Cache(tt.args.key)
 			got := tt.wf.Cache(tt.args.key)
-			if !reflect.DeepEqual(want, got) {
-				t.Errorf("got: %v\nwant: %v\n", got, want)
+			if err := tt.wf.Cache(tt.args.key).Err(); err != nil {
+				t.Errorf("unexpected error %s", err)
 			}
-
-			got2 := tt.wf.Cache(tt.args.key)
-			if got != got2 {
-				t.Errorf("Cache() does not behave singleton 1st %v\n, 2nd %v", got, got2)
+			if want != got {
+				t.Errorf("Cache() does not behave singleton want %#v\n, got %#v\n", want, got)
 			}
 		})
 	}
@@ -129,55 +112,13 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 	}
 }
 
-func Test_SetGetCacheDir(t *testing.T) {
-	name := "set/get cache direvtory"
-	t.Run(name, func(t *testing.T) {
-		if err := NewWorkflow().SetCacheDir("invalid-directory-name"); err == nil {
-			t.Errorf("unexpected results")
-		}
-
-		awf := NewWorkflow()
-		want := tmpDir
-		got := awf.getCacheDir()
-		if want != got {
-			t.Errorf("want %s got %s", want, got)
-		}
-
-		want, err := os.UserHomeDir()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if err := awf.SetCacheDir(want); err != nil {
-			t.Errorf(err.Error())
-		}
-		got = awf.getCacheDir()
-
-		if want != got {
-			t.Errorf("want %s got %s", want, got)
-		}
-	})
-}
-
 func Test_SetGetCacheSuffix(t *testing.T) {
 	name := "set/get cache suffix"
 	t.Run(name, func(t *testing.T) {
 		awf := NewWorkflow()
-		got := awf.getCacheSuffix()
-		want := ""
-		if want != got {
-			t.Errorf("want %s got %s", want, got)
-		}
-
-		got = awf.cache.suffix
-		if want != got {
-			t.Errorf("want %s got %s", want, got)
-		}
-
-		awf = NewWorkflow()
-		want = "test"
+		want := "test"
 		awf.SetCacheSuffix(want)
-		got = awf.getCacheSuffix()
+		got := awf.getCacheSuffix()
 		if want != got {
 			t.Errorf("want %s got %s", want, got)
 		}

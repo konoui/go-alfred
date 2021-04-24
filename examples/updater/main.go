@@ -17,7 +17,10 @@ func main() {
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 	)
 	awf.SetLog(os.Stderr)
+	awf.Run(run)
+}
 
+func run(awf *alfred.Workflow) error {
 	if len(os.Args) >= 2 {
 		if os.Args[1] == "--update" {
 			_ = awf.Updater().Update(context.Background())
@@ -35,4 +38,5 @@ func main() {
 	)
 
 	awf.Output()
+	return nil
 }
