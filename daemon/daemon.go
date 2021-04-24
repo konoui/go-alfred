@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"syscall"
@@ -34,13 +35,8 @@ var (
 
 // Context presents paremeters of a process
 type Context struct {
-	Name        string
-	Args        []string
+	ExtraEnv    []string
 	PidDir      string
-	Dir         string
-	Files       []*os.File
-	Env         []string
-	SysAttr     *syscall.SysProcAttr
 	PidFileName string
 }
 
@@ -55,54 +51,36 @@ func (s ProcessStatus) String() string {
 	}
 }
 
-// Daemonize makes a process as daemon
-func (c *Context) Daemonize() (ProcessStatus, error) {
+func (c *Context) Daemonize(cmd *exec.Cmd) (ProcessStatus, error) {
 	if c.isParentProcess() {
 		if c.IsRunning() {
 			return FailedProcess, ErrAlreadyRunning
 		}
 
 		// here is a parent process
-		err := c.markAsChildProcess()
-		if err != nil {
+		if err := c.markAsChildProcess(); err != nil {
 			return FailedProcess, err
 		}
-		attr := &os.ProcAttr{
-			Dir:   c.Dir,
-			Env:   c.Env,
-			Files: c.Files,
-			Sys:   c.SysAttr,
-		}
-		if attr.Sys == nil {
-			attr.Sys = new(syscall.SysProcAttr)
-		}
-		// overwride sid
-		attr.Sys.Setsid = true
 
-		// update command name to abs path as working directory of child may be changed
-		asbPath, err := filepath.Abs(c.Name)
-		if err != nil {
-			return FailedProcess, err
+		if cmd.SysProcAttr == nil {
+			cmd.SysProcAttr = &syscall.SysProcAttr{}
 		}
-		c.Name = asbPath
+		cmd.SysProcAttr.Setpgid = true
+		cmd.Env = append(cmd.Env, c.ExtraEnv...)
 
-		// must set a program name as first argument
-		args := append([]string{c.Name}, c.Args...)
-
-		child, err := os.StartProcess(c.Name, args, attr)
-		if err != nil {
+		if err := cmd.Start(); err != nil {
 			return FailedProcess, err
 		}
 
 		// create pid file
-		err = createPidFile(child.Pid, c.PidFileName, c.PidDir)
-		if err != nil {
+		child := cmd.Process
+		if err := createPidFile(child.Pid, c.PidFileName, c.PidDir); err != nil {
 			_ = child.Kill()
 			return FailedProcess, err
 		}
 
 		// detach the child process from parent
-		if err = child.Release(); err != nil {
+		if err := child.Release(); err != nil {
 			_ = child.Kill()
 			return FailedProcess, fmt.Errorf("failed to detach child process: %w", err)
 		}
@@ -140,7 +118,7 @@ func (c *Context) Terminate() error {
 
 func (c *Context) markAsChildProcess() error {
 	keyValue := fmt.Sprintf("%s=%s", childEnvKey, childEnvValue)
-	c.Env = append(c.Env, keyValue)
+	c.ExtraEnv = append(c.ExtraEnv, keyValue)
 	return nil
 }
 

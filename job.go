@@ -10,14 +10,13 @@ import (
 	"github.com/konoui/go-alfred/daemon"
 )
 
-const jobDirKey = "job-dir"
 const (
-	// ForegroundParentJob presents running process in forground that means parent process
-	ForegroundParentJob JobProcess = JobProcess(daemon.ParentProcess)
-	// BackgroundChildJob presents running process as job in background that means child process
-	BackgroundChildJob JobProcess = JobProcess(daemon.ChildProcess)
-	// FailedJob presents failed to start Job
-	FailedJob JobProcess = JobProcess(daemon.FailedProcess)
+	// obStarter running process in forground that means parent process
+	JobStarter JobProcess = JobProcess(daemon.ParentProcess)
+	// JJobWorker presents running process as job in background that means child process
+	JobWorker JobProcess = JobProcess(daemon.ChildProcess)
+	// JobFailed presents failed to start Job
+	JobFailed JobProcess = JobProcess(daemon.FailedProcess)
 )
 
 // JobProcess is a type of job
@@ -25,12 +24,12 @@ type JobProcess int
 
 func (j JobProcess) String() string {
 	switch j {
-	case ForegroundParentJob:
-		return "ForegroundParentJob"
-	case BackgroundChildJob:
-		return "BackgroundChildJob"
+	case JobStarter:
+		return "JobStarter"
+	case JobWorker:
+		return "JobWorker"
 	default:
-		return "FailedJob"
+		return "JobFailed"
 	}
 }
 
@@ -40,6 +39,23 @@ type Job struct {
 	daemonCtx *daemon.Context
 	wf        *Workflow
 	logging   bool
+}
+
+var tmpDir = os.TempDir()
+
+func (w *Workflow) getJobDir() string {
+	dir, err := w.GetWorkflowDir()
+	if err != nil {
+		w.Logger().Warnln("using tmp dir for job dir as", err)
+		return tmpDir
+	}
+
+	jobDir := filepath.Join(dir, "jobs")
+	if err := os.MkdirAll(jobDir, os.ModePerm); err != nil {
+		w.Logger().Warnln("cannot create job dir due to", err)
+		return tmpDir
+	}
+	return jobDir
 }
 
 // Job creates new job. name parameter means pid file
@@ -54,39 +70,13 @@ func (w *Workflow) Job(name string) *Job {
 	}
 }
 
-func (w *Workflow) getJobDir() (dir string) {
-	dir, ok := w.dirs[jobDirKey]
-	if ok {
-		return
-	}
-
-	dir = tmpDir
-	w.dirs[jobDirKey] = dir
-	return
-}
-
-// SetJobDir set job data directory
-func (w *Workflow) SetJobDir(dir string) error {
-	abs, err := filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat(abs); err != nil {
-		return err
-	}
-
-	w.dirs[jobDirKey] = abs
-	return nil
-}
-
 // ListJobs return jobs managed by workflow
 func (w *Workflow) ListJobs() []*Job {
 	const ext = ".pid"
 	dir := w.getJobDir()
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		w.logger.Infof("Invalid directory %s\n", dir)
+		w.Logger().Infof("invalid directory %s\n", dir)
 		return nil
 	}
 
@@ -107,7 +97,7 @@ func (w *Workflow) ListJobs() []*Job {
 			continue
 		}
 		// valid process
-		w.logger.Infof("Found a job %v\n", job)
+		w.Logger().Infof("found a job %v\n", job)
 		jobs = append(jobs, job)
 	}
 	return jobs
@@ -118,59 +108,32 @@ func (j *Job) Name() string {
 	return j.name
 }
 
-// Logging redirects output of stdout/err to log file
 func (j *Job) Logging() *Job {
 	j.logging = true
 	return j
 }
 
 // Start behaves as fork if run a self program. If run a external command, it behaves as fork/exec
-func (j *Job) Start(cmdName string, args ...string) (JobProcess, error) {
-	absPath, err := exec.LookPath(cmdName)
-	if err != nil {
-		return FailedJob, err
+func (j *Job) Start(cmd *exec.Cmd) (JobProcess, error) {
+	mergeEnv(cmd, os.Environ())
+	if j.logging {
+		cmd.Stdout, cmd.Stderr = j.files()
 	}
-	j.daemonCtx.Name = absPath
-	j.daemonCtx.Args = args
-	j.daemonCtx.Files = j.files()
-	j.daemonCtx.Env = os.Environ()
-
-	ret, err := j.daemonCtx.Daemonize()
+	ret, err := j.daemonCtx.Daemonize(cmd)
 	if err != nil {
-		return FailedJob, err
+		return JobWorker, err
 	}
 	return JobProcess(ret), nil
 }
 
-func (j *Job) files() []*os.File {
-	if !j.logging {
-		return nil
-	}
-
-	absPath, err := filepath.Abs(filepath.Join(j.daemonCtx.PidDir, j.name+".log"))
-	if err != nil {
-		return nil
-	}
-
-	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		return nil
-	}
-	return []*os.File{
-		nil,
-		f,
-		f,
-	}
-}
-
 // StartWithExit outputs items and continues only a child process.
 // It is helpful to run next instructions as daemon
-func (j *Job) StartWithExit(cmdName string, args ...string) *Workflow {
-	ret, err := j.Start(cmdName, args...)
+func (j *Job) StartWithExit(cmd *exec.Cmd) *Workflow {
+	ret, err := j.Start(cmd)
 	if err != nil {
 		j.wf.Fatal("Failed to start a job", err.Error())
 	}
-	if ret == ForegroundParentJob {
+	if ret == JobStarter {
 		j.wf.Output()
 		os.Exit(0)
 	}
@@ -190,4 +153,38 @@ func (j *Job) IsRunning() bool {
 // Terminate kills the job
 func (j *Job) Terminate() error {
 	return j.daemonCtx.Terminate()
+}
+
+// TODO restrict key and value
+func mergeEnv(cmd *exec.Cmd, envs []string) {
+	contains := func(v string, list []string) bool {
+		for _, c := range list {
+			if c == v {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, env := range envs {
+		if contains(env, cmd.Env) {
+			continue
+		}
+		cmd.Env = append(cmd.Env, env)
+	}
+}
+
+// Logging redirects output of stdout/err to log file
+func (j *Job) files() (out, stderr *os.File) {
+	absPath, err := filepath.Abs(filepath.Join(j.daemonCtx.PidDir, j.name+".log"))
+	if err != nil {
+		return nil, nil
+	}
+
+	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	j.wf.Logger().Debugln("job logs will be stored at", absPath)
+	if err != nil {
+		return nil, nil
+	}
+	return f, f
 }

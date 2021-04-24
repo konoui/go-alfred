@@ -20,9 +20,6 @@ func init() {
 	awf = alfred.NewWorkflow()
 	awf.SetOut(os.Stdout)
 	awf.SetLog(os.Stderr)
-	if err := awf.SetJobDir(dataDir); err != nil {
-		panic(err)
-	}
 }
 
 func main() {
@@ -50,7 +47,8 @@ func getQuery(args []string, idx int) string {
 
 func startJobs() error {
 	jobName := "backgound-job"
-	awf.Job(jobName).Logging().StartWithExit(os.Args[0], os.Args[1:]...)
+	cmd := exec.Command(os.Args[0], os.Args[1:]...)
+	awf.Job(jobName).StartWithExit(cmd)
 	// next instructions will be executed as job
 	awf.Clear()
 	return runCmd()

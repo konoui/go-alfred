@@ -16,17 +16,18 @@ func main() {
 		),
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 	)
-	awf.SetLog(os.Stderr)
-
-	if len(os.Args) >= 2 {
-		if os.Args[1] == "--update" {
-			_ = awf.Updater().Update(context.Background())
-		}
+	if err := awf.OnInitialize(); err != nil {
+		awf.Fatal(err.Error(), err.Error())
 	}
+	awf.SetLog(os.Stderr)
+	run(awf)
+}
 
-	if awf.Updater().NewerVersionAvailable(context.Background()) {
+func run(awf *alfred.Workflow) error {
+	if awf.Updater().NewerVersionAvailable(context.TODO()) {
 		awf.Append(
-			alfred.NewItem().Title("newer version available!"),
+			alfred.NewItem().Title("update workflow").
+				Autocomplete(alfred.ArgWorkflowUpdate),
 		)
 	}
 
@@ -35,4 +36,5 @@ func main() {
 	)
 
 	awf.Output()
+	return nil
 }

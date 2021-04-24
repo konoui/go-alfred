@@ -14,6 +14,7 @@ lint:
 
 ## Run tests for my project
 test:
+	. scripts/setup.sh; \
 	go test -v ./...
 
 build-examples:
@@ -23,6 +24,7 @@ generate:
 	go generate ./...
 
 cover:
+	. scripts/setup.sh; \
 	go test -coverprofile=cover.out ./...
 	go tool cover -html=cover.out -o cover.html
 

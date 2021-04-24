@@ -8,9 +8,8 @@ import (
 )
 
 type updater struct {
-	wf             *Workflow
-	source         update.UpdaterSource
-	currentVersion string
+	wf     *Workflow
+	source update.UpdaterSource
 }
 
 type Updater interface {
@@ -26,9 +25,14 @@ func (w *Workflow) Updater() Updater {
 }
 
 func (u *updater) NewerVersionAvailable(ctx context.Context) bool {
+	if !IsAutoUpdateWorkflowEnabled() {
+		u.wf.Logger().Infoln("auto update environment is disabled(false)")
+		return false
+	}
+
 	ok, err := u.source.NewerVersionAvailable(ctx)
 	if err != nil {
-		u.wf.Logger().Warnln("failed to check newer version", err)
+		u.wf.Logger().Warnln("failed to check newer version due to", err)
 		return false
 	}
 	if ok {
@@ -40,10 +44,7 @@ func (u *updater) NewerVersionAvailable(ctx context.Context) bool {
 }
 
 func (u *updater) Update(ctx context.Context) error {
-	if u.NewerVersionAvailable(ctx) {
-		return u.source.IfNewerVersionAvailable().Update(ctx)
-	}
-	return nil
+	return u.source.IfNewerVersionAvailable().Update(ctx)
 }
 
 type nilUpdater struct{}

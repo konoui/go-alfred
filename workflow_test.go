@@ -23,8 +23,7 @@ func TestNewWorkflow(t *testing.T) {
 				streams: streams{
 					out: os.Stdout,
 				},
-				logger: newLogger(ioutil.Discard, LogLevelInfo),
-				dirs:   make(map[string]string),
+				logger: newLogger(os.Stderr, LogLevelInfo),
 			},
 		},
 	}

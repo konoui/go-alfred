@@ -65,13 +65,11 @@ func TestWorkflow_Updater(t *testing.T) {
 		{
 			wf: &Workflow{
 				updater: &updater{
-					source:         mock.NewMockUpdaterSource(nil),
-					currentVersion: "v0.0.1",
+					source: mock.NewMockUpdaterSource(nil),
 				},
 			},
 			want: &updater{
-				source:         mock.NewMockUpdaterSource(nil),
-				currentVersion: "v0.0.1",
+				source: mock.NewMockUpdaterSource(nil),
 			},
 		},
 		{
@@ -102,7 +100,6 @@ func Test_updater_Update(t *testing.T) {
 				updater.EXPECT().
 					Update(gomock.Any()).
 					Return(nil)
-				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(true, nil)
 				source.EXPECT().IfNewerVersionAvailable().Return(updater)
 			},
 			wantErr: false,
@@ -113,7 +110,6 @@ func Test_updater_Update(t *testing.T) {
 				updater.EXPECT().
 					Update(gomock.Any()).
 					Return(errors.New("injected error"))
-				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(true, nil)
 				source.EXPECT().IfNewerVersionAvailable().Return(updater)
 			},
 			wantErr: true,

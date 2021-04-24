@@ -14,6 +14,7 @@ type Logger interface {
 	Debugf(format string, v ...interface{})
 	Debugln(v ...interface{})
 	Warnln(v ...interface{})
+	Errorln(v ...interface{})
 }
 
 type myLogger struct {
@@ -26,6 +27,7 @@ const (
 	LogLevelDebug LogLevel = "DEBUG"
 	LogLevelInfo  LogLevel = "INFO"
 	LogLevelWarn  LogLevel = "WARN"
+	LogLevelError LogLevel = "ERROR"
 )
 
 func (w *Workflow) Logger() Logger {
@@ -82,5 +84,10 @@ func (l *myLogger) Debugln(v ...interface{}) {
 
 func (l *myLogger) Warnln(v ...interface{}) {
 	level := string(LogLevelWarn)
+	l.l.Println("[" + level + "] " + fmt.Sprintln(v...))
+}
+
+func (l *myLogger) Errorln(v ...interface{}) {
+	level := string(LogLevelError)
 	l.l.Println("[" + level + "] " + fmt.Sprintln(v...))
 }

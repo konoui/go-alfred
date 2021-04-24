@@ -3,16 +3,10 @@ package alfred
 import (
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/konoui/go-alfred/cache"
-)
-
-const (
-	cacheDirKey = "cache-dir"
 )
 
 // ErrCacheExpired represent ttl is expired
@@ -32,32 +26,6 @@ type Cache struct {
 	err      error
 }
 
-func (w *Workflow) getCacheDir() (dir string) {
-	dir, ok := w.dirs[cacheDirKey]
-	if ok {
-		return
-	}
-
-	dir = tmpDir
-	w.dirs[cacheDirKey] = dir
-	return
-}
-
-// SetCacheDir overrides default cache directory
-func (w *Workflow) SetCacheDir(dir string) (err error) {
-	abs, err := filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat(abs); err != nil {
-		return err
-	}
-
-	w.dirs[cacheDirKey] = abs
-	return
-}
-
 func (w *Workflow) getCacheSuffix() (suffix string) {
 	suffix = w.cache.suffix
 	if suffix != "" {
@@ -65,11 +33,10 @@ func (w *Workflow) getCacheSuffix() (suffix string) {
 	}
 
 	defer func() {
-		// Note set env or default value to workflow to reduce Getenv call
 		w.cache.suffix = suffix
 	}()
 
-	suffix = os.Getenv("alfred_workflow_bundleid")
+	suffix = w.GetBundleID()
 	if suffix != "" {
 		return
 	}
@@ -87,6 +54,7 @@ func (w *Workflow) SetCacheSuffix(suffix string) {
 // If key is empty, return Noop cache
 func (w *Workflow) Cache(key string) *Cache {
 	if key == "" {
+		w.Logger().Debugln("try to use nil cacher as cache key is empty")
 		return newNil("", w, nil)
 	}
 
@@ -95,10 +63,10 @@ func (w *Workflow) Cache(key string) *Cache {
 		return v.(*Cache)
 	}
 
-	cr, err := cache.New(w.getCacheDir(), filename)
+	cr, err := cache.New(w.GetCacheDir(), filename)
 	if err != nil {
 		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
-		w.logger.Warnln(err)
+		w.Logger().Errorln(err)
 		return newNil(filename, w, err)
 	}
 
@@ -136,7 +104,7 @@ func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 
 	if c.iCache.Expired(ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
-		c.wf.logger.Infoln(err)
+		c.wf.Logger().Infoln(err.Error())
 		return c
 	}
 
@@ -159,7 +127,7 @@ func (c *Cache) StoreItems() *Cache {
 
 	items := c.wf.std.items
 	if err = c.iCache.Store(&items); err != nil {
-		c.wf.logger.Warnln(err)
+		c.wf.Logger().Errorln(err)
 	}
 	return c
 }
@@ -172,7 +140,7 @@ func (c *Cache) ClearItems() *Cache {
 	}()
 
 	if err = c.iCache.Clear(); err != nil {
-		c.wf.logger.Warnln(err)
+		c.wf.Logger().Errorln(err)
 	}
 	return c
 }
