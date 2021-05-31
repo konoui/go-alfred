@@ -14,6 +14,7 @@ type Workflow struct {
 	std        *ScriptFilter
 	warn       *ScriptFilter
 	err        *ScriptFilter
+	system     *ScriptFilter
 	cache      caches
 	streams    streams
 	markers    markers
@@ -36,9 +37,10 @@ type Option func(*Workflow)
 // NewWorkflow has simple ScriptFilter api
 func NewWorkflow(opts ...Option) *Workflow {
 	wf := &Workflow{
-		std:  NewScriptFilter(),
-		warn: NewScriptFilter(),
-		err:  NewScriptFilter(),
+		std:    NewScriptFilter(),
+		warn:   NewScriptFilter(),
+		err:    NewScriptFilter(),
+		system: NewScriptFilter(),
 		streams: streams{
 			out: os.Stdout,
 		},
@@ -144,7 +146,6 @@ func (w *Workflow) Variable(key, value string) *Workflow {
 
 // SetEmptyWarning message which will be showed if items is empty
 func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
-	w.warn.Clear()
 	w.warn.Append(
 		NewItem().
 			Title(title).
@@ -155,22 +156,50 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 	return w
 }
 
+// SetSystenInfo is useful for showing system information like update recommendation
+// workflow ignores system information when store/load caches
+// item of icon will be overwritten with system icon.
+func (w *Workflow) SetSystemInfo(i *Item) *Workflow {
+	if i == nil {
+		return w
+	}
+	w.system.Append(i)
+	return w
+}
+
 func (w *Workflow) Bytes() []byte {
-	if len(w.err.items) != 0 {
+	if !w.err.IsEmpty() {
 		return w.err.Bytes()
+	}
+
+	savedStdItems := make(Items, len(w.std.items))
+	copy(savedStdItems, w.std.items)
+	savedWarnItems := make(Items, len(w.warn.items))
+	copy(savedWarnItems, w.warn.items)
+	defer func() {
+		w.std.items = savedStdItems
+		w.warn.items = savedWarnItems
+	}()
+
+	if w.isLimited() {
+		w.std.items = savedStdItems[:w.maxResults]
+	}
+
+	if !w.system.IsEmpty() {
+		items := w.std.items
+		w.std.Clear()
+		w.std.Append(w.system.items...)
+		w.std.Append(items...)
+		items = w.warn.items
+		w.warn.Clear()
+		w.warn.Append(w.system.items...)
+		w.warn.Append(items...)
 	}
 
 	if w.IsEmpty() {
 		return w.warn.Bytes()
 	}
 
-	if limit := w.maxResults; limit > 0 && len(w.std.items) > limit {
-		tmp := w.std.items
-		w.std.items = w.std.items[:limit]
-		defer func() {
-			w.std.items = tmp
-		}()
-	}
 	return w.std.Bytes()
 }
 
@@ -211,4 +240,13 @@ func (w *Workflow) IsEmpty() bool {
 
 func (w *Workflow) markDone() {
 	w.markers.done = true
+}
+
+func (w *Workflow) isLimited() bool {
+	// if maxResults equal 0, this means unlimited
+	limit := w.maxResults
+	if limit > 0 && len(w.std.items) > limit {
+		return true
+	}
+	return false
 }

@@ -17,9 +17,10 @@ func TestNewWorkflow(t *testing.T) {
 		{
 			description: "create new workflow",
 			want: &Workflow{
-				std:  NewScriptFilter(),
-				warn: NewScriptFilter(),
-				err:  NewScriptFilter(),
+				std:    NewScriptFilter(),
+				warn:   NewScriptFilter(),
+				err:    NewScriptFilter(),
+				system: NewScriptFilter(),
 				streams: streams{
 					out: os.Stdout,
 				},
@@ -109,31 +110,42 @@ func TestWorkflow_Clear(t *testing.T) {
 	}
 }
 
-func TestWorfkflowMarshal(t *testing.T) {
+func TestWorfkfloByte(t *testing.T) {
 	tests := []struct {
 		description string
 		filepath    string
 		items       Items
-		emptyItem   Item
+		emptyItem   *Item
+		systemItem  *Item
 		opts        []Option
 	}{
 		{
 			description: "output standard items",
 			filepath:    testFilePath("test_scriptfilter_items01.json"),
 			items:       items01,
-			emptyItem:   emptyItem,
+			emptyItem:   &emptyItem,
 		},
 		{
 			description: "output empty warning",
 			filepath:    testFilePath("test_scriptfilter_empty_warning_marshal.json"),
 			items:       Items{},
-			emptyItem:   emptyItem,
+			emptyItem:   &emptyItem,
 		},
 		{
 			description: "limit standard items",
 			filepath:    testFilePath("test_limit_output_item01.json"),
 			items:       items01,
-			emptyItem:   emptyItem,
+			emptyItem:   &emptyItem,
+			opts: []Option{
+				WithMaxResults(1),
+			},
+		},
+		{
+			description: "set system item and  limit standard items",
+			filepath:    testFilePath("test_system_and_limit_output_item01.json"),
+			items:       items01,
+			emptyItem:   &emptyItem,
+			systemItem:  &systemItem,
 			opts: []Option{
 				WithMaxResults(1),
 			},
@@ -154,6 +166,7 @@ func TestWorfkflowMarshal(t *testing.T) {
 
 			awf := NewWorkflow(tt.opts...)
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
+			awf.SetSystemInfo(tt.systemItem)
 			awf.Append(tt.items...)
 
 			got := awf.Bytes()
@@ -231,6 +244,23 @@ func TestOutput(t *testing.T) {
 			if strings.Contains(wantString, gotString) {
 				t.Errorf("\nwant: %s\ngot: %s\n", wantString, gotString)
 			}
+		})
+	}
+}
+
+func TestWorkflow_Fatal(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "fatal",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := NewWorkflow()
+			osExit = func(code int) {}
+			w.Fatal("test", "test1")
 		})
 	}
 }

@@ -11,6 +11,11 @@ var emptyItem = Item{
 	subtitle: "emptySubtitle1",
 }
 
+var systemItem = Item{
+	title:    "systemTitle1",
+	subtitle: "systemSubtitle1",
+}
+
 var items01 = Items{
 	&Item{
 		title:    "title1",
