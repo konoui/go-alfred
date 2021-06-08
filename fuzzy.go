@@ -1,13 +1,63 @@
 package alfred
 
 import (
+	"reflect"
+
 	"github.com/sahilm/fuzzy"
 )
 
-// Filter searches from current items
+type FilterProperty int
+
+const (
+	FilterTitle FilterProperty = iota
+	FilterSubtitle
+	FilterArg
+	FilterUID
+)
+
+// Filter by item title with fuzzy
 func (w *Workflow) Filter(query string) *Workflow {
 	w.std.items = w.std.items.Filter(query)
 	return w
+}
+
+func (w *Workflow) FilterByItemProperty(f func(s string) bool, property FilterProperty) *Workflow {
+	var field = ""
+	switch property {
+	case FilterTitle:
+		field = "title"
+	case FilterSubtitle:
+		field = "subtitle"
+	case FilterArg:
+		field = "arg"
+	case FilterUID:
+		field = "uid"
+	}
+
+	items := Items{}
+	for _, item := range w.std.items {
+		v := getItemValue(item, field)
+		if f(v) {
+			items = append(items, item)
+		}
+	}
+
+	// update
+	w.std.items = items
+	return w
+}
+
+func getItemValue(item *Item, field string) string {
+	rv := reflect.Indirect(reflect.ValueOf(item))
+	rt := rv.Type()
+
+	f, ok := rt.FieldByName(field)
+	if !ok {
+		return ""
+	}
+
+	v := rv.FieldByName(f.Name).String()
+	return v
 }
 
 // String retruns a title of Item for fuzzy interface

@@ -83,6 +83,21 @@ var items04 = Items{
 	},
 }
 
+var items05 = Items{
+	{
+		title:    "title1",
+		subtitle: "subtitle1",
+		arg:      "arg1",
+		uid:      "uid1",
+	},
+	{
+		title:    "title2",
+		subtitle: "subtitle2",
+		arg:      "arg2",
+		uid:      "uid2",
+	},
+}
+
 func TestDiffScriptFilter(t *testing.T) {
 	tests := []struct {
 		description string
