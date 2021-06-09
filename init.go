@@ -17,6 +17,8 @@ var (
 	updateTimeout = 3 * 60 * time.Second
 )
 
+var osExecutable = os.Executable
+
 func (w *Workflow) OnInitialize() error {
 	for idx, arg := range os.Args {
 		os.Args[idx] = Normalize(arg)
@@ -30,7 +32,7 @@ func (w *Workflow) OnInitialize() error {
 	defer cancel()
 	if HasUpdateArg() && w.Updater().NewerVersionAvailable(c) {
 		w.Logger().Infoln("updating workflow...")
-		self, err := os.Executable()
+		self, err := osExecutable()
 		if err != nil {
 			return err
 		}
@@ -62,15 +64,16 @@ func (w *Workflow) OnInitialize() error {
 		}
 
 		if j == JobStarter {
-			go func() {
-				scanner := bufio.NewScanner(io.MultiReader(o, e))
-				for scanner.Scan() {
-					out := scanner.Text()
-					w.Logger().Infoln("[background-updater]", out)
-				}
-
-			}()
-			defer func() { _ = cmd.Wait() }()
+			scanner := bufio.NewScanner(io.MultiReader(o, e))
+			for scanner.Scan() {
+				out := scanner.Text()
+				w.Logger().Infoln("[background-updater]", out)
+			}
+			if err := cmd.Wait(); err != nil {
+				w.Logger().Errorln("background-updater job failed due to", err, ".", "command dumps:", cmd.String())
+				return fmt.Errorf("background-updater job failed: %w", err)
+			}
+			return nil
 		}
 	}
 	return nil

@@ -79,11 +79,6 @@ func (c *Context) Daemonize(cmd *exec.Cmd) (ProcessStatus, error) {
 			return FailedProcess, err
 		}
 
-		// detach the child process from parent
-		if err := child.Release(); err != nil {
-			_ = child.Kill()
-			return FailedProcess, fmt.Errorf("failed to detach child process: %w", err)
-		}
 		return ParentProcess, nil
 	}
 
