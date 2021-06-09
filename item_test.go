@@ -66,7 +66,7 @@ func TestItemAPI(t *testing.T) {
 	}
 }
 
-func Test_AddVariableVariables(t *testing.T) {
+func Test_Variables(t *testing.T) {
 	name := "Add a variable and variables"
 	vals := Variables{"key1": "val1", "key2": "val2"}
 	want := &Item{
