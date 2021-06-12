@@ -3,7 +3,6 @@ package alfred
 import (
 	"encoding/json"
 	"io/ioutil"
-	"reflect"
 	"testing"
 )
 
@@ -17,27 +16,6 @@ var scriptfilter01 = &ScriptFilter{
 }
 var additionalKey = "key3"
 var additionalValue = "value3"
-
-func TestNewScriptFilter(t *testing.T) {
-	tests := []struct {
-		description string
-		want        *ScriptFilter
-	}{
-		{
-			description: "create new scriptfilter",
-			want:        &ScriptFilter{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			got := NewScriptFilter()
-			if !reflect.DeepEqual(tt.want, got) {
-				t.Errorf("want: %+v, got: %+v", tt.want, got)
-			}
-
-		})
-	}
-}
 
 func TestScriptFilterMarshal(t *testing.T) {
 	tests := []struct {
@@ -63,7 +41,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 			}
 
 			sf := NewScriptFilter()
-			sf.Append(tt.scriptfilter.items...)
+			sf.Items(tt.scriptfilter.items...)
 			sf.Variables(tt.scriptfilter.variables)
 			sf.Variable(tt.key, tt.value)
 
@@ -95,7 +73,7 @@ func TestUnmarshalJSON(t *testing.T) {
 			}
 
 			wantSf := NewScriptFilter()
-			wantSf.Append(tt.items...)
+			wantSf.Items(tt.items...)
 
 			gotSf := ScriptFilter{}
 			err = json.Unmarshal(input, &gotSf)

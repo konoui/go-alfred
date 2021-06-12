@@ -6,14 +6,29 @@ import (
 	"github.com/sahilm/fuzzy"
 )
 
-type FilterProperty int
+type ItemProperty int
 
 const (
-	FilterTitle FilterProperty = iota
-	FilterSubtitle
-	FilterArg
-	FilterUID
+	ItemPropertyTitle ItemProperty = iota
+	ItemPropertySubtitle
+	ItemPropertyArg
+	ItemPropertyUID
 )
+
+func (p ItemProperty) String() string {
+	var field string
+	switch p {
+	case ItemPropertyTitle:
+		field = "title"
+	case ItemPropertySubtitle:
+		field = "subtitle"
+	case ItemPropertyArg:
+		field = "arg"
+	case ItemPropertyUID:
+		field = "uid"
+	}
+	return field
+}
 
 // Filter by item title with fuzzy
 func (w *Workflow) Filter(query string) *Workflow {
@@ -21,22 +36,10 @@ func (w *Workflow) Filter(query string) *Workflow {
 	return w
 }
 
-func (w *Workflow) FilterByItemProperty(f func(s string) bool, property FilterProperty) *Workflow {
-	var field = ""
-	switch property {
-	case FilterTitle:
-		field = "title"
-	case FilterSubtitle:
-		field = "subtitle"
-	case FilterArg:
-		field = "arg"
-	case FilterUID:
-		field = "uid"
-	}
-
-	items := Items{}
+func (w *Workflow) FilterByItemProperty(f func(s string) bool, property ItemProperty) *Workflow {
+	items := make(Items, 0, cap(w.std.items))
 	for _, item := range w.std.items {
-		v := getItemValue(item, field)
+		v := getItemValue(item, property.String())
 		if f(v) {
 			items = append(items, item)
 		}

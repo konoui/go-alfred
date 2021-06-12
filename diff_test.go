@@ -130,7 +130,7 @@ func TestDiffScriptFilter(t *testing.T) {
 			}
 
 			sf := NewScriptFilter()
-			sf.Append(tt.items...)
+			sf.Items(tt.items...)
 
 			gotData := sf.Bytes()
 			diff := DiffOutput(wantData, gotData)

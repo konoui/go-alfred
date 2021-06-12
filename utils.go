@@ -10,15 +10,6 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
-var (
-	iconPath      = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
-	IconTrash     = NewIcon().Path(filepath.Join(iconPath, "TrashIcon.icns"))
-	IconAlertNote = NewIcon().Path(filepath.Join(iconPath, "AlertNoteIcon.icns"))
-	IconCaution   = NewIcon().Path(filepath.Join(iconPath, "AlertCautionBadgeIcon.icns"))
-	IconAlertStop = NewIcon().Path(filepath.Join(iconPath, "AlertStopIcon.icns"))
-	IconExec      = NewIcon().Path(filepath.Join(iconPath, "ExecutableBinaryIcon.icns"))
-)
-
 const (
 	// see https://www.alfredapp.com/help/workflows/script-environment-variables/
 	envWorkflowData        = "alfred_workflow_data"
@@ -75,15 +66,6 @@ func HasUpdateArg() bool {
 	return hasArg(ArgWorkflowUpdate)
 }
 
-func hasArg(v string) bool {
-	for _, arg := range os.Args {
-		if arg == v {
-			return true
-		}
-	}
-	return false
-}
-
 func IsDebugEnabled() bool {
 	isDebug := parseBool(
 		os.Getenv(envWorkflowDebug),
@@ -121,4 +103,27 @@ func parseBool(v string) bool {
 	}
 
 	return false
+}
+
+func hasArg(v string) bool {
+	for _, arg := range os.Args {
+		if arg == v {
+			return true
+		}
+	}
+	return false
+}
+
+func createFile(path string, data []byte) (err error) {
+	f, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	_, err = f.Write(data)
+	if err != nil {
+		return
+	}
+	return
 }

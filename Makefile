@@ -17,6 +17,10 @@ test:
 	. scripts/setup.sh; \
 	go test -v ./...
 
+bench:
+	. scripts/setup.sh; \
+	go test -benchmem -run="^$$" -bench "^(Benchmark.+)$$" -benchtime 1x -count 2
+
 build-examples:
 	examples/build-test.sh
 

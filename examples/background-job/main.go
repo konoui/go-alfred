@@ -17,12 +17,17 @@ const (
 )
 
 func init() {
-	awf = alfred.NewWorkflow()
+	awf = alfred.NewWorkflow(
+		alfred.WithLogLevel(alfred.LogLevelDebug),
+	)
 	awf.SetOut(os.Stdout)
 	awf.SetLog(os.Stderr)
 }
 
 func main() {
+	if err := awf.OnInitialize(); err != nil {
+		panic(err)
+	}
 	if err := run(); err != nil {
 		panic(err)
 	}

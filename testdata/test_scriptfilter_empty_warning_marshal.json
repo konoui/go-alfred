@@ -5,7 +5,7 @@
             "subtitle": "emptySubtitle1",
             "valid": false,
             "icon": {
-                "path": "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+                "path": "/tmp/go-alfred-data/assets/AlertNoteIcon.icns"
             }
         }
     ]

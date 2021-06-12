@@ -28,6 +28,14 @@ func (w *Workflow) OnInitialize() error {
 		return err
 	}
 
+	if err := w.initAssets(); err != nil {
+		return err
+	}
+
+	return w.initUpdate()
+}
+
+func (w *Workflow) initUpdate() error {
 	c, cancel := context.WithTimeout(context.Background(), checkTimeout)
 	defer cancel()
 	if HasUpdateArg() && w.Updater().NewerVersionAvailable(c) {
@@ -76,7 +84,7 @@ func (w *Workflow) OnInitialize() error {
 				w.Logger().Infoln("[background-updater]", out)
 			}
 			if err := cmd.Wait(); err != nil {
-				w.Logger().Errorln("background-updater job failed due to", err, ".", "command dumps:", cmd.String())
+				w.Logger().Errorln("background-updater job failed due to %v. command dumps: %s", err, cmd.String())
 				return fmt.Errorf("background-updater job failed: %w", err)
 			}
 			return nil
@@ -85,18 +93,17 @@ func (w *Workflow) OnInitialize() error {
 	return nil
 }
 
-func initDir(key string) error {
-	dir := getDir(key)
-	if dir == "" {
-		return fmt.Errorf(emptyEnvFormat, key)
+func (w *Workflow) initAssets() (err error) {
+	err = os.MkdirAll(w.getAssetsDir(), os.ModePerm)
+	if err != nil {
+		return err
 	}
 
-	if _, err := os.Stat(dir); err != nil {
-		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-			return err
-		}
+	err = generateAssets(w.getAssetsDir())
+	if err != nil {
+		return err
 	}
-
+	w.Logger().Debugf("pre-defined assets are generated in %s", w.getAssetsDir())
 	return nil
 }
 
@@ -113,5 +120,20 @@ func (w *Workflow) init() error {
 	if err := initDir(envWorkflowCache); err != nil {
 		return err
 	}
+	return nil
+}
+
+func initDir(key string) error {
+	dir := getDir(key)
+	if dir == "" {
+		return fmt.Errorf(emptyEnvFormat, key)
+	}
+
+	if _, err := os.Stat(dir); err != nil {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

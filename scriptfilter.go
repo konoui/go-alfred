@@ -19,7 +19,15 @@ type ScriptFilter struct {
 
 // NewScriptFilter creates a new ScriptFilter
 func NewScriptFilter() *ScriptFilter {
-	return &ScriptFilter{}
+	return &ScriptFilter{
+		// set default cap 200
+		items: make(Items, 0, 200),
+	}
+}
+
+// Items adds item
+func (s *ScriptFilter) Items(i ...*Item) {
+	s.items = append(s.items, i...)
 }
 
 // Variables sets ScriptFilter variables
@@ -42,14 +50,9 @@ func (s *ScriptFilter) Rerun(i Rerun) {
 	s.rerun = i
 }
 
-// Append adds item
-func (s *ScriptFilter) Append(i ...*Item) {
-	s.items = append(s.items, i...)
-}
-
 // Clear remove all items
 func (s *ScriptFilter) Clear() {
-	s.items = Items{}
+	s.items = make(Items, 0, cap(s.items))
 }
 
 func (s *ScriptFilter) Bytes() []byte {

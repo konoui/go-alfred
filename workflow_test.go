@@ -4,39 +4,9 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 )
-
-func TestNewWorkflow(t *testing.T) {
-	tests := []struct {
-		description string
-		want        *Workflow
-	}{
-		{
-			description: "create new workflow",
-			want: &Workflow{
-				std:    NewScriptFilter(),
-				warn:   NewScriptFilter(),
-				err:    NewScriptFilter(),
-				system: NewScriptFilter(),
-				streams: streams{
-					out: os.Stdout,
-				},
-				logger: newLogger(os.Stderr, LogLevelInfo),
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.description, func(t *testing.T) {
-			got := NewWorkflow()
-			if !reflect.DeepEqual(tt.want, got) {
-				t.Errorf("want: %#v, got: %#v", tt.want, got)
-			}
-		})
-	}
-}
 
 func TestWorkflow_Rerun(t *testing.T) {
 	type fields struct {
@@ -49,7 +19,6 @@ func TestWorkflow_Rerun(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *Workflow
 	}{
 		{
 			name: "Add return 2",
@@ -59,28 +28,13 @@ func TestWorkflow_Rerun(t *testing.T) {
 			args: args{
 				i: 2,
 			},
-			want: &Workflow{
-				std: &ScriptFilter{
-					rerun: 2,
-				},
-				warn: &ScriptFilter{
-					rerun: 2,
-				},
-				err: &ScriptFilter{
-					rerun: 2,
-				},
-			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := &Workflow{
-				std:  tt.fields.s,
-				warn: tt.fields.s,
-				err:  tt.fields.s,
-			}
-			if got := w.Rerun(tt.args.i); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Workflow.Rerun() = %v, want %v", got, tt.want)
+			w := NewWorkflow().Rerun(tt.args.i)
+			if !(w.err.rerun == tt.args.i && w.std.rerun == tt.args.i && w.warn.rerun == tt.args.i) {
+				t.Errorf("Workflow.Rerun() = %v, want %v", w, tt.args.i)
 			}
 		})
 	}
