@@ -44,7 +44,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger:     newLogger(os.Stderr, LogLevelInfo),
+		logger:     newLogger(io.Discard, LogLevelInfo),
 		maxResults: 0,
 		loglevel:   "",
 	}
@@ -114,7 +114,7 @@ func (w *Workflow) SetLog(out io.Writer) {
 
 // Append new items to ScriptFilter
 func (w *Workflow) Append(item ...*Item) *Workflow {
-	w.std.Append(item...)
+	w.std.Items(item...)
 	return w
 }
 
@@ -146,12 +146,12 @@ func (w *Workflow) Variable(key, value string) *Workflow {
 
 // SetEmptyWarning message which will be showed if items is empty
 func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
-	w.warn.Append(
+	w.warn.Items(
 		NewItem().
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(IconAlertNote),
+			Icon(w.Assets().IconAlertNote()),
 	)
 	return w
 }
@@ -163,7 +163,7 @@ func (w *Workflow) SetSystemInfo(i *Item) *Workflow {
 	if i == nil {
 		return w
 	}
-	w.system.Append(i)
+	w.system.Items(i)
 	return w
 }
 
@@ -172,9 +172,9 @@ func (w *Workflow) Bytes() []byte {
 		return w.err.Bytes()
 	}
 
-	savedStdItems := make(Items, len(w.std.items))
+	savedStdItems := make(Items, len(w.std.items), cap(w.std.items))
 	copy(savedStdItems, w.std.items)
-	savedWarnItems := make(Items, len(w.warn.items))
+	savedWarnItems := make(Items, len(w.std.items), cap(w.std.items))
 	copy(savedWarnItems, w.warn.items)
 	defer func() {
 		w.std.items = savedStdItems
@@ -188,12 +188,12 @@ func (w *Workflow) Bytes() []byte {
 	if !w.system.IsEmpty() {
 		items := w.std.items
 		w.std.Clear()
-		w.std.Append(w.system.items...)
-		w.std.Append(items...)
+		w.std.Items(w.system.items...)
+		w.std.Items(items...)
 		items = w.warn.items
 		w.warn.Clear()
-		w.warn.Append(w.system.items...)
-		w.warn.Append(items...)
+		w.warn.Items(w.system.items...)
+		w.warn.Items(items...)
 	}
 
 	if w.IsEmpty() {
@@ -211,12 +211,12 @@ var osExit = os.Exit
 
 // Fatal output error to io stream and call os.Exit(1)
 func (w *Workflow) Fatal(title, subtitle string) {
-	w.err.Append(
+	w.err.Items(
 		NewItem().
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(IconCaution),
+			Icon(w.Assets().IconCaution()),
 	)
 	w.Output()
 	osExit(1)

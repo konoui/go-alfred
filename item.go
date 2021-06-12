@@ -166,7 +166,7 @@ type iItem struct {
 }
 
 func (i Items) internal() iItems {
-	items := make(iItems, len(i))
+	items := make(iItems, len(i), cap(i))
 	for idx, itm := range i {
 		items[idx] = itm.internal()
 	}
@@ -174,7 +174,7 @@ func (i Items) internal() iItems {
 }
 
 func (i iItems) external() Items {
-	items := make(Items, len(i))
+	items := make(Items, len(i), cap(i))
 	for idx, itm := range i {
 		items[idx] = itm.external()
 	}

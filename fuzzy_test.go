@@ -47,7 +47,7 @@ func TestFilter(t *testing.T) {
 func TestWorkflow_FilterByItemProperty(t *testing.T) {
 	type args struct {
 		f        func(s string) bool
-		property FilterProperty
+		property ItemProperty
 	}
 	tests := []struct {
 		name  string
@@ -59,7 +59,7 @@ func TestWorkflow_FilterByItemProperty(t *testing.T) {
 			name: "by title",
 			args: args{
 				f:        func(s string) bool { return strings.HasPrefix(s, "title2") },
-				property: FilterTitle,
+				property: ItemPropertyTitle,
 			},
 			items: items05,
 			want: Items{
@@ -70,7 +70,7 @@ func TestWorkflow_FilterByItemProperty(t *testing.T) {
 			name: "by subtitle",
 			args: args{
 				f:        func(s string) bool { return strings.HasPrefix(s, "subtitle2") },
-				property: FilterSubtitle,
+				property: ItemPropertySubtitle,
 			},
 			items: items05,
 			want: Items{
@@ -81,7 +81,7 @@ func TestWorkflow_FilterByItemProperty(t *testing.T) {
 			name: "by arg",
 			args: args{
 				f:        func(s string) bool { return strings.HasPrefix(s, "arg2") },
-				property: FilterArg,
+				property: ItemPropertyArg,
 			},
 			items: items05,
 			want: Items{
@@ -92,7 +92,7 @@ func TestWorkflow_FilterByItemProperty(t *testing.T) {
 			name: "by uid",
 			args: args{
 				f:        func(s string) bool { return strings.HasPrefix(s, "uid2") },
-				property: FilterUID,
+				property: ItemPropertyUID,
 			},
 			items: items05,
 			want: Items{
@@ -103,7 +103,7 @@ func TestWorkflow_FilterByItemProperty(t *testing.T) {
 			name: "not match",
 			args: args{
 				f:        func(s string) bool { return strings.HasPrefix(s, "uid100") },
-				property: FilterUID,
+				property: ItemPropertyUID,
 			},
 			items: items05,
 			want:  Items{},
