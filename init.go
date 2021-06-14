@@ -31,6 +31,12 @@ func (w *Workflow) OnInitialize() error {
 	c, cancel := context.WithTimeout(context.Background(), checkTimeout)
 	defer cancel()
 	if HasUpdateArg() && w.Updater().NewerVersionAvailable(c) {
+		jobName := "workflow-managed-update"
+		if w.Job(jobName).IsRunning() {
+			w.Logger().Infoln("workflow-managed-update is already running")
+			return nil
+		}
+
 		w.Logger().Infoln("updating workflow...")
 		self, err := osExecutable()
 		if err != nil {
@@ -49,7 +55,7 @@ func (w *Workflow) OnInitialize() error {
 			return err
 		}
 
-		j, err := w.Job("workflow-managed-update").Start(cmd)
+		j, err := w.Job(jobName).Start(cmd)
 		if err != nil {
 			return err
 		}
