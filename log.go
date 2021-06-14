@@ -14,6 +14,7 @@ type Logger interface {
 	Debugf(format string, v ...interface{})
 	Debugln(v ...interface{})
 	Warnln(v ...interface{})
+	Errorf(format string, v ...interface{})
 	Errorln(v ...interface{})
 }
 
@@ -64,17 +65,17 @@ func validate(level LogLevel) LogLevel {
 
 func (l *myLogger) Infof(format string, v ...interface{}) {
 	level := string(LogLevelInfo)
-	l.l.Printf("["+level+"] "+format, v)
+	l.l.Printf("["+level+"] "+format, v...)
 }
 
 func (l *myLogger) Infoln(v ...interface{}) {
 	level := string(LogLevelInfo)
-	l.l.Println("[" + level + "] " + fmt.Sprintln(v...))
+	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
 }
 
 func (l *myLogger) Debugf(format string, v ...interface{}) {
 	level := string(LogLevelDebug)
-	l.l.Printf("["+level+"] "+format, v)
+	l.l.Printf("["+level+"] "+format, v...)
 }
 
 func (l *myLogger) Debugln(v ...interface{}) {
@@ -84,10 +85,15 @@ func (l *myLogger) Debugln(v ...interface{}) {
 
 func (l *myLogger) Warnln(v ...interface{}) {
 	level := string(LogLevelWarn)
-	l.l.Println("[" + level + "] " + fmt.Sprintln(v...))
+	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
+}
+
+func (l *myLogger) Errorf(format string, v ...interface{}) {
+	level := string(LogLevelError)
+	l.l.Printf("["+level+"] "+format, v...)
 }
 
 func (l *myLogger) Errorln(v ...interface{}) {
 	level := string(LogLevelError)
-	l.l.Println("[" + level + "] " + fmt.Sprintln(v...))
+	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
 }
