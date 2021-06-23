@@ -129,7 +129,7 @@ func initDir(key string) error {
 		return fmt.Errorf(emptyEnvFormat, key)
 	}
 
-	if _, err := os.Stat(dir); err != nil {
+	if !pathExists(dir) {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return err
 		}

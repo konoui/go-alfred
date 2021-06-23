@@ -46,8 +46,8 @@ func (w *Workflow) GetWorkflowDir() (string, error) {
 	}
 
 	abs := filepath.Join(baseDir, "workflows", uid)
-	if _, err := os.Stat(abs); err != nil {
-		return "", fmt.Errorf("%s does not stat: %w", abs, err)
+	if !pathExists(abs) {
+		return "", fmt.Errorf("%s does not stat", abs)
 	}
 	return abs, nil
 }
@@ -126,4 +126,9 @@ func createFile(path string, data []byte) (err error) {
 		return
 	}
 	return
+}
+
+func pathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

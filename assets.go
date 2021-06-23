@@ -3,7 +3,6 @@ package alfred
 import (
 	"embed"
 	"io/fs"
-	"os"
 	"path/filepath"
 )
 
@@ -46,7 +45,7 @@ func generateAssets(assetsDir string) error {
 		// Note remove directory name
 		name := filepath.Base(relaPath)
 		path := filepath.Join(assetsDir, name)
-		if _, err := os.Stat(path); err == nil {
+		if pathExists(path) {
 			continue
 		}
 
@@ -60,7 +59,7 @@ func generateAssets(assetsDir string) error {
 
 func (a *Assets) getIconPath(filename string) string {
 	path := filepath.Join(a.wf.getAssetsDir(), filename)
-	if _, err := os.Stat(path); err != nil {
+	if !pathExists(path) {
 		return filepath.Join(systemIconPath, filename)
 	}
 	return path
