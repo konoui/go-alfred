@@ -22,6 +22,7 @@ type Workflow struct {
 	maxResults int
 	loglevel   LogLevel
 	updater    Updater
+	actions    []Initializer
 }
 
 type streams struct {
@@ -47,6 +48,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		logger:     newLogger(io.Discard, LogLevelInfo),
 		maxResults: 0,
 		loglevel:   "",
+		actions:    []Initializer{new(envs), new(assets), new(autoUpdater)},
 	}
 
 	for _, opt := range opts {
@@ -98,10 +100,20 @@ func WithUpdater(source update.UpdaterSource, currentVersion string) Option {
 	}
 }
 
+// WithInitializer registers Initializer.
+// Initializer will be involved when OnInitialize() is called
+func WithInitializer(i Initializer) Option {
+	return func(wf *Workflow) {
+		wf.actions = append(wf.actions, i)
+	}
+}
+
+// SetOut redirects workflow output
 func (w *Workflow) SetOut(out io.Writer) {
 	w.streams.out = out
 }
 
+// SetLog redirects workflow log output
 func (w *Workflow) SetLog(out io.Writer) {
 	level := LogLevelInfo
 	if IsDebugEnabled() {
@@ -159,7 +171,6 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 
 // SetSystenInfo is useful for showing system information like update recommendation
 // workflow ignores system information when store/load caches
-// item of icon will be overwritten with system icon.
 func (w *Workflow) SetSystemInfo(i *Item) *Workflow {
 	if i == nil {
 		return w

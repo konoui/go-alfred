@@ -34,7 +34,14 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			tmp := make([]string, len(os.Args))
+			copy(tmp, os.Args)
+			// overwrite os.Args for test
 			os.Args = []string{tt.cmd, ArgWorkflowUpdate}
+			defer func() {
+				os.Args = tmp
+			}()
+
 			osExecutable = func() (string, error) {
 				return tt.cmd, nil
 			}
@@ -43,7 +50,7 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 			mockSource := mock.NewMockUpdaterSource(ctrl)
 			mockUpdater := mock.NewMockUpdater(ctrl)
 			mockSource.EXPECT().NewerVersionAvailable(gomock.Any()).
-				Return(newerVersionAvailable, nil)
+				Return(newerVersionAvailable, nil).AnyTimes()
 			// Note: AnyTimes() is required since IfNewerVersionAvailable and Update are called on job process not test process
 			mockSource.EXPECT().IfNewerVersionAvailable().
 				Return(mockUpdater).AnyTimes()

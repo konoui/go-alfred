@@ -12,11 +12,11 @@ func Benchmark_initAssets(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	if err := w.init(); err != nil {
+	if err := new(envs).Initialize(w); err != nil {
 		b.Fatal(err)
 	}
 
-	if err := w.initAssets(); err != nil {
+	if err := new(assets).Initialize(w); err != nil {
 		b.Fatal(err)
 	}
 }

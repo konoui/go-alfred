@@ -12,7 +12,7 @@ const (
 )
 
 //go:embed assets/*
-var assets embed.FS
+var embedAssets embed.FS
 
 type Assets struct {
 	wf *Workflow
@@ -29,7 +29,7 @@ func (w *Workflow) Assets() *Assets {
 }
 
 func generateAssets(assetsDir string) error {
-	icons, err := fs.Glob(assets, "**/*.icns")
+	icons, err := fs.Glob(embedAssets, "**/*.icns")
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func generateAssets(assetsDir string) error {
 	for _, relaPath := range icons {
 		// Note relaPath format is `assets/<filename>`
 		// this means that is contains directory name(`assets`)
-		data, err := assets.ReadFile(relaPath)
+		data, err := embedAssets.ReadFile(relaPath)
 		if err != nil {
 			return err
 		}
