@@ -121,6 +121,7 @@ func (w *Workflow) Append(item ...*Item) *Workflow {
 // Clear items of ScriptFilter
 func (w *Workflow) Clear() *Workflow {
 	w.std.Clear()
+	w.warn.Clear()
 	return w
 }
 
