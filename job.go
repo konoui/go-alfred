@@ -131,6 +131,7 @@ func (j *Job) Start(cmd *exec.Cmd) (JobProcess, error) {
 func (j *Job) StartWithExit(cmd *exec.Cmd) *Workflow {
 	ret, err := j.Start(cmd)
 	if err != nil {
+		j.wf.Logger().Errorln("Failed to start a job", err.Error())
 		j.wf.Fatal("Failed to start a job", err.Error())
 	}
 	if ret == JobStarter {
@@ -147,7 +148,8 @@ func (j *Job) IsJob() bool {
 
 // IsRunning returns true if the job(process) is running
 func (j *Job) IsRunning() bool {
-	return j.daemonCtx.IsRunning()
+	// Note ignore case that caller is the job
+	return !j.IsJob() && j.daemonCtx.IsRunning()
 }
 
 // Terminate kills the job
