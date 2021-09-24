@@ -35,18 +35,18 @@ func generateAssets(assetsDir string) error {
 	}
 
 	for _, relaPath := range icons {
-		// Note relaPath format is `assets/<filename>`
-		// this means that is contains directory name(`assets`)
-		data, err := embedAssets.ReadFile(relaPath)
-		if err != nil {
-			return err
-		}
-
 		// Note remove directory name
 		name := filepath.Base(relaPath)
 		path := filepath.Join(assetsDir, name)
 		if pathExists(path) {
 			continue
+		}
+
+		// Note relaPath format is `assets/<filename>`
+		// this means that is contains directory name(`assets`)
+		data, err := embedAssets.ReadFile(relaPath)
+		if err != nil {
+			return err
 		}
 
 		if err := createFile(path, data); err != nil {
