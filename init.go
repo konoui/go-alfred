@@ -51,11 +51,11 @@ func (*autoUpdater) Keyword() string {
 func (*autoUpdater) Initialize(w *Workflow) error {
 	jobName := "workflow-managed-update"
 	if w.Job(jobName).IsRunning() {
-		w.Logger().Infoln("workflow-managed-update is already running")
+		w.sLogger().Infoln("workflow-managed-update is already running")
 		return nil
 	}
 
-	w.Logger().Infoln("updating workflow...")
+	w.sLogger().Infoln("updating workflow...")
 	self, err := osExecutable()
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 	if j == JobWorker {
 		err = w.Updater().Update(c)
 		if err != nil {
-			w.Logger().Errorln("failed to update due to %v", err)
+			w.sLogger().Errorln("failed to update due to %v", err)
 		}
 	}
 
@@ -91,10 +91,10 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 		scanner := bufio.NewScanner(io.MultiReader(o, e))
 		for scanner.Scan() {
 			out := scanner.Text()
-			w.Logger().Infoln("[background-updater]", out)
+			w.sLogger().Infoln("[background-updater]", out)
 		}
 		if err := cmd.Wait(); err != nil {
-			w.Logger().Errorf("background-updater job failed due to %v. command dumps: %s", err, cmd.String())
+			w.sLogger().Errorf("background-updater job failed due to %v. command dumps: %s", err, cmd.String())
 			return fmt.Errorf("background-updater job failed: %w", err)
 		}
 		return nil
@@ -118,7 +118,7 @@ func (*assets) Initialize(w *Workflow) (err error) {
 	if err != nil {
 		return err
 	}
-	w.Logger().Debugf("pre-defined assets are generated in %s", w.getAssetsDir())
+	w.sLogger().Debugf("pre-defined assets are generated in %s", w.getAssetsDir())
 	return nil
 }
 

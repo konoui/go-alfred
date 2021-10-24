@@ -18,9 +18,8 @@ type Workflow struct {
 	cache      caches
 	streams    streams
 	markers    markers
-	logger     Logger
+	logger     logger
 	maxResults int
-	loglevel   LogLevel
 	updater    Updater
 	actions    []Initializer
 }
@@ -31,6 +30,13 @@ type streams struct {
 
 type markers struct {
 	done bool
+}
+
+type logger struct {
+	l      Logger
+	system Logger
+	level  LogLevel
+	tag    string
 }
 
 type Option func(*Workflow)
@@ -45,9 +51,13 @@ func NewWorkflow(opts ...Option) *Workflow {
 		streams: streams{
 			out: os.Stdout,
 		},
-		logger:     newLogger(io.Discard, LogLevelInfo),
+		logger: logger{
+			tag:    "App",
+			level:  LogLevelInfo,
+			l:      newLogger(io.Discard, LogLevelInfo, "App"),
+			system: newLogger(io.Discard, LogLevelInfo, "System"),
+		},
 		maxResults: 0,
-		loglevel:   "",
 		actions:    []Initializer{new(envs), new(assets), new(autoUpdater)},
 	}
 
@@ -71,7 +81,13 @@ func WithMaxResults(n int) Option {
 
 func WithLogLevel(l LogLevel) Option {
 	return func(wf *Workflow) {
-		wf.loglevel = l
+		wf.logger.level = l
+	}
+}
+
+func WithLogTag(tag string) Option {
+	return func(wf *Workflow) {
+		wf.logger.tag = tag
 	}
 }
 
@@ -115,13 +131,13 @@ func (w *Workflow) SetOut(out io.Writer) {
 
 // SetLog redirects workflow log output
 func (w *Workflow) SetLog(out io.Writer) {
-	level := LogLevelInfo
+	level := w.logger.level
+	tag := w.logger.tag
 	if IsDebugEnabled() {
 		level = LogLevelDebug
-	} else if w.loglevel != "" {
-		level = w.loglevel
 	}
-	w.logger = newLogger(out, level)
+	w.logger.l = newLogger(out, level, tag)
+	w.logger.system = newLogger(out, level, "System")
 }
 
 // Append new items to ScriptFilter
@@ -237,7 +253,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 // Output to io stream
 func (w *Workflow) Output() *Workflow {
 	if w.markers.done {
-		w.Logger().Warnln(sentMessage)
+		w.sLogger().Warnln(sentMessage)
 		return w
 	}
 	defer w.markDone()

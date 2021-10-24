@@ -54,7 +54,7 @@ func (w *Workflow) SetCacheSuffix(suffix string) {
 // If key is empty, return Noop cache
 func (w *Workflow) Cache(key string) *Cache {
 	if key == "" {
-		w.Logger().Debugln("try to use nil cacher as cache key is empty")
+		w.sLogger().Debugln("try to use nil cacher as cache key is empty")
 		return newNil("", w, nil)
 	}
 
@@ -66,7 +66,7 @@ func (w *Workflow) Cache(key string) *Cache {
 	cr, err := cache.New(w.GetCacheDir(), filename)
 	if err != nil {
 		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
-		w.Logger().Errorln(err)
+		w.sLogger().Errorln(err)
 		return newNil(filename, w, err)
 	}
 
@@ -104,7 +104,7 @@ func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 
 	if c.iCache.Expired(ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
-		c.wf.Logger().Infoln(err.Error())
+		c.wf.sLogger().Infoln(err.Error())
 		return c
 	}
 
@@ -127,7 +127,7 @@ func (c *Cache) StoreItems() *Cache {
 
 	items := c.wf.std.items
 	if err = c.iCache.Store(&items); err != nil {
-		c.wf.Logger().Errorln(err)
+		c.wf.sLogger().Errorln(err)
 	}
 	return c
 }
@@ -140,7 +140,7 @@ func (c *Cache) ClearItems() *Cache {
 	}()
 
 	if err = c.iCache.Clear(); err != nil {
-		c.wf.Logger().Errorln(err)
+		c.wf.sLogger().Errorln(err)
 	}
 	return c
 }

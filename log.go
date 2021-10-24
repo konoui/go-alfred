@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-
-	"github.com/hashicorp/logutils"
 )
 
 type Logger interface {
@@ -19,81 +17,82 @@ type Logger interface {
 }
 
 type myLogger struct {
-	l *log.Logger
+	l     *log.Logger
+	level LogLevel
+	tag   string
 }
 
-type LogLevel string
+type LogLevel int
 
 const (
-	LogLevelDebug LogLevel = "DEBUG"
-	LogLevelInfo  LogLevel = "INFO"
-	LogLevelWarn  LogLevel = "WARN"
-	LogLevelError LogLevel = "ERROR"
+	LogLevelError LogLevel = iota + 1
+	LogLevelWarn
+	LogLevelInfo
+	LogLevelDebug
 )
 
-func (w *Workflow) Logger() Logger {
-	return w.logger
-}
-
-func newLogger(out io.Writer, level LogLevel) Logger {
-	filter := &logutils.LevelFilter{
-		Levels: []logutils.LogLevel{
-			logutils.LogLevel(LogLevelDebug),
-			logutils.LogLevel(LogLevelInfo),
-			logutils.LogLevel(LogLevelWarn),
-		},
-		MinLevel: logutils.LogLevel(
-			validate(level),
-		),
-		Writer: out,
-	}
-
-	return &myLogger{
-		l: log.New(filter, "", 0),
-	}
-}
-
-func validate(level LogLevel) LogLevel {
-	switch level {
+func (l LogLevel) String() string {
+	switch l {
+	case LogLevelError:
+		return "Error"
 	case LogLevelWarn:
+		return "Warn"
 	case LogLevelInfo:
+		return "Info"
 	case LogLevelDebug:
-		return level
+		return "Debug"
+	default:
+		return "Unknown"
 	}
-	return LogLevelInfo
+}
+
+func (w *Workflow) sLogger() Logger {
+	return w.logger.system
+}
+
+func (w *Workflow) Logger() Logger {
+	return w.logger.l
+}
+
+func newLogger(out io.Writer, level LogLevel, tag string) Logger {
+	return &myLogger{
+		l:     log.New(out, "", 0),
+		level: level,
+		tag:   tag,
+	}
+}
+
+func (l *myLogger) logInternal(logLevel LogLevel, tag, message string) {
+	if l.level < logLevel {
+		return
+	}
+	l.l.Printf("[%s][%s] %s", logLevel.String(), tag, message)
 }
 
 func (l *myLogger) Infof(format string, v ...interface{}) {
-	level := string(LogLevelInfo)
-	l.l.Printf("["+level+"] "+format, v...)
+	l.logInternal(LogLevelInfo, l.tag, fmt.Sprintf(format, v...))
 }
 
 func (l *myLogger) Infoln(v ...interface{}) {
-	level := string(LogLevelInfo)
-	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
+	l.Infof(fmt.Sprintln(v...))
 }
 
 func (l *myLogger) Debugf(format string, v ...interface{}) {
-	level := string(LogLevelDebug)
-	l.l.Printf("["+level+"] "+format, v...)
+	l.logInternal(LogLevelDebug, l.tag, fmt.Sprintf(format, v...))
 }
 
 func (l *myLogger) Debugln(v ...interface{}) {
-	level := string(LogLevelDebug)
-	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
+	l.Debugf(fmt.Sprintln(v...))
 }
 
 func (l *myLogger) Warnln(v ...interface{}) {
-	level := string(LogLevelWarn)
-	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
+	l.logInternal(LogLevelWarn, l.tag, fmt.Sprintln(v...))
 }
 
 func (l *myLogger) Errorf(format string, v ...interface{}) {
-	level := string(LogLevelError)
-	l.l.Printf("["+level+"] "+format, v...)
+	l.logInternal(LogLevelError, l.tag, fmt.Sprintf(format, v...))
 }
 
 func (l *myLogger) Errorln(v ...interface{}) {
-	level := string(LogLevelError)
-	l.l.Printf("[" + level + "] " + fmt.Sprintln(v...))
+	l.Errorf(fmt.Sprintln(v...))
 }

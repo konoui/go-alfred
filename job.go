@@ -46,13 +46,13 @@ var tmpDir = os.TempDir()
 func (w *Workflow) getJobDir() string {
 	dir, err := w.GetWorkflowDir()
 	if err != nil {
-		w.Logger().Warnln("using tmp dir for job dir as", err)
+		w.sLogger().Warnln("using tmp dir for job dir as", err)
 		return tmpDir
 	}
 
 	jobDir := filepath.Join(dir, "jobs")
 	if err := os.MkdirAll(jobDir, os.ModePerm); err != nil {
-		w.Logger().Warnln("cannot create job dir due to", err)
+		w.sLogger().Warnln("cannot create job dir due to", err)
 		return tmpDir
 	}
 	return jobDir
@@ -76,7 +76,7 @@ func (w *Workflow) ListJobs() []*Job {
 	dir := w.getJobDir()
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		w.Logger().Infof("invalid directory %s\n", dir)
+		w.sLogger().Infof("invalid directory %s\n", dir)
 		return nil
 	}
 
@@ -97,7 +97,7 @@ func (w *Workflow) ListJobs() []*Job {
 			continue
 		}
 		// valid process
-		w.Logger().Infof("found a job %v\n", job)
+		w.sLogger().Infof("found a job %v\n", job)
 		jobs = append(jobs, job)
 	}
 	return jobs
@@ -131,7 +131,7 @@ func (j *Job) Start(cmd *exec.Cmd) (JobProcess, error) {
 func (j *Job) StartWithExit(cmd *exec.Cmd) *Workflow {
 	ret, err := j.Start(cmd)
 	if err != nil {
-		j.wf.Logger().Errorln("Failed to start a job", err.Error())
+		j.wf.sLogger().Errorln("Failed to start a job", err.Error())
 		j.wf.Fatal("Failed to start a job", err.Error())
 	}
 	if ret == JobStarter {
@@ -184,7 +184,7 @@ func (j *Job) files() (out, stderr *os.File) {
 	}
 
 	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	j.wf.Logger().Debugln("job logs will be stored at", absPath)
+	j.wf.sLogger().Debugln("job logs will be stored at", absPath)
 	if err != nil {
 		return nil, nil
 	}
