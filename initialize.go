@@ -25,6 +25,9 @@ var (
 
 var osExecutable = os.Executable
 
+// OnInitialize executes followings
+// 1. normalize arguments
+// 2. execute pre-defined and custom initializers
 func (w *Workflow) OnInitialize() error {
 	for idx, arg := range os.Args {
 		os.Args[idx] = Normalize(arg)
@@ -44,10 +47,13 @@ func (w *Workflow) OnInitialize() error {
 
 type autoUpdater struct{}
 
+// Keyword returns auto-update arguments
+// This means that if the argument is specified, execute the Initializer
 func (*autoUpdater) Keyword() string {
 	return ArgWorkflowUpdate
 }
 
+// Initialize executes auto-updater of the workflow
 func (*autoUpdater) Initialize(w *Workflow) error {
 	jobName := "workflow-managed-update"
 	if w.Job(jobName).IsRunning() {
@@ -104,10 +110,13 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 
 type assets struct{}
 
+// Keyword returns empty string
+// This means that the initializer is always executed
 func (*assets) Keyword() string {
 	return ""
 }
 
+// Initialize generates/creates asset files and directories
 func (*assets) Initialize(w *Workflow) (err error) {
 	err = os.MkdirAll(w.getAssetsDir(), os.ModePerm)
 	if err != nil {
@@ -124,10 +133,13 @@ func (*assets) Initialize(w *Workflow) (err error) {
 
 type envs struct{}
 
+// Keyword returns empty string
+// This means that the initializer is always executed
 func (*envs) Keyword() string {
 	return ""
 }
 
+// Initialize validates alfred workflow environment variables and creates directories
 func (*envs) Initialize(w *Workflow) error {
 	bundleID := w.GetBundleID()
 	if bundleID == "" {

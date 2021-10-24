@@ -7,13 +7,13 @@ import (
 )
 
 type Logger interface {
-	Infof(format string, v ...interface{})
-	Infoln(v ...interface{})
-	Debugf(format string, v ...interface{})
-	Debugln(v ...interface{})
-	Warnln(v ...interface{})
-	Errorf(format string, v ...interface{})
-	Errorln(v ...interface{})
+	Infof(string, ...interface{})
+	Infoln(...interface{})
+	Debugf(string, ...interface{})
+	Debugln(...interface{})
+	Warnln(...interface{})
+	Errorf(string, ...interface{})
+	Errorln(...interface{})
 }
 
 type myLogger struct {

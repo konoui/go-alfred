@@ -10,9 +10,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// DiffOutput is a helper function that compare unsorted ScriptFilter Output
-// return "" if `gotData` is equal to `wantData` regardless of sorted or unsorted
-// format: -want +got
+// DiffOutput is a helper function that compares unsorted ScriptFilter output.
+// It returns "" if `gotData` is equal to `wantData` regardless of sorted or unsorted
+// Format: -want +got
 func DiffOutput(wantData, gotData []byte) string {
 	out1, out2 := new(ScriptFilter), new(ScriptFilter)
 	errA := json.NewDecoder(bytes.NewReader(wantData)).Decode(out1)
@@ -27,8 +27,8 @@ func DiffOutput(wantData, gotData []byte) string {
 	return Diff(out1, out2)
 }
 
-// Diff compare alfred object
-// format: -want +got
+// Diff compares alfred object
+// Format: -want +got
 func Diff(want, got interface{}) string {
 	wrt := reflect.TypeOf(want)
 	grt := reflect.TypeOf(got)

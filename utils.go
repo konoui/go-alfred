@@ -18,23 +18,27 @@ const (
 	envWorkflowDebug       = "alfred_debug"
 	envWorkflowPreferences = "alfred_preferences"
 	envWorkflowUID         = "alfred_workflow_uid"
-	// EnvAlfredAutoUpdateWorkflow is bool value
+	// EnvAutoUpdateWorkflowis bool value
 	EnvAutoUpdateWorkflow = "alfred_auto_update_workflow"
 	ArgWorkflowUpdate     = "workflow:update"
 )
 
+// GetBundleID returns value of alfred_workflow_bundleid environment variable
 func (w *Workflow) GetBundleID() string {
 	return os.Getenv(envWorkflowBundleID)
 }
 
+// GetDataDir returns value of alfred_workflow_data environment variable
 func (w *Workflow) GetDataDir() string {
 	return getDir(envWorkflowData)
 }
 
+// GetCacheDir returns value of alfred_workflow_cache environment variable
 func (w *Workflow) GetCacheDir() string {
 	return getDir(envWorkflowCache)
 }
 
+// GetWorkflowDir returns absolute path of the alfred workflow
 func (w *Workflow) GetWorkflowDir() (string, error) {
 	baseDir := getDir(envWorkflowPreferences)
 	if baseDir == "" {
@@ -62,10 +66,12 @@ func IsAutoUpdateWorkflowEnabled() bool {
 	return parseBool(v)
 }
 
+// HasUpdateArg return true if `ArgWorkflowUpdate` variable is specified
 func HasUpdateArg() bool {
 	return hasArg(ArgWorkflowUpdate)
 }
 
+// IsDebugEnabled return true if alfred_debug is true
 func IsDebugEnabled() bool {
 	isDebug := parseBool(
 		os.Getenv(envWorkflowDebug),
@@ -78,7 +84,7 @@ func getDir(key string) string {
 	return os.Getenv(key)
 }
 
-// Normalize return NFC string
+// Normalize returns NFC string
 // alfred workflow pass query as NFD
 func Normalize(s string) string {
 	return norm.NFC.String(s)

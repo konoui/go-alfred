@@ -43,7 +43,7 @@ func generateAssets(assetsDir string) error {
 		}
 
 		// Note relaPath format is `assets/<filename>`
-		// this means that is contains directory name(`assets`)
+		// assets is a dir name of go-alfred package, not `assetsDirName` val
 		data, err := embedAssets.ReadFile(relaPath)
 		if err != nil {
 			return err

@@ -25,11 +25,6 @@ func (w *Workflow) Updater() Updater {
 }
 
 func (u *updater) NewerVersionAvailable(ctx context.Context) bool {
-	if !IsAutoUpdateWorkflowEnabled() {
-		u.wf.sLogger().Infoln("auto update environment is disabled(false)")
-		return false
-	}
-
 	ok, err := u.source.NewerVersionAvailable(ctx)
 	if err != nil {
 		u.wf.sLogger().Warnln("failed to check newer version due to", err)

@@ -59,9 +59,7 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 			defer ctrl.Finish()
 
 			w := NewWorkflow(
-				WithUpdater(
-					mockSource, "dummy",
-				),
+				WithUpdater(mockSource),
 			)
 			logBuffer := new(bytes.Buffer)
 			w.SetLog(logBuffer)

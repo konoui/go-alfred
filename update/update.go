@@ -64,7 +64,6 @@ func updateContext(ctx context.Context, url string) error {
 	}
 
 	cmd := exec.CommandContext(ctx, openCmd, path)
-
 	if err := cmd.Start(); err != nil {
 		return err
 	}

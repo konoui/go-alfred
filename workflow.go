@@ -58,7 +58,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			system: newLogger(io.Discard, LogLevelInfo, "System"),
 		},
 		maxResults: 0,
-		actions:    []Initializer{new(envs), new(assets), new(autoUpdater)},
+		actions:    []Initializer{new(envs), new(assets)},
 	}
 
 	for _, opt := range opts {
@@ -68,6 +68,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 	return wf
 }
 
+// WithMaxResults arranges number of item result listed by Script Filter
 func WithMaxResults(n int) Option {
 	return func(wf *Workflow) {
 		if n < 0 {
@@ -79,12 +80,15 @@ func WithMaxResults(n int) Option {
 	}
 }
 
+// WithLogLevel sets log level
 func WithLogLevel(l LogLevel) Option {
 	return func(wf *Workflow) {
 		wf.logger.level = l
 	}
 }
 
+// WithLogTag changes tag of a log message
+// Log formats are [LogLevel][Tag] Message
 func WithLogTag(tag string) Option {
 	return func(wf *Workflow) {
 		wf.logger.tag = tag
@@ -93,26 +97,25 @@ func WithLogTag(tag string) Option {
 
 // WithGitHubUpdater is managed github updater. updater will check newer version per `interval`
 func WithGitHubUpdater(owner, repo, currentVersion string, interval time.Duration) Option {
-	return func(wf *Workflow) {
-		wf.updater = &updater{
-			source: update.NewGitHubSource(
-				owner,
-				repo,
-				currentVersion,
-				update.WithCheckInterval(interval),
-			),
-			wf: wf,
-		}
-	}
+	return WithUpdater(
+		update.NewGitHubSource(
+			owner,
+			repo,
+			currentVersion,
+			update.WithCheckInterval(interval),
+		),
+	)
 }
 
 // WithUpdater supports native updater satisfing UpdaterSource interface
-func WithUpdater(source update.UpdaterSource, currentVersion string) Option {
+func WithUpdater(source update.UpdaterSource) Option {
 	return func(wf *Workflow) {
 		wf.updater = &updater{
 			source: source,
 			wf:     wf,
 		}
+		// add auto updater initializer
+		wf.actions = append(wf.actions, new(autoUpdater))
 	}
 }
 
