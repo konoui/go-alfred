@@ -18,9 +18,7 @@ const (
 	envWorkflowDebug       = "alfred_debug"
 	envWorkflowPreferences = "alfred_preferences"
 	envWorkflowUID         = "alfred_workflow_uid"
-	// EnvAutoUpdateWorkflowis bool value
-	EnvAutoUpdateWorkflow = "alfred_auto_update_workflow"
-	ArgWorkflowUpdate     = "workflow:update"
+	ArgWorkflowUpdate      = "workflow:update"
 )
 
 // GetBundleID returns value of alfred_workflow_bundleid environment variable
@@ -54,16 +52,6 @@ func (w *Workflow) GetWorkflowDir() (string, error) {
 		return "", fmt.Errorf("%s does not stat", abs)
 	}
 	return abs, nil
-}
-
-// IsAutoUpdateWorkflowEnabled return false only when env value is false
-// otherwise return true e.g.) env is not set
-func IsAutoUpdateWorkflowEnabled() bool {
-	v := os.Getenv(EnvAutoUpdateWorkflow)
-	if v == "" {
-		return true
-	}
-	return parseBool(v)
 }
 
 // HasUpdateArg return true if `ArgWorkflowUpdate` variable is specified

@@ -1,7 +1,6 @@
 package alfred
 
 import (
-	"os"
 	"testing"
 
 	"golang.org/x/text/unicode/norm"
@@ -67,45 +66,6 @@ func Test_parseBool(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := parseBool(tt.value); got != tt.want {
 				t.Errorf("parseBool() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestIsAutoUpdateWorkflowEnabled(t *testing.T) {
-	tests := []struct {
-		name  string
-		want  bool
-		value string
-	}{
-		{
-			name:  "enable explicitly with env",
-			value: "true",
-			want:  true,
-		},
-		{
-			name:  "enable implicitly without env",
-			value: "",
-			want:  true,
-		},
-		{
-			name:  "disable explicitly with env",
-			value: "false",
-			want:  false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := os.Setenv(EnvAutoUpdateWorkflow, tt.value); err != nil {
-				t.Fatal(err)
-			}
-			defer func() {
-				if err := os.Unsetenv(EnvAutoUpdateWorkflow); err != nil {
-					t.Fatal(err)
-				}
-			}()
-			if got := IsAutoUpdateWorkflowEnabled(); got != tt.want {
-				t.Errorf("IsAutoUpdateWorkflowEnabled() = %v, want %v", got, tt.want)
 			}
 		})
 	}
