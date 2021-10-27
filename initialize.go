@@ -28,12 +28,14 @@ var osExecutable = os.Executable
 // OnInitialize executes followings
 // 1. normalize arguments
 // 2. execute pre-defined and custom initializers
-func (w *Workflow) OnInitialize() error {
+// Custom initializer will be passed from arguments of OnInitialize or WithInitializer
+func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	for idx, arg := range os.Args {
 		os.Args[idx] = Normalize(arg)
 	}
 
-	for _, i := range w.actions {
+	actions := append(w.actions, initializers...)
+	for _, i := range actions {
 		// If Keyword() returns empty, always do Initialize()
 		if key := i.Keyword(); key == "" || hasArg(key) {
 			if err := i.Initialize(w); err != nil {
