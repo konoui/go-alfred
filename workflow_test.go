@@ -173,9 +173,10 @@ func TestOutput(t *testing.T) {
 			}
 
 			outBuf, errBuf := new(bytes.Buffer), new(bytes.Buffer)
-			awf := NewWorkflow()
-			awf.SetOut(outBuf)
-			awf.SetLog(errBuf)
+			awf := NewWorkflow(
+				WithOutWriter(outBuf),
+				WithLogWriter(errBuf),
+			)
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
 			awf.Append(tt.scriptfilter.items...).
 				Variables(tt.scriptfilter.variables).

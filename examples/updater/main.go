@@ -15,8 +15,9 @@ func main() {
 			0,
 		),
 		alfred.WithLogLevel(alfred.LogLevelDebug),
+		alfred.WithLogWriter(os.Stderr),
 	)
-	awf.SetLog(os.Stderr)
+
 	if err := awf.OnInitialize(); err != nil {
 		awf.Fatal(err.Error(), err.Error())
 	}

@@ -6,8 +6,10 @@ import (
 )
 
 func Benchmark_initAssets(b *testing.B) {
-	w := NewWorkflow()
-	w.SetLog(os.Stderr)
+	w := NewWorkflow(
+		WithLogWriter(os.Stderr),
+	)
+
 	if err := os.RemoveAll(w.getAssetsDir()); err != nil {
 		b.Fatal(err)
 	}

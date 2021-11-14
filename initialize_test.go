@@ -58,12 +58,12 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 				Return(nil).AnyTimes()
 			defer ctrl.Finish()
 
+			logBuffer := new(bytes.Buffer)
 			w := NewWorkflow(
 				WithUpdater(mockSource),
+				WithOutWriter(io.Discard),
+				WithLogWriter(logBuffer),
 			)
-			logBuffer := new(bytes.Buffer)
-			w.SetLog(logBuffer)
-			w.SetOut(io.Discard)
 
 			if err := w.OnInitialize(); (err != nil) != tt.wantErr {
 				t.Errorf("Workflow.OnInitialize() error = %v, wantErr %v", err, tt.wantErr)

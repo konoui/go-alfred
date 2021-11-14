@@ -19,9 +19,8 @@ const (
 func init() {
 	awf = alfred.NewWorkflow(
 		alfred.WithLogLevel(alfred.LogLevelDebug),
+		alfred.WithLogWriter(os.Stderr),
 	)
-	awf.SetOut(os.Stdout)
-	awf.SetLog(os.Stderr)
 }
 
 func main() {

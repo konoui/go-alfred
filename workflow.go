@@ -26,6 +26,7 @@ type Workflow struct {
 
 type streams struct {
 	out io.Writer
+	log io.Writer
 }
 
 type markers struct {
@@ -50,12 +51,13 @@ func NewWorkflow(opts ...Option) *Workflow {
 		system: NewScriptFilter(),
 		streams: streams{
 			out: os.Stdout,
+			log: io.Discard,
 		},
 		logger: logger{
 			tag:    "App",
 			level:  LogLevelInfo,
-			l:      newLogger(io.Discard, LogLevelInfo, "App"),
-			system: newLogger(io.Discard, LogLevelInfo, "System"),
+			l:      nil,
+			system: nil,
 		},
 		maxResults: 0,
 		actions:    []Initializer{new(envs), new(assets)},
@@ -65,6 +67,18 @@ func NewWorkflow(opts ...Option) *Workflow {
 		opt(wf)
 	}
 
+	if IsDebugEnabled() {
+		wf.logger.level = LogLevelDebug
+	}
+
+	wf.logger.l = newLogger(
+		wf.streams.log,
+		wf.logger.level,
+		wf.logger.tag)
+	wf.logger.system = newLogger(
+		wf.streams.log,
+		wf.logger.level,
+		"System")
 	return wf
 }
 
@@ -127,20 +141,16 @@ func WithInitializer(i Initializer) Option {
 	}
 }
 
-// SetOut redirects workflow output
-func (w *Workflow) SetOut(out io.Writer) {
-	w.streams.out = out
+func WithLogWriter(w io.Writer) Option {
+	return func(wf *Workflow) {
+		wf.streams.log = w
+	}
 }
 
-// SetLog redirects workflow log output
-func (w *Workflow) SetLog(out io.Writer) {
-	level := w.logger.level
-	tag := w.logger.tag
-	if IsDebugEnabled() {
-		level = LogLevelDebug
+func WithOutWriter(w io.Writer) Option {
+	return func(wf *Workflow) {
+		wf.streams.out = w
 	}
-	w.logger.l = newLogger(out, level, tag)
-	w.logger.system = newLogger(out, level, "System")
 }
 
 func (w *Workflow) OutWriter() io.Writer {
