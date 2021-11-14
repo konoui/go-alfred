@@ -14,6 +14,7 @@ type Logger interface {
 	Warnln(...interface{})
 	Errorf(string, ...interface{})
 	Errorln(...interface{})
+	Writer() io.Writer
 }
 
 type myLogger struct {
@@ -60,6 +61,10 @@ func newLogger(out io.Writer, level LogLevel, tag string) Logger {
 		level: level,
 		tag:   tag,
 	}
+}
+
+func (l *myLogger) Writer() io.Writer {
+	return l.l.Writer()
 }
 
 func (l *myLogger) logInternal(logLevel LogLevel, tag, message string) {

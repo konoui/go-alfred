@@ -143,6 +143,14 @@ func (w *Workflow) SetLog(out io.Writer) {
 	w.logger.system = newLogger(out, level, "System")
 }
 
+func (w *Workflow) OutWriter() io.Writer {
+	return w.streams.out
+}
+
+func (w *Workflow) LogWriter() io.Writer {
+	return w.logger.l.Writer()
+}
+
 // Append new items to ScriptFilter
 func (w *Workflow) Append(item ...*Item) *Workflow {
 	w.std.Items(item...)
