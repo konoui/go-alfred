@@ -29,7 +29,7 @@ func (w *Workflow) Assets() *Assets {
 }
 
 func generateAssets(assetsDir string) error {
-	icons, err := fs.Glob(embedAssets, "**/*.icns")
+	icons, err := fs.Glob(embedAssets, "**/*.png")
 	if err != nil {
 		return err
 	}
@@ -67,22 +67,22 @@ func (a *Assets) getIconPath(filename string) string {
 
 func (a *Assets) IconTrash() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("TrashIcon.icns"))
+		Path(a.getIconPath("TrashIcon.png"))
 }
 
 func (a *Assets) IconAlertNote() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("AlertNoteIcon.icns"))
+		Path(a.getIconPath("AlertNoteIcon.png"))
 }
 
 func (a *Assets) IconCaution() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("AlertCautionBadgeIcon.icns"))
+		Path(a.getIconPath("AlertCautionBadgeIcon.png"))
 }
 
 func (a *Assets) IconAlertStop() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("AlertStopIcon.icns"))
+		Path(a.getIconPath("AlertStopIcon.png"))
 }
 
 func (a *Assets) IconExec() *Icon {
