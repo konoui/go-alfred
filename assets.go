@@ -35,15 +35,15 @@ func generateAssets(assetsDir string) error {
 	}
 
 	for _, relaPath := range icons {
-		// Note remove directory name
+		// Note relaPath format is `assets/<filename>`.
+		// assets is a dir name of go-alfred package, not `assetsDirName` val.
+		// remove directory name.
 		name := filepath.Base(relaPath)
 		path := filepath.Join(assetsDir, name)
 		if pathExists(path) {
 			continue
 		}
 
-		// Note relaPath format is `assets/<filename>`
-		// assets is a dir name of go-alfred package, not `assetsDirName` val
 		data, err := embedAssets.ReadFile(relaPath)
 		if err != nil {
 			return err

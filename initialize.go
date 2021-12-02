@@ -124,7 +124,6 @@ func (*assets) Initialize(w *Workflow) (err error) {
 	if err != nil {
 		return err
 	}
-	w.sLogger().Debugf("pre-defined assets are generated in %s", w.getAssetsDir())
 	return nil
 }
 
