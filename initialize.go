@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"time"
 )
 
 // Initializer will invoke Initialize() when os.Args has Keyword()
@@ -18,10 +17,6 @@ type Initializer interface {
 }
 
 const emptyEnvFormat = "%s env is empty"
-
-var (
-	updateTimeout = 3 * 60 * time.Second
-)
 
 var osExecutable = os.Executable
 
@@ -86,7 +81,7 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 		return err
 	}
 
-	c, cancel := context.WithTimeout(context.Background(), updateTimeout)
+	c, cancel := context.WithTimeout(context.Background(), w.GetAutoUpdateTimeout())
 	defer cancel()
 	if j == JobWorker {
 		err = w.Updater().Update(c)

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/text/unicode/norm"
 )
@@ -20,6 +21,11 @@ const (
 	envWorkflowUID         = "alfred_workflow_uid"
 	ArgWorkflowUpdate      = "workflow:update"
 )
+
+// GetAutoUpdateTimeout return timeout. default timeout is 120s
+func (w *Workflow) GetAutoUpdateTimeout() time.Duration {
+	return w.customEnvs.autoUpdateTimeout
+}
 
 // GetBundleID returns value of alfred_workflow_bundleid environment variable
 func (w *Workflow) GetBundleID() string {

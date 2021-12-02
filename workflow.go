@@ -16,12 +16,13 @@ type Workflow struct {
 	err        *ScriptFilter
 	system     *ScriptFilter
 	cache      caches
-	streams    streams
 	markers    markers
-	logger     logger
+	streams    *streams
+	logger     *logger
 	maxResults int
 	updater    Updater
 	actions    []Initializer
+	customEnvs *customEnvs
 }
 
 type streams struct {
@@ -40,6 +41,10 @@ type logger struct {
 	tag    string
 }
 
+type customEnvs struct {
+	autoUpdateTimeout time.Duration
+}
+
 type Option func(*Workflow)
 
 // NewWorkflow has simple ScriptFilter api
@@ -49,11 +54,11 @@ func NewWorkflow(opts ...Option) *Workflow {
 		warn:   NewScriptFilter(),
 		err:    NewScriptFilter(),
 		system: NewScriptFilter(),
-		streams: streams{
+		streams: &streams{
 			out: os.Stdout,
 			log: io.Discard,
 		},
-		logger: logger{
+		logger: &logger{
 			tag:    "App",
 			level:  LogLevelInfo,
 			l:      nil,
@@ -61,6 +66,9 @@ func NewWorkflow(opts ...Option) *Workflow {
 		},
 		maxResults: 0,
 		actions:    []Initializer{new(envs), new(assets)},
+		customEnvs: &customEnvs{
+			autoUpdateTimeout: 2 * 60 * time.Second,
+		},
 	}
 
 	for _, opt := range opts {
@@ -71,6 +79,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		wf.logger.level = LogLevelDebug
 	}
 
+	// sync log stream to logger
 	wf.logger.l = newLogger(
 		wf.streams.log,
 		wf.logger.level,
@@ -153,12 +162,18 @@ func WithOutWriter(w io.Writer) Option {
 	}
 }
 
+func WithAutoUpdateTimeout(v time.Duration) Option {
+	return func(wf *Workflow) {
+		wf.customEnvs.autoUpdateTimeout = v
+	}
+}
+
 func (w *Workflow) OutWriter() io.Writer {
 	return w.streams.out
 }
 
 func (w *Workflow) LogWriter() io.Writer {
-	return w.logger.l.Writer()
+	return w.streams.log
 }
 
 // Append new items to ScriptFilter
