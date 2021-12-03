@@ -34,17 +34,17 @@ func (w *Workflow) GetBundleID() string {
 
 // GetDataDir returns value of alfred_workflow_data environment variable
 func (w *Workflow) GetDataDir() string {
-	return getDir(envWorkflowData)
+	return os.Getenv(envWorkflowData)
 }
 
 // GetCacheDir returns value of alfred_workflow_cache environment variable
 func (w *Workflow) GetCacheDir() string {
-	return getDir(envWorkflowCache)
+	return os.Getenv(envWorkflowCache)
 }
 
 // GetWorkflowDir returns absolute path of the alfred workflow
 func (w *Workflow) GetWorkflowDir() (string, error) {
-	baseDir := getDir(envWorkflowPreferences)
+	baseDir := os.Getenv(envWorkflowPreferences)
 	if baseDir == "" {
 		return "", fmt.Errorf(emptyEnvFormat, envWorkflowPreferences)
 	}
@@ -72,10 +72,6 @@ func IsDebugEnabled() bool {
 	)
 	// debug env is highest priority
 	return isDebug
-}
-
-func getDir(key string) string {
-	return os.Getenv(key)
 }
 
 // Normalize returns NFC string

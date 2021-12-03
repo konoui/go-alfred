@@ -3,7 +3,6 @@ package alfred
 import (
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/konoui/go-alfred/cache"
@@ -11,11 +10,6 @@ import (
 
 // ErrCacheExpired represent ttl is expired
 var ErrCacheExpired = errors.New("cache expired")
-
-type caches struct {
-	suffix string
-	caches sync.Map
-}
 
 // Cache wrapes cache.Cacher
 // If cache load/store error occurs, workflow will continue to work
@@ -27,16 +21,13 @@ type Cache struct {
 }
 
 func (w *Workflow) getCacheSuffix() (suffix string) {
-	suffix = w.cache.suffix
+	suffix = w.customEnvs.cacheSuffix
 	if suffix != "" {
 		return
 	}
 
-	suffix = w.GetBundleID()
-	w.cache.suffix = suffix
-
-	// Note default is bundle id
-	return
+	// default value is empty
+	return ""
 }
 
 // Cache creates singleton instance
@@ -48,7 +39,7 @@ func (w *Workflow) Cache(key string) *Cache {
 	}
 
 	filename := key + w.getCacheSuffix()
-	if v, ok := w.cache.caches.Load(filename); ok {
+	if v, ok := w.cache.Load(filename); ok {
 		return v.(*Cache)
 	}
 
@@ -65,7 +56,7 @@ func (w *Workflow) Cache(key string) *Cache {
 		iCache:   cr,
 		filename: filename,
 	}
-	w.cache.caches.Store(filename, c)
+	w.cache.Store(filename, c)
 	return c
 }
 

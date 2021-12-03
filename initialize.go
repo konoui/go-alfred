@@ -153,7 +153,7 @@ func (*envs) Initialize(w *Workflow) error {
 }
 
 func initEnvDir(key string) error {
-	dir := getDir(key)
+	dir := os.Getenv(key)
 	if dir == "" {
 		return fmt.Errorf(emptyEnvFormat, key)
 	}

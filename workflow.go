@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/konoui/go-alfred/update"
@@ -15,11 +16,10 @@ type Workflow struct {
 	warn       *ScriptFilter
 	err        *ScriptFilter
 	system     *ScriptFilter
-	cache      *caches
+	cache      sync.Map
 	markers    markers
 	streams    *streams
 	logger     *logger
-	maxResults int
 	updater    Updater
 	actions    []Initializer
 	customEnvs *customEnvs
@@ -43,6 +43,8 @@ type logger struct {
 
 type customEnvs struct {
 	autoUpdateTimeout time.Duration
+	maxResults        int
+	cacheSuffix       string
 }
 
 type Option func(*Workflow)
@@ -58,17 +60,17 @@ func NewWorkflow(opts ...Option) *Workflow {
 			out: os.Stdout,
 			log: io.Discard,
 		},
-		cache: &caches{},
 		logger: &logger{
 			tag:    "App",
 			level:  LogLevelInfo,
 			l:      nil,
 			system: nil,
 		},
-		maxResults: 0,
-		actions:    []Initializer{new(envs), new(assets)},
+		actions: []Initializer{new(envs), new(assets)},
 		customEnvs: &customEnvs{
 			autoUpdateTimeout: 2 * 60 * time.Second,
+			maxResults:        0,
+			cacheSuffix:       "",
 		},
 	}
 
@@ -99,7 +101,7 @@ func WithMaxResults(n int) Option {
 			return
 		}
 		if n > 0 {
-			wf.maxResults = n
+			wf.customEnvs.maxResults = n
 		}
 	}
 }
@@ -170,10 +172,10 @@ func WithAutoUpdateTimeout(v time.Duration) Option {
 	}
 }
 
-// WithCacheSuffix configures custom cacche siffux. default value is alfred bundle id
+// WithCacheSuffix configures custom cacche siffux. default value is empty.
 func WithCacheSuffix(suffix string) Option {
 	return func(wf *Workflow) {
-		wf.cache.suffix = suffix
+		wf.customEnvs.cacheSuffix = suffix
 	}
 }
 
@@ -255,7 +257,7 @@ func (w *Workflow) Bytes() []byte {
 	}()
 
 	if w.isLimited() {
-		w.std.items = savedStdItems[:w.maxResults]
+		w.std.items = savedStdItems[:w.customEnvs.maxResults]
 	}
 
 	if !w.system.IsEmpty() {
@@ -317,7 +319,7 @@ func (w *Workflow) markDone() {
 
 func (w *Workflow) isLimited() bool {
 	// if maxResults equal 0, this means unlimited
-	limit := w.maxResults
+	limit := w.customEnvs.maxResults
 	if limit > 0 && len(w.std.items) > limit {
 		return true
 	}
