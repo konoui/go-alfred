@@ -115,9 +115,10 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 func Test_SetGetCacheSuffix(t *testing.T) {
 	name := "set/get cache suffix"
 	t.Run(name, func(t *testing.T) {
-		awf := NewWorkflow()
 		want := "test"
-		awf.SetCacheSuffix(want)
+		awf := NewWorkflow(
+			WithCacheSuffix(want),
+		)
 		got := awf.getCacheSuffix()
 		if want != got {
 			t.Errorf("want %s got %s", want, got)

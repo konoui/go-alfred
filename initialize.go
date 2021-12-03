@@ -23,7 +23,7 @@ var osExecutable = os.Executable
 // OnInitialize executes followings
 // 1. normalize arguments
 // 2. execute pre-defined and custom initializers
-// Custom initializer will be passed from arguments of OnInitialize or WithInitializer
+// Custom initializer will be able to pass to OnInitialize or WithInitializer
 func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	for idx, arg := range os.Args {
 		os.Args[idx] = Normalize(arg)

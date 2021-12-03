@@ -32,22 +32,11 @@ func (w *Workflow) getCacheSuffix() (suffix string) {
 		return
 	}
 
-	defer func() {
-		w.cache.suffix = suffix
-	}()
-
 	suffix = w.GetBundleID()
-	if suffix != "" {
-		return
-	}
-
-	// Note default is empty
-	return ""
-}
-
-// SetCacheSuffix overrides suffix of default cache file
-func (w *Workflow) SetCacheSuffix(suffix string) {
 	w.cache.suffix = suffix
+
+	// Note default is bundle id
+	return
 }
 
 // Cache creates singleton instance

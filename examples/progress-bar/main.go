@@ -23,12 +23,12 @@ func main() {
 	awf = alfred.NewWorkflow(
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 		alfred.WithLogWriter(os.Stderr),
+		alfred.WithCacheSuffix(cacheSuffix),
 	)
 	if err := awf.OnInitialize(); err != nil {
 		panic(err)
 	}
 
-	awf.SetCacheSuffix(cacheSuffix)
 	if err := run(awf); err != nil {
 		panic(err)
 	}

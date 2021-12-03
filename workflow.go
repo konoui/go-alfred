@@ -15,7 +15,7 @@ type Workflow struct {
 	warn       *ScriptFilter
 	err        *ScriptFilter
 	system     *ScriptFilter
-	cache      caches
+	cache      *caches
 	markers    markers
 	streams    *streams
 	logger     *logger
@@ -58,6 +58,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			out: os.Stdout,
 			log: io.Discard,
 		},
+		cache: &caches{},
 		logger: &logger{
 			tag:    "App",
 			level:  LogLevelInfo,
@@ -162,9 +163,17 @@ func WithOutWriter(w io.Writer) Option {
 	}
 }
 
+// WithAutoUpdateTimeout configures auto-update timeout for auto update Initializer
 func WithAutoUpdateTimeout(v time.Duration) Option {
 	return func(wf *Workflow) {
 		wf.customEnvs.autoUpdateTimeout = v
+	}
+}
+
+// WithCacheSuffix configures custom cacche siffux. default value is alfred bundle id
+func WithCacheSuffix(suffix string) Option {
+	return func(wf *Workflow) {
+		wf.cache.suffix = suffix
 	}
 }
 
