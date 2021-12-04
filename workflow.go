@@ -145,11 +145,11 @@ func WithUpdater(source update.UpdaterSource) Option {
 	}
 }
 
-// WithInitializer registers Initializer.
+// WithInitializers registers Initializer.
 // Initializer will be involved when OnInitialize() is called
-func WithInitializer(i Initializer) Option {
+func WithInitializers(i ...Initializer) Option {
 	return func(wf *Workflow) {
-		wf.actions = append(wf.actions, i)
+		wf.actions = append(wf.actions, i...)
 	}
 }
 
