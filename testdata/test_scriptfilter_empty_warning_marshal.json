@@ -5,7 +5,7 @@
             "subtitle": "emptySubtitle1",
             "valid": false,
             "icon": {
-                "path": "/tmp/go-alfred-data/assets/AlertNoteIcon.png"
+                "path": "/tmp/go-alfred-data/assets/AlertNoteIcon.icns"
             }
         }
     ]
