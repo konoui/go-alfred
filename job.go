@@ -46,13 +46,13 @@ var tmpDir = os.TempDir()
 func (w *Workflow) getJobDir() string {
 	dir, err := w.GetWorkflowDir()
 	if err != nil {
-		w.sLogger().Warnln("using tmp dir for job dir as", err)
+		w.sLogger().Warnf("using tmp dir %s for job dir as %s", tmpDir, err)
 		return tmpDir
 	}
 
 	jobDir := filepath.Join(dir, "jobs")
 	if err := os.MkdirAll(jobDir, os.ModePerm); err != nil {
-		w.sLogger().Warnln("cannot create job dir due to", err)
+		w.sLogger().Warnf("cannot create job dir due to %s", err)
 		return tmpDir
 	}
 	return jobDir
@@ -96,10 +96,14 @@ func (w *Workflow) ListJobs() []*Job {
 		if !job.IsRunning() {
 			continue
 		}
+
 		// valid process
-		w.sLogger().Infof("found a job %v\n", job)
+		pidfile := filepath.Join(job.daemonCtx.PidDir, job.daemonCtx.PidFileName)
+		w.sLogger().Debugf("found a job in %s", pidfile)
 		jobs = append(jobs, job)
 	}
+
+	w.sLogger().Infof("results: found %d jobs", len(jobs))
 	return jobs
 }
 

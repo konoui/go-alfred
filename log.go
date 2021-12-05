@@ -12,6 +12,7 @@ type Logger interface {
 	Debugf(string, ...interface{})
 	Debugln(...interface{})
 	Warnln(...interface{})
+	Warnf(string, ...interface{})
 	Errorf(string, ...interface{})
 	Errorln(...interface{})
 }
@@ -87,6 +88,10 @@ func (l *myLogger) Debugln(v ...interface{}) {
 
 func (l *myLogger) Warnln(v ...interface{}) {
 	l.logInternal(LogLevelWarn, l.tag, fmt.Sprintln(v...))
+}
+
+func (l *myLogger) Warnf(format string, v ...interface{}) {
+	l.logInternal(LogLevelWarn, l.tag, fmt.Sprintf(format, v...))
 }
 
 func (l *myLogger) Errorf(format string, v ...interface{}) {

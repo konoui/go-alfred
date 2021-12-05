@@ -38,13 +38,19 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 			copy(tmp, os.Args)
 			// overwrite os.Args for test
 			os.Args = []string{tt.cmd, ArgWorkflowUpdate}
-			defer func() {
-				os.Args = tmp
-			}()
-
 			osExecutable = func() (string, error) {
 				return tt.cmd, nil
 			}
+			osExit = func(code int) {
+				if code != 0 {
+					t.Fatalf("osExit status code is %d", code)
+				}
+			}
+			defer func() {
+				os.Args = tmp
+				osExecutable = os.Executable
+				osExit = os.Exit
+			}()
 			newerVersionAvailable := true
 			ctrl := gomock.NewController(t)
 			mockSource := mock.NewMockUpdaterSource(ctrl)

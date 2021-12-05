@@ -108,7 +108,8 @@ func (c *Context) Terminate() error {
 	if err != nil {
 		return nil
 	}
-	return proc.Kill()
+	// kill group processes instead of proc.Kill()
+	return syscall.Kill(-proc.Pid, syscall.SIGKILL)
 }
 
 func (c *Context) markAsChildProcess() error {

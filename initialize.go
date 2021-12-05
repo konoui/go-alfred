@@ -83,26 +83,40 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 
 	c, cancel := context.WithTimeout(context.Background(), w.GetAutoUpdateTimeout())
 	defer cancel()
-	if j == JobWorker {
+	switch j {
+	case JobWorker:
 		err = w.Updater().Update(c)
+		code := 0
 		if err != nil {
 			w.sLogger().Errorln("failed to update due to %v", err)
+			code = 1
 		}
-	}
 
-	if j == JobStarter {
+		// after updating, worker process will exit
+		osExit(code)
+		return nil
+	case JobStarter:
 		scanner := bufio.NewScanner(io.MultiReader(o, e))
 		for scanner.Scan() {
 			out := scanner.Text()
 			w.sLogger().Infoln("[background-updater]", out)
 		}
+
 		if err := cmd.Wait(); err != nil {
 			w.sLogger().Errorf("background-updater job failed due to %v. command dumps: %s", err, cmd.String())
 			return fmt.Errorf("background-updater job failed: %w", err)
 		}
+
+		// after waiting for worker process, output success message and exit
+		w.SetSystemInfo(
+			NewItem().
+				Title("Update successfully"),
+		).Output()
+		osExit(0)
 		return nil
+	default:
+		return fmt.Errorf("unexpected job status %d", j)
 	}
-	return nil
 }
 
 type assets struct{}

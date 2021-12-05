@@ -32,9 +32,4 @@ cover:
 	go test -coverprofile=cover.out ./...
 	go tool cover -html=cover.out -o cover.html
 
-## Show help
-help:
-	@(if ! type make2help >/dev/null 2>&1; then go get -u github.com/Songmu/make2help/cmd/make2help ;fi)
-	@make2help $(MAKEFILE_LIST)
-
 .PHONY: test lint fmt help

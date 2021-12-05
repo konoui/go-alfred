@@ -14,6 +14,7 @@ var (
 
 const (
 	dataDir = "./data"
+	jobName = "backgound-job"
 )
 
 func init() {
@@ -37,7 +38,7 @@ func run() error {
 		return startJobs()
 	}
 	if strings.EqualFold(getQuery(os.Args, 1), "kill") {
-		return terminateJob(getQuery(os.Args, 2))
+		return terminateJob(jobName)
 	}
 	return listJobs()
 }
@@ -50,8 +51,8 @@ func getQuery(args []string, idx int) string {
 }
 
 func startJobs() error {
-	jobName := "backgound-job"
 	cmd := exec.Command(os.Args[0], os.Args[1:]...)
+	awf.Logger().Infof("starting the %s ...", jobName)
 	awf.Job(jobName).StartWithExit(cmd)
 	// next instructions will be executed as job
 	awf.Clear()
@@ -76,6 +77,7 @@ func runCmd() error {
 
 func listJobs() error {
 	awf.SetEmptyWarning("no jobs", "")
+	awf.Logger().Infoln("listing jobs ...")
 	jobs := awf.ListJobs()
 	for _, job := range jobs {
 		awf.Append(
@@ -87,5 +89,6 @@ func listJobs() error {
 }
 
 func terminateJob(jobName string) error {
+	awf.Logger().Infof("kill the %s ...", jobName)
 	return awf.Job(jobName).Terminate()
 }
