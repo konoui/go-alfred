@@ -1,5 +1,5 @@
 ![Generic badge](https://github.com/konoui/go-alfred/workflows/test/badge.svg)
-![Code Grade](https://www.code-inspector.com/project/20713/status/svg)
+[![Code Grade](https://api.codiga.io/project/20713/status/svg)](https://www.codiga.io)
 
 ## go-alfred
 
