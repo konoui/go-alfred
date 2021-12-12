@@ -179,10 +179,12 @@ func WithCacheSuffix(suffix string) Option {
 	}
 }
 
+// OutWriter returns output writer
 func (w *Workflow) OutWriter() io.Writer {
 	return w.streams.out
 }
 
+// LogWriter returns logger writer
 func (w *Workflow) LogWriter() io.Writer {
 	return w.streams.log
 }
@@ -193,14 +195,14 @@ func (w *Workflow) Append(item ...*Item) *Workflow {
 	return w
 }
 
-// Clear items of ScriptFilter
+// Clear items of ScriptFilters
 func (w *Workflow) Clear() *Workflow {
 	w.std.Clear()
 	w.warn.Clear()
 	return w
 }
 
-// Rerun add rerun variable
+// Rerun adds rerun variable
 func (w *Workflow) Rerun(i Rerun) *Workflow {
 	w.std.Rerun(i)
 	w.warn.Rerun(i)
@@ -208,19 +210,19 @@ func (w *Workflow) Rerun(i Rerun) *Workflow {
 	return w
 }
 
-// Variables add variables for ScriptFilter
+// Variables adds variables for ScriptFilter
 func (w *Workflow) Variables(v Variables) *Workflow {
 	w.std.Variables(v)
 	return w
 }
 
-// Variable add variable for ScriptFilter
+// Variable adds variable for ScriptFilter
 func (w *Workflow) Variable(key, value string) *Workflow {
 	w.std.Variable(key, value)
 	return w
 }
 
-// SetEmptyWarning message which will be showed if items is empty
+// SetEmptyWarning displays messages if items are empty
 func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 	w.warn.Items(
 		NewItem().
@@ -232,8 +234,8 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 	return w
 }
 
-// SetSystenInfo is useful for showing system information like update recommendation
-// workflow ignores system information when store/load caches
+// SetSystenInfo is useful for displaying system information like update recommendation
+// workflow ignores system information when it store/loads caches
 func (w *Workflow) SetSystemInfo(i *Item) *Workflow {
 	if i == nil {
 		return w
@@ -282,9 +284,7 @@ func (w *Workflow) String() string {
 	return string(w.Bytes())
 }
 
-var osExit = os.Exit
-
-// Fatal output error to io stream and call os.Exit(1)
+// Fatal outputs error to io stream and call os.Exit(1)
 func (w *Workflow) Fatal(title, subtitle string) {
 	w.err.Items(
 		NewItem().
@@ -308,7 +308,7 @@ func (w *Workflow) Output() *Workflow {
 	return w
 }
 
-// IsEmpty return true if the items is empty
+// IsEmpty returns true if the items is empty
 func (w *Workflow) IsEmpty() bool {
 	return w.std.IsEmpty()
 }

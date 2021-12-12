@@ -13,12 +13,11 @@ import (
 // if Keyword() returns empty, Initialize() will be invoked
 type Initializer interface {
 	Initialize(*Workflow) error
+	// TODO using bool function for check to execute initialize or not
 	Keyword() string
 }
 
 const emptyEnvFormat = "%s env is empty"
-
-var osExecutable = os.Executable
 
 // OnInitialize executes followings
 // 1. normalize arguments
@@ -81,7 +80,8 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 		return err
 	}
 
-	c, cancel := context.WithTimeout(context.Background(), w.GetAutoUpdateTimeout())
+	c, cancel := context.WithTimeout(context.Background(),
+		w.GetAutoUpdateTimeout())
 	defer cancel()
 	switch j {
 	case JobWorker:

@@ -22,6 +22,13 @@ const (
 	ArgWorkflowUpdate      = "workflow:update"
 )
 
+var (
+	// wrapper for tests
+	osExit       = os.Exit
+	osExecutable = os.Executable
+	tmpDir       = os.TempDir()
+)
+
 // GetAutoUpdateTimeout return timeout. default timeout is 120s
 func (w *Workflow) GetAutoUpdateTimeout() time.Duration {
 	return w.customEnvs.autoUpdateTimeout

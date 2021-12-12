@@ -45,7 +45,7 @@ func (w *Workflow) Cache(key string) *Cache {
 
 	cr, err := cache.New(w.GetCacheDir(), filename)
 	if err != nil {
-		err = fmt.Errorf("failed to create cache. try to use nil cacher: %w", err)
+		err = fmt.Errorf("failed to create a cache. try to use a nil cacher: %w", err)
 		w.sLogger().Errorln(err)
 		return newNil(filename, w, err)
 	}

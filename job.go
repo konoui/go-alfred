@@ -22,6 +22,8 @@ const (
 // JobProcess is a type of job
 type JobProcess int
 
+const pidExt = ".pid"
+
 func (j JobProcess) String() string {
 	switch j {
 	case JobStarter:
@@ -41,8 +43,6 @@ type Job struct {
 	logging   bool
 }
 
-var tmpDir = os.TempDir()
-
 func (w *Workflow) getJobDir() string {
 	dir, err := w.GetWorkflowDir()
 	if err != nil {
@@ -51,9 +51,11 @@ func (w *Workflow) getJobDir() string {
 	}
 
 	jobDir := filepath.Join(dir, "jobs")
-	if err := os.MkdirAll(jobDir, os.ModePerm); err != nil {
-		w.sLogger().Warnf("cannot create job dir due to %s", err)
-		return tmpDir
+	if !pathExists(jobDir) {
+		if err := os.MkdirAll(jobDir, os.ModePerm); err != nil {
+			w.sLogger().Warnf("cannot create job dir due to %s", err)
+			return tmpDir
+		}
 	}
 	return jobDir
 }
@@ -61,7 +63,7 @@ func (w *Workflow) getJobDir() string {
 // Job creates new job. name parameter means pid file
 func (w *Workflow) Job(name string) *Job {
 	c := new(daemon.Context)
-	c.PidFileName = name + ".pid"
+	c.PidFileName = name + pidExt
 	c.PidDir = w.getJobDir()
 	return &Job{
 		name:      name,
@@ -70,9 +72,8 @@ func (w *Workflow) Job(name string) *Job {
 	}
 }
 
-// ListJobs return jobs managed by workflow
+// ListJobs returns jobs managed by the workflow
 func (w *Workflow) ListJobs() []*Job {
-	const ext = ".pid"
 	dir := w.getJobDir()
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -87,11 +88,11 @@ func (w *Workflow) ListJobs() []*Job {
 		}
 
 		filename := f.Name()
-		if !strings.HasSuffix(filename, ext) {
+		if !strings.HasSuffix(filename, pidExt) {
 			continue
 		}
 
-		jobName := filename[:len(filename)-len(ext)]
+		jobName := filename[:len(filename)-len(pidExt)]
 		job := w.Job(jobName)
 		if !job.IsRunning() {
 			continue
@@ -112,6 +113,7 @@ func (j *Job) Name() string {
 	return j.name
 }
 
+// Loggin enables file logging for the job
 func (j *Job) Logging() *Job {
 	j.logging = true
 	return j
@@ -140,17 +142,18 @@ func (j *Job) StartWithExit(cmd *exec.Cmd) *Workflow {
 	}
 	if ret == JobStarter {
 		j.wf.Output()
-		os.Exit(0)
+		osExit(0)
 	}
 	return j.wf
 }
 
-// IsJob returns true if I am a job but I may no be the job
+// IsJob returns true if a caller am a job but the caller may no be the job
 func (j *Job) IsJob() bool {
 	return j.daemonCtx.IsChildProcess()
 }
 
 // IsRunning returns true if the job(process) is running
+// If caller is a job, it will return false.
 func (j *Job) IsRunning() bool {
 	// Note ignore case that caller is the job
 	return !j.IsJob() && j.daemonCtx.IsRunning()
