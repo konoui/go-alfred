@@ -85,7 +85,7 @@ func TestWorkflow_GetWorkflowDir(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := NewWorkflow()
-			if err := w.OnInitialize(); err != nil {
+			if err := w.onInitialize(); err != nil {
 				t.Fatal(err)
 			}
 

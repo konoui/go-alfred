@@ -25,13 +25,7 @@ func main() {
 		alfred.WithLogWriter(os.Stderr),
 		alfred.WithCacheSuffix(cacheSuffix),
 	)
-	if err := awf.OnInitialize(); err != nil {
-		panic(err)
-	}
-
-	if err := run(awf); err != nil {
-		panic(err)
-	}
+	os.Exit(awf.Run(run))
 }
 
 func run(awf *alfred.Workflow) error {

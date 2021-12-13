@@ -17,11 +17,7 @@ func main() {
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 		alfred.WithLogWriter(os.Stderr),
 	)
-
-	if err := awf.OnInitialize(); err != nil {
-		awf.Fatal(err.Error(), err.Error())
-	}
-	run(awf)
+	os.Exit(awf.Run(run))
 }
 
 func run(awf *alfred.Workflow) error {

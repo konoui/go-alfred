@@ -25,12 +25,7 @@ func init() {
 }
 
 func main() {
-	if err := awf.OnInitialize(); err != nil {
-		panic(err)
-	}
-	if err := run(); err != nil {
-		panic(err)
-	}
+	os.Exit(awf.RunSimple(run))
 }
 
 func run() error {

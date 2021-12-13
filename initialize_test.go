@@ -71,7 +71,7 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 				WithLogWriter(logBuffer),
 			)
 
-			if err := w.OnInitialize(); (err != nil) != tt.wantErr {
+			if err := w.onInitialize(); (err != nil) != tt.wantErr {
 				t.Errorf("Workflow.OnInitialize() error = %v, wantErr %v", err, tt.wantErr)
 			}
 

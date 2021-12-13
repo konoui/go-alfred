@@ -58,7 +58,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		system: NewScriptFilter(),
 		streams: &streams{
 			out: os.Stdout,
-			log: io.Discard,
+			log: os.Stderr,
 		},
 		logger: &logger{
 			tag:    "App",
