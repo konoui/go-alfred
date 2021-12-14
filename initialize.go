@@ -41,13 +41,36 @@ func (w *Workflow) onInitialize(initializers ...Initializer) error {
 	return nil
 }
 
+type updateChecker struct{}
+
+func (*updateChecker) Keyword() string { return "" }
+func (*updateChecker) Initialize(w *Workflow) error {
+	ctx, cancel := context.WithTimeout(context.Background(),
+		w.customEnvs.updateCheckTimeout)
+	defer cancel()
+	if w.updater == nil {
+		w.sLogger().Warnln("update checker is enabled but auto-update is not enabled")
+		return nil
+	}
+
+	if !HasUpdateArg() && w.Updater().NewerVersionAvailable(ctx) {
+		w.SetSystemInfo(
+			NewItem().
+				Title("New version of the workflow is available!").
+				Subtitle("↩ for update").
+				Autocomplete(ArgWorkflowUpdate).
+				Valid(false).
+				Icon(w.Assets().IconAlertNote()),
+		)
+	}
+	return nil
+}
+
 type autoUpdater struct{}
 
 // Keyword returns auto-update arguments
 // This means that if the argument is specified, execute the Initializer
-func (*autoUpdater) Keyword() string {
-	return ArgWorkflowUpdate
-}
+func (*autoUpdater) Keyword() string { return ArgWorkflowUpdate }
 
 // Initialize executes auto-updater of the workflow
 func (*autoUpdater) Initialize(w *Workflow) error {
@@ -81,7 +104,7 @@ func (*autoUpdater) Initialize(w *Workflow) error {
 	}
 
 	c, cancel := context.WithTimeout(context.Background(),
-		w.GetAutoUpdateTimeout())
+		w.customEnvs.autoUpdateTimeout)
 	defer cancel()
 	switch j {
 	case JobWorker:
@@ -123,9 +146,7 @@ type assets struct{}
 
 // Keyword returns empty string
 // This means that the initializer is always executed
-func (*assets) Keyword() string {
-	return ""
-}
+func (*assets) Keyword() string { return "" }
 
 // Initialize generates/creates asset files and directories
 func (*assets) Initialize(w *Workflow) (err error) {
@@ -145,9 +166,7 @@ type envs struct{}
 
 // Keyword returns empty string
 // This means that the initializer is always executed
-func (*envs) Keyword() string {
-	return ""
-}
+func (*envs) Keyword() string { return "" }
 
 // Initialize validates alfred workflow environment variables and creates directories
 func (*envs) Initialize(w *Workflow) error {

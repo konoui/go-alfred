@@ -42,9 +42,10 @@ type logger struct {
 }
 
 type customEnvs struct {
-	autoUpdateTimeout time.Duration
-	maxResults        int
-	cacheSuffix       string
+	autoUpdateTimeout  time.Duration
+	updateCheckTimeout time.Duration
+	maxResults         int
+	cacheSuffix        string
 }
 
 type Option func(*Workflow)
@@ -68,9 +69,8 @@ func NewWorkflow(opts ...Option) *Workflow {
 		},
 		actions: []Initializer{new(envs), new(assets)},
 		customEnvs: &customEnvs{
-			autoUpdateTimeout: 2 * 60 * time.Second,
-			maxResults:        0,
-			cacheSuffix:       "",
+			maxResults:  0,
+			cacheSuffix: "",
 		},
 	}
 
@@ -140,16 +140,32 @@ func WithUpdater(source update.UpdaterSource) Option {
 			source: source,
 			wf:     wf,
 		}
-		// add auto updater initializer
-		wf.actions = append(wf.actions, new(autoUpdater))
 	}
 }
 
 // WithInitializers registers Initializer.
-// Initializer will be involved when OnInitialize() is called
+// Initializer will be involved on managed-run such as *Workflow.Run()
 func WithInitializers(i ...Initializer) Option {
 	return func(wf *Workflow) {
 		wf.actions = append(wf.actions, i...)
+	}
+}
+
+// WithAutoUpdatec updates the workflow automatically when new version of it is available.
+// also see WithAutoUpdateChecker
+func WithAutoUpdater(timeout time.Duration) Option {
+	return func(wf *Workflow) {
+		wf.customEnvs.autoUpdateTimeout = timeout
+		wf.actions = append(wf.actions, new(autoUpdater))
+	}
+}
+
+// WithAutoUpdateChecker enables to display auto-update recommendation for results.
+// also see WithGitHubUpdater or WithUpdater
+func WithAutoUpdateCheker(timeout time.Duration) Option {
+	return func(wf *Workflow) {
+		wf.customEnvs.updateCheckTimeout = timeout
+		wf.actions = append(wf.actions, new(updateChecker))
 	}
 }
 
@@ -162,13 +178,6 @@ func WithLogWriter(w io.Writer) Option {
 func WithOutWriter(w io.Writer) Option {
 	return func(wf *Workflow) {
 		wf.streams.out = w
-	}
-}
-
-// WithAutoUpdateTimeout configures auto-update timeout for auto update Initializer
-func WithAutoUpdateTimeout(v time.Duration) Option {
-	return func(wf *Workflow) {
-		wf.customEnvs.autoUpdateTimeout = v
 	}
 }
 

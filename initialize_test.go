@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	mock "github.com/konoui/go-alfred/update/mock_update"
@@ -69,6 +70,7 @@ func TestWorkflow_OnInitialize(t *testing.T) {
 				WithUpdater(mockSource),
 				WithOutWriter(io.Discard),
 				WithLogWriter(logBuffer),
+				WithAutoUpdater(5*time.Hour),
 			)
 
 			if err := w.onInitialize(); (err != nil) != tt.wantErr {
