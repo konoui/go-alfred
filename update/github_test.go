@@ -95,7 +95,7 @@ func Test_getLatestAssetInfo(t *testing.T) {
 	}
 }
 
-func Test_gitHubUpdater_newerVersionAvailableContext(t *testing.T) {
+func Test_gitHubUpdater_newVersionAvailableContext(t *testing.T) {
 	type fields struct {
 		checkInterval time.Duration
 	}
@@ -114,7 +114,7 @@ func Test_gitHubUpdater_newerVersionAvailableContext(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "newer version available",
+			name: "new version available",
 			fields: fields{
 				checkInterval: 0,
 			},
@@ -127,7 +127,7 @@ func Test_gitHubUpdater_newerVersionAvailableContext(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "no newer version",
+			name: "no new version",
 			fields: fields{
 				checkInterval: 0,
 			},
@@ -194,22 +194,22 @@ func Test_gitHubUpdater_newerVersionAvailableContext(t *testing.T) {
 				currentVersion: tt.args.currentVersion,
 				checkInterval:  tt.fields.checkInterval,
 			}
-			gotOK, gotURL, err := g.newerVersionAvailableContext(tt.args.ctx, tt.args.currentVersion)
+			gotOK, gotURL, err := g.newVersionAvailableContext(tt.args.ctx, tt.args.currentVersion)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("gitHubUpdater.newerVersionAvailableContext() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("gitHubUpdater.newVersionAvailableContext() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotOK != tt.wantOK {
-				t.Errorf("gitHubUpdater.newerVersionAvailableContext() gotOK = %v, want %v", gotOK, tt.wantOK)
+				t.Errorf("gitHubUpdater.newVersionAvailableContext() gotOK = %v, want %v", gotOK, tt.wantOK)
 			}
 			if gotURL != tt.wantURL {
-				t.Errorf("gitHubUpdater.newerVersionAvailableContext() gotURL = %v, want %v", gotURL, tt.wantURL)
+				t.Errorf("gitHubUpdater.newVersionAvailableContext() gotURL = %v, want %v", gotURL, tt.wantURL)
 			}
 		})
 	}
 }
 
-func Test_gitHubUpdater_NewerVersionAvailable(t *testing.T) {
+func Test_gitHubUpdater_NewVersionAvailable(t *testing.T) {
 	type fields struct {
 		checkInterval time.Duration
 	}
@@ -225,7 +225,7 @@ func Test_gitHubUpdater_NewerVersionAvailable(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "no newer version available",
+			name: "no new version available",
 			fields: fields{
 				checkInterval: 0,
 			},
@@ -249,13 +249,13 @@ func Test_gitHubUpdater_NewerVersionAvailable(t *testing.T) {
 				client:         m,
 				checkInterval:  tt.fields.checkInterval,
 			}
-			got, err := g.NewerVersionAvailable(context.TODO())
+			got, err := g.IsNewVersionAvailable(context.TODO())
 			if (err != nil) != tt.wantErr {
-				t.Errorf("gitHubUpdater.NewerVersionAvailable() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("gitHubUpdater.NewVersionAvailable() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("gitHubUpdater.NewerVersionAvailable() = %v, want %v", got, tt.want)
+				t.Errorf("gitHubUpdater.NewVersionAvailable() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -277,7 +277,7 @@ func Test_gitHubUpdater_Update(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "no newer version available",
+			name: "no new version available",
 			fields: fields{
 				checkInterval: 0,
 			},
@@ -311,7 +311,7 @@ func Test_gitHubUpdater_Update(t *testing.T) {
 				checkInterval:  tt.fields.checkInterval,
 				currentVersion: tt.args.currentVersion,
 			}
-			err := g.IfNewerVersionAvailable().Update(tt.args.ctx)
+			err := g.IfNewVersionAvailable().Update(tt.args.ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("gitHubUpdater.Update() error = %v, wantErr %v", err, tt.wantErr)
 			}

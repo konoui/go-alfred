@@ -16,8 +16,8 @@ import (
 var tmpDir = os.TempDir()
 
 type UpdaterSource interface {
-	NewerVersionAvailable(context.Context) (bool, error)
-	IfNewerVersionAvailable() Updater
+	IsNewVersionAvailable(context.Context) (bool, error)
+	IfNewVersionAvailable() Updater
 }
 
 type Updater interface {

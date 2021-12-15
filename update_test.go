@@ -10,7 +10,7 @@ import (
 	mock "github.com/konoui/go-alfred/update/mock_update"
 )
 
-func Test_updater_IfNewerVersionAvailable(t *testing.T) {
+func Test_updater_IfNewVersionAvailable(t *testing.T) {
 	tests := []struct {
 		name          string
 		want          bool
@@ -20,20 +20,20 @@ func Test_updater_IfNewerVersionAvailable(t *testing.T) {
 			name: "new version available",
 			want: true,
 			setupMockFunc: func(source *mock.MockUpdaterSource) {
-				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(true, nil)
+				source.EXPECT().IsNewVersionAvailable(gomock.Any()).Return(true, nil)
 			},
 		},
 		{
 			name: "new version unavailable",
 			want: false,
 			setupMockFunc: func(source *mock.MockUpdaterSource) {
-				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(false, nil)
+				source.EXPECT().IsNewVersionAvailable(gomock.Any()).Return(false, nil)
 			},
 		},
 		{
 			name: "return false if error occurs",
 			setupMockFunc: func(source *mock.MockUpdaterSource) {
-				source.EXPECT().NewerVersionAvailable(gomock.Any()).Return(false, errors.New("injected error"))
+				source.EXPECT().IsNewVersionAvailable(gomock.Any()).Return(false, errors.New("injected error"))
 			},
 			want: false,
 		},
@@ -48,8 +48,8 @@ func Test_updater_IfNewerVersionAvailable(t *testing.T) {
 				wf:     NewWorkflow(),
 			}
 			defer ctrl.Finish()
-			if got := updater.NewerVersionAvailable(context.TODO()); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("updater.IfNewerVersionAvailable() = %v, want %v", got, tt.want)
+			if got := updater.IsNewVersionAvailable(context.TODO()); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("updater.IfNewVersionAvailable() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -100,7 +100,7 @@ func Test_updater_Update(t *testing.T) {
 				updater.EXPECT().
 					Update(gomock.Any()).
 					Return(nil)
-				source.EXPECT().IfNewerVersionAvailable().Return(updater)
+				source.EXPECT().IfNewVersionAvailable().Return(updater)
 			},
 			wantErr: false,
 		},
@@ -110,7 +110,7 @@ func Test_updater_Update(t *testing.T) {
 				updater.EXPECT().
 					Update(gomock.Any()).
 					Return(errors.New("injected error"))
-				source.EXPECT().IfNewerVersionAvailable().Return(updater)
+				source.EXPECT().IfNewVersionAvailable().Return(updater)
 			},
 			wantErr: true,
 		},

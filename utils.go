@@ -18,14 +18,12 @@ const (
 	envWorkflowDebug       = "alfred_debug"
 	envWorkflowPreferences = "alfred_preferences"
 	envWorkflowUID         = "alfred_workflow_uid"
-	ArgWorkflowUpdate      = "workflow:update"
 )
 
 var (
 	// wrapper for tests
-	osExit       = os.Exit
-	osExecutable = os.Executable
-	tmpDir       = os.TempDir()
+	osExit = os.Exit
+	tmpDir = os.TempDir()
 )
 
 // GetBundleID returns value of alfred_workflow_bundleid environment variable
@@ -61,11 +59,6 @@ func (w *Workflow) GetWorkflowDir() (string, error) {
 	return abs, nil
 }
 
-// HasUpdateArg return true if `ArgWorkflowUpdate` variable is specified
-func HasUpdateArg() bool {
-	return hasArg(ArgWorkflowUpdate)
-}
-
 // IsDebugEnabled return true if alfred_debug is true
 func IsDebugEnabled() bool {
 	isDebug := parseBool(
@@ -99,15 +92,6 @@ func parseBool(v string) bool {
 		return b
 	}
 
-	return false
-}
-
-func hasArg(v string) bool {
-	for _, arg := range os.Args {
-		if arg == v {
-			return true
-		}
-	}
 	return false
 }
 

@@ -36,33 +36,33 @@ func (m *MockUpdaterSource) EXPECT() *MockUpdaterSourceMockRecorder {
 	return m.recorder
 }
 
-// IfNewerVersionAvailable mocks base method.
-func (m *MockUpdaterSource) IfNewerVersionAvailable() update.Updater {
+// IfNewVersionAvailable mocks base method.
+func (m *MockUpdaterSource) IfNewVersionAvailable() update.Updater {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IfNewerVersionAvailable")
+	ret := m.ctrl.Call(m, "IfNewVersionAvailable")
 	ret0, _ := ret[0].(update.Updater)
 	return ret0
 }
 
-// IfNewerVersionAvailable indicates an expected call of IfNewerVersionAvailable.
-func (mr *MockUpdaterSourceMockRecorder) IfNewerVersionAvailable() *gomock.Call {
+// IfNewVersionAvailable indicates an expected call of IfNewVersionAvailable.
+func (mr *MockUpdaterSourceMockRecorder) IfNewVersionAvailable() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IfNewerVersionAvailable", reflect.TypeOf((*MockUpdaterSource)(nil).IfNewerVersionAvailable))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IfNewVersionAvailable", reflect.TypeOf((*MockUpdaterSource)(nil).IfNewVersionAvailable))
 }
 
-// NewerVersionAvailable mocks base method.
-func (m *MockUpdaterSource) NewerVersionAvailable(arg0 context.Context) (bool, error) {
+// IsNewVersionAvailable mocks base method.
+func (m *MockUpdaterSource) IsNewVersionAvailable(arg0 context.Context) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NewerVersionAvailable", arg0)
+	ret := m.ctrl.Call(m, "IsNewVersionAvailable", arg0)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// NewerVersionAvailable indicates an expected call of NewerVersionAvailable.
-func (mr *MockUpdaterSourceMockRecorder) NewerVersionAvailable(arg0 interface{}) *gomock.Call {
+// IsNewVersionAvailable indicates an expected call of IsNewVersionAvailable.
+func (mr *MockUpdaterSourceMockRecorder) IsNewVersionAvailable(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewerVersionAvailable", reflect.TypeOf((*MockUpdaterSource)(nil).NewerVersionAvailable), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsNewVersionAvailable", reflect.TypeOf((*MockUpdaterSource)(nil).IsNewVersionAvailable), arg0)
 }
 
 // MockUpdater is a mock of Updater interface.
@@ -125,14 +125,14 @@ func (m *MockUpdaterSourceOption) EXPECT() *MockUpdaterSourceOptionMockRecorder 
 	return m.recorder
 }
 
-// setCheckInterval mocks base method.
-func (m *MockUpdaterSourceOption) setCheckInterval(arg0 time.Duration) {
+// SetCheckInterval mocks base method.
+func (m *MockUpdaterSourceOption) SetCheckInterval(arg0 time.Duration) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "setCheckInterval", arg0)
+	m.ctrl.Call(m, "SetCheckInterval", arg0)
 }
 
-// setCheckInterval indicates an expected call of setCheckInterval.
-func (mr *MockUpdaterSourceOptionMockRecorder) setCheckInterval(arg0 interface{}) *gomock.Call {
+// SetCheckInterval indicates an expected call of SetCheckInterval.
+func (mr *MockUpdaterSourceOptionMockRecorder) SetCheckInterval(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "setCheckInterval", reflect.TypeOf((*MockUpdaterSourceOption)(nil).setCheckInterval), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetCheckInterval", reflect.TypeOf((*MockUpdaterSourceOption)(nil).SetCheckInterval), arg0)
 }

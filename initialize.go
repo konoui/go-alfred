@@ -1,20 +1,15 @@
 package alfred
 
 import (
-	"bufio"
-	"context"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
 )
 
 // Initializer will invoke Initialize() when os.Args has Keyword()
 // if Keyword() returns empty, Initialize() will be invoked
 type Initializer interface {
 	Initialize(*Workflow) error
-	// TODO using bool function for check to execute initialize or not
-	Keyword() string
+	Condition() bool
 }
 
 const emptyEnvFormat = "%s env is empty"
@@ -31,7 +26,7 @@ func (w *Workflow) onInitialize(initializers ...Initializer) error {
 	actions := append(w.actions, initializers...)
 	for _, i := range actions {
 		// If Keyword() returns empty, always do Initialize()
-		if key := i.Keyword(); key == "" || hasArg(key) {
+		if i.Condition() {
 			if err := i.Initialize(w); err != nil {
 				return err
 			}
@@ -41,112 +36,11 @@ func (w *Workflow) onInitialize(initializers ...Initializer) error {
 	return nil
 }
 
-type updateChecker struct{}
-
-func (*updateChecker) Keyword() string { return "" }
-func (*updateChecker) Initialize(w *Workflow) error {
-	ctx, cancel := context.WithTimeout(context.Background(),
-		w.customEnvs.updateCheckTimeout)
-	defer cancel()
-	if w.updater == nil {
-		w.sLogger().Warnln("update checker is enabled but auto-update is not enabled")
-		return nil
-	}
-
-	if !HasUpdateArg() && w.Updater().NewerVersionAvailable(ctx) {
-		w.SetSystemInfo(
-			NewItem().
-				Title("New version of the workflow is available!").
-				Subtitle("↩ for update").
-				Autocomplete(ArgWorkflowUpdate).
-				Valid(false).
-				Icon(w.Assets().IconAlertNote()),
-		)
-	}
-	return nil
-}
-
-type autoUpdater struct{}
-
-// Keyword returns auto-update arguments
-// This means that if the argument is specified, execute the Initializer
-func (*autoUpdater) Keyword() string { return ArgWorkflowUpdate }
-
-// Initialize executes auto-updater of the workflow
-func (*autoUpdater) Initialize(w *Workflow) error {
-	jobName := "workflow-managed-update"
-	if w.Job(jobName).IsRunning() {
-		w.sLogger().Infoln("workflow-managed-update is already running")
-		return nil
-	}
-
-	w.sLogger().Infoln("updating workflow...")
-	self, err := osExecutable()
-	if err != nil {
-		return err
-	}
-
-	cmd := exec.Command(self, os.Args[1:]...)
-	cmd.Env = os.Environ()
-	cmd.Stdin = nil
-	o, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	e, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	j, err := w.Job(jobName).Start(cmd)
-	if err != nil {
-		return err
-	}
-
-	c, cancel := context.WithTimeout(context.Background(),
-		w.customEnvs.autoUpdateTimeout)
-	defer cancel()
-	switch j {
-	case JobWorker:
-		err = w.Updater().Update(c)
-		code := 0
-		if err != nil {
-			w.sLogger().Errorln("failed to update due to %v", err)
-			code = 1
-		}
-
-		// after updating, worker process will exit
-		osExit(code)
-		return nil
-	case JobStarter:
-		scanner := bufio.NewScanner(io.MultiReader(o, e))
-		for scanner.Scan() {
-			out := scanner.Text()
-			w.sLogger().Infoln("[background-updater]", out)
-		}
-
-		if err := cmd.Wait(); err != nil {
-			w.sLogger().Errorf("background-updater job failed due to %v. command dumps: %s", err, cmd.String())
-			return fmt.Errorf("background-updater job failed: %w", err)
-		}
-
-		// after waiting for worker process, output success message and exit
-		w.SetSystemInfo(
-			NewItem().
-				Title("Update successfully"),
-		).Output()
-		osExit(0)
-		return nil
-	default:
-		return fmt.Errorf("unexpected job status %d", j)
-	}
-}
-
 type assets struct{}
 
-// Keyword returns empty string
+// Condition returns empty string
 // This means that the initializer is always executed
-func (*assets) Keyword() string { return "" }
+func (*assets) Condition() bool { return true }
 
 // Initialize generates/creates asset files and directories
 func (*assets) Initialize(w *Workflow) (err error) {
@@ -164,9 +58,9 @@ func (*assets) Initialize(w *Workflow) (err error) {
 
 type envs struct{}
 
-// Keyword returns empty string
+// Condition returns empty string
 // This means that the initializer is always executed
-func (*envs) Keyword() string { return "" }
+func (*envs) Condition() bool { return true }
 
 // Initialize validates alfred workflow environment variables and creates directories
 func (*envs) Initialize(w *Workflow) error {

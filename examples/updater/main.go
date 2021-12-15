@@ -1,10 +1,11 @@
 package main
 
 import (
-	"context"
 	"os"
+	"time"
 
 	"github.com/konoui/go-alfred"
+	"github.com/konoui/go-alfred/initialize"
 )
 
 func main() {
@@ -16,18 +17,15 @@ func main() {
 		),
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 		alfred.WithLogWriter(os.Stderr),
+		alfred.WithInitializers(
+			initialize.NewAutoUpdateChecker(2*time.Second),
+			initialize.NewAutoUpdater(3*time.Minute),
+		),
 	)
 	os.Exit(awf.Run(run))
 }
 
 func run(awf *alfred.Workflow) error {
-	if awf.Updater().NewerVersionAvailable(context.TODO()) {
-		awf.Append(
-			alfred.NewItem().Title("update workflow").
-				Autocomplete(alfred.ArgWorkflowUpdate),
-		)
-	}
-
 	awf.Append(
 		alfred.NewItem().Title("test"),
 	)

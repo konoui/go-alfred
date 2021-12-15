@@ -42,10 +42,8 @@ type logger struct {
 }
 
 type customEnvs struct {
-	autoUpdateTimeout  time.Duration
-	updateCheckTimeout time.Duration
-	maxResults         int
-	cacheSuffix        string
+	maxResults  int
+	cacheSuffix string
 }
 
 type Option func(*Workflow)
@@ -121,7 +119,7 @@ func WithLogTag(tag string) Option {
 	}
 }
 
-// WithGitHubUpdater is managed github updater. updater will check newer version per `interval`
+// WithGitHubUpdater is managed github updater. updater will check new version per `interval`
 func WithGitHubUpdater(owner, repo, currentVersion string, interval time.Duration) Option {
 	return WithUpdater(
 		update.NewGitHubSource(
@@ -148,24 +146,6 @@ func WithUpdater(source update.UpdaterSource) Option {
 func WithInitializers(i ...Initializer) Option {
 	return func(wf *Workflow) {
 		wf.actions = append(wf.actions, i...)
-	}
-}
-
-// WithAutoUpdatec updates the workflow automatically when new version of it is available.
-// also see WithAutoUpdateChecker
-func WithAutoUpdater(timeout time.Duration) Option {
-	return func(wf *Workflow) {
-		wf.customEnvs.autoUpdateTimeout = timeout
-		wf.actions = append(wf.actions, new(autoUpdater))
-	}
-}
-
-// WithAutoUpdateChecker enables to display auto-update recommendation for results.
-// also see WithGitHubUpdater or WithUpdater
-func WithAutoUpdateCheker(timeout time.Duration) Option {
-	return func(wf *Workflow) {
-		wf.customEnvs.updateCheckTimeout = timeout
-		wf.actions = append(wf.actions, new(updateChecker))
 	}
 }
 

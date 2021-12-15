@@ -8,7 +8,7 @@ import (
 
 type testInitializer struct{}
 
-func (*testInitializer) Keyword() string { return "" }
+func (*testInitializer) Condition() bool { return true }
 func (*testInitializer) Initialize(w *Workflow) error {
 	return fmt.Errorf("initializer error")
 }

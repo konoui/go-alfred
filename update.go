@@ -14,7 +14,7 @@ type updater struct {
 
 type Updater interface {
 	Update(context.Context) error
-	NewerVersionAvailable(context.Context) bool
+	IsNewVersionAvailable(context.Context) bool
 }
 
 func (w *Workflow) Updater() Updater {
@@ -24,22 +24,22 @@ func (w *Workflow) Updater() Updater {
 	return w.updater
 }
 
-func (u *updater) NewerVersionAvailable(ctx context.Context) bool {
-	ok, err := u.source.NewerVersionAvailable(ctx)
+func (u *updater) IsNewVersionAvailable(ctx context.Context) bool {
+	ok, err := u.source.IsNewVersionAvailable(ctx)
 	if err != nil {
-		u.wf.sLogger().Warnln("failed to check newer version due to", err)
+		u.wf.sLogger().Warnln("failed to check new version due to", err)
 		return false
 	}
 	if ok {
-		u.wf.sLogger().Infoln("newer version available")
+		u.wf.sLogger().Infoln("new workflow version available")
 		return true
 	}
-	u.wf.sLogger().Debugln("no newer version exists")
+	u.wf.sLogger().Debugln("new workflow version does not exist")
 	return false
 }
 
 func (u *updater) Update(ctx context.Context) error {
-	return u.source.IfNewerVersionAvailable().Update(ctx)
+	return u.source.IfNewVersionAvailable().Update(ctx)
 }
 
 type nilUpdater struct{}
@@ -48,6 +48,6 @@ func (u *nilUpdater) Update(ctx context.Context) error {
 	return errors.New("no implemented")
 }
 
-func (u *nilUpdater) NewerVersionAvailable(ctx context.Context) bool {
+func (u *nilUpdater) IsNewVersionAvailable(ctx context.Context) bool {
 	return false
 }

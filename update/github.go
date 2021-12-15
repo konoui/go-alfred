@@ -11,13 +11,13 @@ import (
 )
 
 type gitHubUpdater struct {
-	client                RepositoriesService
-	currentVersion        string
-	owner                 string
-	repo                  string
-	newerVersionAvailable bool
-	checkInterval         time.Duration
-	fetchURL              string
+	client              RepositoriesService
+	currentVersion      string
+	owner               string
+	repo                string
+	newVersionAvailable bool
+	checkInterval       time.Duration
+	fetchURL            string
 }
 
 type RepositoriesService interface {
@@ -39,17 +39,17 @@ func NewGitHubSource(owner, repo, currentVersion string, opts ...Option) Updater
 	return g
 }
 
-func (g *gitHubUpdater) NewerVersionAvailable(ctx context.Context) (bool, error) {
-	ok, _, err := g.newerVersionAvailableContext(ctx, g.currentVersion)
+func (g *gitHubUpdater) IsNewVersionAvailable(ctx context.Context) (bool, error) {
+	ok, _, err := g.newVersionAvailableContext(ctx, g.currentVersion)
 	return ok, err
 }
 
-func (g *gitHubUpdater) IfNewerVersionAvailable() Updater {
+func (g *gitHubUpdater) IfNewVersionAvailable() Updater {
 	return g
 }
 
 func (g *gitHubUpdater) Update(ctx context.Context) error {
-	ok, url, err := g.newerVersionAvailableContext(ctx, g.currentVersion)
+	ok, url, err := g.newVersionAvailableContext(ctx, g.currentVersion)
 	if err != nil {
 		return err
 	}
@@ -63,8 +63,8 @@ func (g *gitHubUpdater) SetCheckInterval(interval time.Duration) {
 	g.checkInterval = interval
 }
 
-func (g *gitHubUpdater) newerVersionAvailableContext(ctx context.Context, currentVersion string) (ok bool, url string, err error) {
-	if g.newerVersionAvailable && g.fetchURL != "" {
+func (g *gitHubUpdater) newVersionAvailableContext(ctx context.Context, currentVersion string) (ok bool, url string, err error) {
+	if g.newVersionAvailable && g.fetchURL != "" {
 		return true, g.fetchURL, nil
 	}
 
@@ -97,10 +97,10 @@ func (g *gitHubUpdater) newerVersionAvailableContext(ctx context.Context, curren
 		// if current is latest, check next time after interval
 		return false, "", t.checkout()
 	}
-	// newer version available
+	// new version available
 	d := func() {
 		g.fetchURL = url
-		g.newerVersionAvailable = true
+		g.newVersionAvailable = true
 	}
 	d()
 	return true, url, nil
