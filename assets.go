@@ -2,8 +2,12 @@ package alfred
 
 import (
 	"embed"
+	"io"
 	"io/fs"
+	"os"
 	"path/filepath"
+
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -34,7 +38,9 @@ func generateAssets(assetsDir string) error {
 		return err
 	}
 
-	for _, relaPath := range icons {
+	var eg errgroup.Group
+	for _, iconPath := range icons {
+		relaPath := iconPath
 		// Note relaPath format is `assets/<filename>`.
 		// assets is a dir name of go-alfred package, not `assetsDirName` val.
 		// remove directory name.
@@ -44,17 +50,26 @@ func generateAssets(assetsDir string) error {
 			continue
 		}
 
-		data, err := embedAssets.ReadFile(relaPath)
-		if err != nil {
-			return err
-		}
+		eg.Go(func() error {
+			src, err := embedAssets.Open(relaPath)
+			if err != nil {
+				return err
+			}
+			defer src.Close()
 
-		if err := createFile(path, data); err != nil {
-			return err
-		}
+			dst, err := os.Create(path)
+			if err != nil {
+				return err
+			}
+			defer dst.Close()
+
+			if _, err := io.Copy(dst, src); err != nil {
+				return err
+			}
+			return nil
+		})
 	}
-
-	return nil
+	return eg.Wait()
 }
 
 func (a *Assets) getIconPath(filename string) string {

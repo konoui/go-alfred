@@ -95,20 +95,6 @@ func parseBool(v string) bool {
 	return false
 }
 
-func createFile(path string, data []byte) (err error) {
-	f, err := os.Create(path)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	_, err = f.Write(data)
-	if err != nil {
-		return
-	}
-	return
-}
-
 func pathExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil

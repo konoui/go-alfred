@@ -8,6 +8,7 @@ require (
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/hashicorp/go-version v1.2.1
 	github.com/sahilm/fuzzy v0.1.0
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	golang.org/x/text v0.3.4
 )
 
