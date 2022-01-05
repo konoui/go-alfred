@@ -31,7 +31,8 @@ type streams struct {
 }
 
 type markers struct {
-	done bool
+	outputDone bool
+	initDone   bool
 }
 
 type logger struct {
@@ -288,7 +289,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 
 // Output to io stream
 func (w *Workflow) Output() *Workflow {
-	if w.markers.done {
+	if w.markers.outputDone {
 		w.sLogger().Warnln(sentMessage)
 		return w
 	}
@@ -303,7 +304,7 @@ func (w *Workflow) IsEmpty() bool {
 }
 
 func (w *Workflow) markDone() {
-	w.markers.done = true
+	w.markers.outputDone = true
 }
 
 func (w *Workflow) isLimited() bool {

@@ -14,11 +14,17 @@ type Initializer interface {
 
 const emptyEnvFormat = "%s env is empty"
 
-// onInitialize executes followings
+// OnInitialize executes followings
 // 1. normalize arguments
 // 2. execute pre-defined and custom initializers
-// Custom initializer will be able to pass to OnInitialize or WithInitializer
-func (w *Workflow) onInitialize(initializers ...Initializer) error {
+// When using Run or Runsimple, do not need to involke OnInitialize.
+func (w *Workflow) OnInitialize(initializers ...Initializer) error {
+	if w.markers.initDone {
+		w.sLogger().Warnln("The workflow has already initialized")
+		return nil
+	}
+	defer func() { w.markers.initDone = true }()
+
 	for idx, arg := range os.Args {
 		os.Args[idx] = Normalize(arg)
 	}

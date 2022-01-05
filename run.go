@@ -21,7 +21,7 @@ func (w *Workflow) Run(fn func(*Workflow) error, i ...Initializer) (exitCode int
 
 func (w *Workflow) run(fn func(*Workflow) error, i ...Initializer) (exitCode int) {
 	exitCode = 1
-	if err := w.onInitialize(i...); err != nil {
+	if err := w.OnInitialize(i...); err != nil {
 		outputErr(w, err)
 		return
 	}
@@ -56,7 +56,7 @@ func outputErr(w *Workflow, err error) {
 		return
 	}
 
-	if w.markers.done {
+	if w.markers.outputDone {
 		return
 	}
 
