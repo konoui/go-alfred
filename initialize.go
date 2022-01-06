@@ -5,8 +5,7 @@ import (
 	"os"
 )
 
-// Initializer will invoke Initialize() when os.Args has Keyword()
-// if Keyword() returns empty, Initialize() will be invoked
+// Initializer will invoke Initialize() when Condition returns true
 type Initializer interface {
 	Initialize(*Workflow) error
 	Condition() bool
@@ -14,9 +13,7 @@ type Initializer interface {
 
 const emptyEnvFormat = "%s env is empty"
 
-// OnInitialize executes followings
-// 1. normalize arguments
-// 2. execute pre-defined and custom initializers
+// OnInitialize executes pre-defined and custom initializers
 // When using Run or Runsimple, do not need to involke OnInitialize.
 func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	if w.markers.initDone {
@@ -25,13 +22,8 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	}
 	defer func() { w.markers.initDone = true }()
 
-	for idx, arg := range os.Args {
-		os.Args[idx] = Normalize(arg)
-	}
-
 	actions := append(w.actions, initializers...)
 	for _, i := range actions {
-		// If Keyword() returns empty, always do Initialize()
 		if i.Condition() {
 			if err := i.Initialize(w); err != nil {
 				return err
@@ -42,9 +34,19 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	return nil
 }
 
+type normalizer struct{}
+
+func (*normalizer) Condition() bool { return true }
+func (*normalizer) Initialize(w *Workflow) (err error) {
+	for idx, arg := range os.Args {
+		os.Args[idx] = Normalize(arg)
+	}
+	return nil
+}
+
 type assets struct{}
 
-// Condition returns empty string
+// Condition returns true
 // This means that the initializer is always executed
 func (*assets) Condition() bool { return true }
 
@@ -64,7 +66,7 @@ func (*assets) Initialize(w *Workflow) (err error) {
 
 type envs struct{}
 
-// Condition returns empty string
+// Condition returns true
 // This means that the initializer is always executed
 func (*envs) Condition() bool { return true }
 

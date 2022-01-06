@@ -66,7 +66,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			l:      nil,
 			system: nil,
 		},
-		actions: []Initializer{new(envs), new(assets)},
+		actions: []Initializer{new(envs), new(normalizer), new(assets)},
 		customEnvs: &customEnvs{
 			maxResults:  0,
 			cacheSuffix: "",
