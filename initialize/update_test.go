@@ -76,7 +76,7 @@ func TestDisplayUpdateSystemInfo(t *testing.T) {
 				alfred.WithOutWriter(outBuffer),
 				alfred.WithLogWriter(logBuffer),
 				alfred.WithInitializers(
-					NewAutoUpdateChecker(2*time.Second),
+					NewUpdateRecommendation(2*time.Second),
 				),
 			)
 			exitCode := w.Run(app)
@@ -150,7 +150,7 @@ func TestAutoUpdateBackgroundJob(t *testing.T) {
 				alfred.WithUpdater(mockSource),
 				alfred.WithOutWriter(outBuffer),
 				alfred.WithLogWriter(logBuffer),
-				alfred.WithInitializers(NewAutoUpdater(2*time.Second)),
+				alfred.WithInitializers(NewUpdateExecution(2*time.Second)),
 			)
 
 			exitCode := w.RunSimple(func() error {

@@ -35,7 +35,7 @@ func hasUpdateArg() bool {
 	return false
 }
 
-func NewAutoUpdateChecker(timeout time.Duration) alfred.Initializer {
+func NewUpdateRecommendation(timeout time.Duration) alfred.Initializer {
 	return &updateChecker{timeout: timeout}
 }
 
@@ -60,7 +60,7 @@ type autoUpdater struct {
 	timeout time.Duration
 }
 
-func NewAutoUpdater(timeout time.Duration) alfred.Initializer {
+func NewUpdateExecution(timeout time.Duration) alfred.Initializer {
 	return &autoUpdater{timeout: timeout}
 }
 

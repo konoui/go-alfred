@@ -18,8 +18,8 @@ func main() {
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 		alfred.WithLogWriter(os.Stderr),
 		alfred.WithInitializers(
-			initialize.NewAutoUpdateChecker(2*time.Second),
-			initialize.NewAutoUpdater(3*time.Minute),
+			initialize.NewUpdateRecommendation(2*time.Second),
+			initialize.NewUpdateExecution(3*time.Minute),
 		),
 	)
 	os.Exit(awf.Run(run))
