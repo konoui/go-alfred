@@ -53,7 +53,7 @@ func (w *Workflow) GetWorkflowDir() (string, error) {
 	}
 
 	abs := filepath.Join(baseDir, "workflows", uid)
-	if !pathExists(abs) {
+	if !PathExists(abs) {
 		return "", fmt.Errorf("%s does not stat", abs)
 	}
 	return abs, nil
@@ -95,7 +95,7 @@ func parseBool(v string) bool {
 	return false
 }
 
-func pathExists(path string) bool {
+func PathExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }

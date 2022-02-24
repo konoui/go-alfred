@@ -51,7 +51,7 @@ func (w *Workflow) getJobDir() string {
 	}
 
 	jobDir := filepath.Join(dir, "jobs")
-	if !pathExists(jobDir) {
+	if !PathExists(jobDir) {
 		if err := os.MkdirAll(jobDir, os.ModePerm); err != nil {
 			w.sLogger().Warnf("cannot create job dir due to %s", err)
 			return tmpDir

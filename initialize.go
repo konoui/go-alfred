@@ -44,26 +44,6 @@ func (*normalizer) Initialize(w *Workflow) (err error) {
 	return nil
 }
 
-type assets struct{}
-
-// Condition returns true
-// This means that the initializer is always executed
-func (*assets) Condition() bool { return true }
-
-// Initialize generates/creates asset files and directories
-func (*assets) Initialize(w *Workflow) (err error) {
-	err = os.MkdirAll(w.getAssetsDir(), os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = generateAssets(w.getAssetsDir())
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 type envs struct{}
 
 // Condition returns true
@@ -93,11 +73,10 @@ func initEnvDir(key string) error {
 		return fmt.Errorf(emptyEnvFormat, key)
 	}
 
-	if !pathExists(dir) {
+	if !PathExists(dir) {
 		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
