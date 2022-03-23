@@ -51,7 +51,13 @@ type envs struct{}
 func (*envs) Condition() bool { return true }
 
 // Initialize validates alfred workflow environment variables and creates directories
-func (*envs) Initialize(w *Workflow) error {
+func (*envs) Initialize(w *Workflow) (err error) {
+	defer func() {
+		if w.customEnvs.skipEnvVerify && err != nil {
+			w.sLogger().Warnln("skip environment initialization error")
+			err = nil
+		}
+	}()
 	bundleID := w.GetBundleID()
 	if bundleID == "" {
 		return fmt.Errorf(emptyEnvFormat, envWorkflowBundleID)

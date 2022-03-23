@@ -43,8 +43,9 @@ type logger struct {
 }
 
 type customEnvs struct {
-	maxResults  int
-	cacheSuffix string
+	maxResults    int
+	cacheSuffix   string
+	skipEnvVerify bool
 }
 
 type Option func(*Workflow)
@@ -68,8 +69,9 @@ func NewWorkflow(opts ...Option) *Workflow {
 		},
 		actions: []Initializer{new(envs), new(normalizer)},
 		customEnvs: &customEnvs{
-			maxResults:  0,
-			cacheSuffix: "",
+			maxResults:    0,
+			cacheSuffix:   "",
+			skipEnvVerify: false,
 		},
 	}
 
@@ -166,6 +168,12 @@ func WithOutWriter(w io.Writer) Option {
 func WithCacheSuffix(suffix string) Option {
 	return func(wf *Workflow) {
 		wf.customEnvs.cacheSuffix = suffix
+	}
+}
+
+func WithSkipEnvVerify() Option {
+	return func(w *Workflow) {
+		w.customEnvs.skipEnvVerify = true
 	}
 }
 
