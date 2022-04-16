@@ -3,7 +3,6 @@ package daemon
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -129,7 +128,7 @@ func createPidFile(pid int, filename, dir string) error {
 	tmpPidfile := filepath.Join(dir, tmpfile)
 	pidfile := filepath.Join(dir, filename)
 	data := []byte(fmt.Sprintf("%d", pid))
-	err := ioutil.WriteFile(tmpPidfile, data, 0600)
+	err := os.WriteFile(tmpPidfile, data, 0o600)
 	if err != nil {
 		return err
 	}
@@ -150,7 +149,7 @@ func readPidFile(filename, dir string) (int, error) {
 		return invalidPid, fmt.Errorf("pid file %s does not exist: %w", pidfile, err)
 	}
 
-	v, err := ioutil.ReadFile(pidfile)
+	v, err := os.ReadFile(pidfile)
 	if err != nil {
 		return invalidPid, fmt.Errorf("failed to read %s: %w", pidfile, err)
 	}

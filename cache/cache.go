@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 )
 
@@ -21,7 +20,6 @@ type Cacher interface {
 type Cache struct {
 	Dir  string
 	File string
-	sync.Mutex
 }
 
 // New create a new cache instance
@@ -38,8 +36,6 @@ func New(dir, file string) (Cacher, error) {
 
 // Load read data saved cache into v
 func (c *Cache) Load(v interface{}) error {
-	c.Lock()
-	defer c.Unlock()
 	p := c.path()
 	f, err := os.Open(p)
 	if err != nil {
@@ -56,8 +52,6 @@ func (c *Cache) Load(v interface{}) error {
 
 // Store save data into cache
 func (c *Cache) Store(v interface{}) error {
-	c.Lock()
-	defer c.Unlock()
 	p := c.path()
 	f, err := os.Create(p)
 	if err != nil {
@@ -75,8 +69,6 @@ func (c *Cache) Store(v interface{}) error {
 
 // Clear remove cache file if exist
 func (c *Cache) Clear() error {
-	c.Lock()
-	defer c.Unlock()
 	p := c.path()
 	if pathExists(p) {
 		return os.Remove(p)

@@ -2,7 +2,7 @@ package alfred
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -35,7 +35,7 @@ func TestScriptFilterMarshal(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			want, err := ioutil.ReadFile(tt.filepath)
+			want, err := os.ReadFile(tt.filepath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -67,7 +67,7 @@ func TestUnmarshalJSON(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			input, err := ioutil.ReadFile(tt.filepath)
+			input, err := os.ReadFile(tt.filepath)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -87,7 +87,7 @@ func donwloadContext(ctx context.Context, url, path string) error {
 	}
 	defer f.Close()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return err
 	}

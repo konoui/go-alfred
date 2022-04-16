@@ -1,7 +1,6 @@
 package alfred
 
 import (
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -75,7 +74,7 @@ func (w *Workflow) Job(name string) *Job {
 // ListJobs returns jobs managed by the workflow
 func (w *Workflow) ListJobs() []*Job {
 	dir := w.getJobDir()
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		w.sLogger().Infof("invalid directory %s\n", dir)
 		return nil
@@ -190,7 +189,7 @@ func (j *Job) files() (out, stderr *os.File) {
 		return nil, nil
 	}
 
-	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 	j.wf.sLogger().Debugln("job logs will be stored at", absPath)
 	if err != nil {
 		return nil, nil

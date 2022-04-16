@@ -1,7 +1,7 @@
 package alfred
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -124,7 +124,7 @@ func TestDiffScriptFilter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			wantData, err := ioutil.ReadFile(tt.filepath)
+			wantData, err := os.ReadFile(tt.filepath)
 			if err != nil {
 				t.Fatal(err)
 			}

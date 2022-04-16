@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -16,7 +16,7 @@ import (
 
 func repositoryReleaseData(t *testing.T, filepath string) *github.RepositoryRelease {
 	t.Helper()
-	data, err := ioutil.ReadFile(filepath)
+	data, err := os.ReadFile(filepath)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,7 +2,7 @@ package alfred
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -113,7 +113,7 @@ func TestWorfkfloByte(t *testing.T) {
 			}
 			defer f.Close()
 
-			want, err := ioutil.ReadAll(f)
+			want, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -167,7 +167,7 @@ func TestOutput(t *testing.T) {
 			}
 			defer f.Close()
 
-			wantData, err := ioutil.ReadAll(f)
+			wantData, err := io.ReadAll(f)
 			if err != nil {
 				t.Fatal(err)
 			}

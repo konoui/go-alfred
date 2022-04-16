@@ -22,8 +22,8 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	}
 	defer func() { w.markers.initDone = true }()
 
-	actions := append(w.actions, initializers...)
-	for _, i := range actions {
+	w.actions = append(w.actions, initializers...)
+	for _, i := range w.actions {
 		if i.Condition() {
 			if err := i.Initialize(w); err != nil {
 				return err
