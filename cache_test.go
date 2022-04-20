@@ -93,7 +93,7 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 			}
 
 			// load cache from new workflow
-			err = tt.wf.Cache(cacheKey).LoadItems(tt.ttl).Err()
+			err = tt.wf.Cache(cacheKey).TTL(tt.ttl).LoadItems().Err()
 			if !tt.expectErr && err != nil {
 				t.Fatal(err)
 			}

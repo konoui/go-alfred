@@ -18,6 +18,19 @@ type Cache struct {
 	filename string
 	wf       *Workflow
 	err      error
+	ttl      time.Duration
+}
+
+type Cacher interface {
+	Workflow() *Workflow
+	TTL(time.Duration) CacheLoader
+	Err() error
+	StoreItems() Cacher
+	ClearItems() Cacher
+}
+
+type CacheLoader interface {
+	LoadItems() Cacher
 }
 
 func (w *Workflow) getCacheSuffix() (suffix string) {
@@ -32,7 +45,7 @@ func (w *Workflow) getCacheSuffix() (suffix string) {
 
 // Cache creates singleton instance
 // If key is empty, return Noop cache
-func (w *Workflow) Cache(key string) *Cache {
+func (w *Workflow) Cache(key string) Cacher {
 	if key == "" {
 		w.sLogger().Debugln("try to use nil cacher as cache key is empty")
 		return newNil("", w, nil)
@@ -70,8 +83,13 @@ func (c *Cache) Err() error {
 	return c.err
 }
 
+func (c *Cache) TTL(ttl time.Duration) CacheLoader {
+	c.ttl = ttl
+	return c
+}
+
 // LoadItems reads data from cache file
-func (c *Cache) LoadItems(ttl time.Duration) *Cache {
+func (c *Cache) LoadItems() Cacher {
 	var err error
 	defer func() {
 		c.err = err
@@ -82,7 +100,7 @@ func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 		return c
 	}
 
-	if c.iCache.Expired(ttl) {
+	if c.iCache.Expired(c.ttl) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.wf.sLogger().Infoln(err.Error())
 		return c
@@ -93,7 +111,7 @@ func (c *Cache) LoadItems(ttl time.Duration) *Cache {
 }
 
 // StoreItems saves data into cache file
-func (c *Cache) StoreItems() *Cache {
+func (c *Cache) StoreItems() Cacher {
 	var err error
 	defer func() {
 		c.err = err
@@ -113,7 +131,7 @@ func (c *Cache) StoreItems() *Cache {
 }
 
 // ClearItems clear cache data
-func (c *Cache) ClearItems() *Cache {
+func (c *Cache) ClearItems() Cacher {
 	var err error
 	defer func() {
 		c.err = err
