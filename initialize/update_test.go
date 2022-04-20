@@ -115,10 +115,6 @@ func TestAutoUpdateBackgroundJob(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tmp := make([]string, len(os.Args))
-			copy(tmp, os.Args)
-			// overwrite os.Args for test
-			os.Args = []string{tt.cmd, ArgWorkflowUpdate}
 			osExecutable = func() (string, error) {
 				return tt.cmd, nil
 			}
@@ -128,7 +124,6 @@ func TestAutoUpdateBackgroundJob(t *testing.T) {
 				}
 			}
 			defer func() {
-				os.Args = tmp
 				osExecutable = os.Executable
 				osExit = os.Exit
 			}()
@@ -153,6 +148,9 @@ func TestAutoUpdateBackgroundJob(t *testing.T) {
 				alfred.WithLogWriter(logBuffer),
 				alfred.WithInitializers(
 					NewUpdateExecution(2*time.Second),
+				),
+				alfred.WithArguments(
+					tt.cmd, ArgWorkflowUpdate,
 				),
 			)
 

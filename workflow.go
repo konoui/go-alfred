@@ -23,6 +23,7 @@ type Workflow struct {
 	updater    Updater
 	actions    []Initializer
 	customEnvs *customEnvs
+	args       []string
 }
 
 type streams struct {
@@ -73,6 +74,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			cacheSuffix:   "",
 			skipEnvVerify: false,
 		},
+		args: os.Args[1:],
 	}
 
 	for _, opt := range opts {
@@ -171,9 +173,10 @@ func WithCacheSuffix(suffix string) Option {
 	}
 }
 
-func WithSkipEnvVerify() Option {
+// WithArguments configures input args. default values are os.Args[1:]
+func WithArguments(args ...string) Option {
 	return func(w *Workflow) {
-		w.customEnvs.skipEnvVerify = true
+		w.args = args
 	}
 }
 
@@ -185,6 +188,10 @@ func (w *Workflow) OutWriter() io.Writer {
 // LogWriter returns logger writer
 func (w *Workflow) LogWriter() io.Writer {
 	return w.streams.log
+}
+
+func (w *Workflow) Args() []string {
+	return w.args
 }
 
 // Append new items to ScriptFilter

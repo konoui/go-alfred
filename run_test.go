@@ -8,8 +8,8 @@ import (
 
 type testInitializer struct{}
 
-func (*testInitializer) Condition() bool { return true }
-func (*testInitializer) Initialize(w *Workflow) error {
+func (*testInitializer) Condition(_ *Workflow) bool { return true }
+func (*testInitializer) Initialize(_ *Workflow) error {
 	return fmt.Errorf("initializer error")
 }
 

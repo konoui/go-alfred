@@ -26,8 +26,8 @@ type updateChecker struct {
 }
 
 // HasUpdateArg return true if `ArgWorkflowUpdate` variable is specified
-func hasUpdateArg() bool {
-	for _, arg := range os.Args {
+func hasUpdateArg(args []string) bool {
+	for _, arg := range args {
 		if ArgWorkflowUpdate == arg {
 			return true
 		}
@@ -39,11 +39,11 @@ func NewUpdateRecommendation(timeout time.Duration) alfred.Initializer {
 	return &updateChecker{timeout: timeout}
 }
 
-func (*updateChecker) Condition() bool { return true }
+func (*updateChecker) Condition(_ *alfred.Workflow) bool { return true }
 func (i *updateChecker) Initialize(w *alfred.Workflow) error {
 	ctx, cancel := context.WithTimeout(context.Background(), i.timeout)
 	defer cancel()
-	if !hasUpdateArg() && w.Updater().IsNewVersionAvailable(ctx) {
+	if !hasUpdateArg(w.Args()) && w.Updater().IsNewVersionAvailable(ctx) {
 		w.SetSystemInfo(
 			alfred.NewItem().
 				Title("New version workflow is available!").
@@ -64,8 +64,8 @@ func NewUpdateExecution(timeout time.Duration) alfred.Initializer {
 	return &autoUpdater{timeout: timeout}
 }
 
-func (*autoUpdater) Condition() bool {
-	return hasUpdateArg()
+func (*autoUpdater) Condition(w *alfred.Workflow) bool {
+	return hasUpdateArg(w.Args())
 }
 
 // Initialize executes auto-updater of the workflow
@@ -82,7 +82,7 @@ func (i *autoUpdater) Initialize(w *alfred.Workflow) error {
 		return err
 	}
 
-	cmd := exec.Command(self, os.Args[1:]...)
+	cmd := exec.Command(self, w.Args()...)
 	cmd.Env = os.Environ()
 	cmd.Stdin = nil
 	o, err := cmd.StdoutPipe()

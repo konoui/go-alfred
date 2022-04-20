@@ -8,7 +8,7 @@ import (
 // Initializer will invoke Initialize() when Condition returns true
 type Initializer interface {
 	Initialize(*Workflow) error
-	Condition() bool
+	Condition(*Workflow) bool
 }
 
 const emptyEnvFormat = "%s env is empty"
@@ -24,7 +24,7 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 
 	w.actions = append(w.actions, initializers...)
 	for _, i := range w.actions {
-		if i.Condition() {
+		if i.Condition(w) {
 			if err := i.Initialize(w); err != nil {
 				return err
 			}
@@ -36,10 +36,10 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 
 type normalizer struct{}
 
-func (*normalizer) Condition() bool { return true }
+func (*normalizer) Condition(_ *Workflow) bool { return true }
 func (*normalizer) Initialize(w *Workflow) (err error) {
-	for idx, arg := range os.Args {
-		os.Args[idx] = Normalize(arg)
+	for idx, arg := range w.args {
+		w.args[idx] = Normalize(arg)
 	}
 	return nil
 }
@@ -48,16 +48,10 @@ type envs struct{}
 
 // Condition returns true
 // This means that the initializer is always executed
-func (*envs) Condition() bool { return true }
+func (*envs) Condition(_ *Workflow) bool { return true }
 
 // Initialize validates alfred workflow environment variables and creates directories
 func (*envs) Initialize(w *Workflow) (err error) {
-	defer func() {
-		if w.customEnvs.skipEnvVerify && err != nil {
-			w.sLogger().Warnln("skip environment initialization error")
-			err = nil
-		}
-	}()
 	bundleID := w.GetBundleID()
 	if bundleID == "" {
 		return fmt.Errorf(emptyEnvFormat, envWorkflowBundleID)

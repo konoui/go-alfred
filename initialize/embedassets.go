@@ -22,7 +22,7 @@ func NewEmbedAssets() alfred.Initializer {
 
 // Condition returns true
 // This means that the initializer is always executed
-func (*embedAssets) Condition() bool { return true }
+func (*embedAssets) Condition(*alfred.Workflow) bool { return true }
 
 // Initialize creates asset files and directories
 func (*embedAssets) Initialize(w *alfred.Workflow) (err error) {
@@ -30,12 +30,7 @@ func (*embedAssets) Initialize(w *alfred.Workflow) (err error) {
 	if err != nil {
 		return err
 	}
-
-	err = generateAssets(w.GetAssetsDir())
-	if err != nil {
-		return err
-	}
-	return nil
+	return generateAssets(w.GetAssetsDir())
 }
 
 func generateAssets(assetsDir string) error {

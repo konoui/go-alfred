@@ -28,9 +28,9 @@ func (w *Workflow) run(fn func(*Workflow) error, i ...Initializer) (exitCode int
 
 	defer func() {
 		if r := recover(); r != nil {
-			w.sLogger().Errorln("FATAL ERROR")
-			w.sLogger().Errorf("DUMP:\n %s\n", r)
-			w.sLogger().Errorf("DUMP:\n %s\n", debug.Stack())
+			w.sLogger().Errorln("Fatal Error")
+			w.sLogger().Errorf("dump:\n %s\n", r)
+			w.sLogger().Errorf("dump:\n %s\n", debug.Stack())
 
 			err, ok := r.(error)
 			if ok {
