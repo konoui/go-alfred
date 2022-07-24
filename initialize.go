@@ -24,6 +24,9 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 
 	w.actions = append(w.actions, initializers...)
 	for _, i := range w.actions {
+		if i == nil {
+			continue
+		}
 		if i.Condition(w) {
 			if err := i.Initialize(w); err != nil {
 				return err

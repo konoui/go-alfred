@@ -44,9 +44,8 @@ type logger struct {
 }
 
 type customEnvs struct {
-	maxResults    int
-	cacheSuffix   string
-	skipEnvVerify bool
+	maxResults  int
+	cacheSuffix string
 }
 
 type Option func(*Workflow)
@@ -70,9 +69,8 @@ func NewWorkflow(opts ...Option) *Workflow {
 		},
 		actions: []Initializer{new(envs), new(normalizer)},
 		customEnvs: &customEnvs{
-			maxResults:    0,
-			cacheSuffix:   "",
-			skipEnvVerify: false,
+			maxResults:  0,
+			cacheSuffix: "",
 		},
 		args: os.Args[1:],
 	}
