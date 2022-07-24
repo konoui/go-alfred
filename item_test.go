@@ -38,7 +38,6 @@ func TestItemAPI(t *testing.T) {
 						LargeType(input.text.largeType),
 				)
 
-			// TODO
 			got := item.Mods(input.mods).Variables(input.variables)
 			if diff := Diff(tt.want, got); diff != "" {
 				t.Errorf("-want +got\n%+v", diff)
