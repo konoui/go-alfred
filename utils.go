@@ -74,7 +74,7 @@ func Normalize(s string) string {
 	return norm.NFC.String(s)
 }
 
-func NormalizeAll(args []string) []string {
+func normalizeAll(args []string) []string {
 	normargs := make([]string, len(args))
 	for idx, arg := range args {
 		normargs[idx] = Normalize(arg)
