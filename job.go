@@ -34,6 +34,15 @@ func (j JobProcess) String() string {
 	}
 }
 
+type Jobber interface {
+	Name() string
+	Logging() *Job
+	Start(cmd *exec.Cmd) (JobProcess, error)
+	IsJob() bool
+	IsRunning() bool
+	Terminate() error
+}
+
 // Job is context
 type Job struct {
 	name      string

@@ -72,7 +72,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			maxResults:  0,
 			cacheSuffix: "",
 		},
-		args: normalize(os.Args[1:]),
+		args: NormalizeAll(os.Args[1:]),
 	}
 
 	for _, opt := range opts {
@@ -182,7 +182,7 @@ func WithCacheSuffix(suffix string) Option {
 // WithArguments configures input args. default values are os.Args[1:]
 func WithArguments(args ...string) Option {
 	return func(w *Workflow) {
-		w.args = normalize(args)
+		w.args = NormalizeAll(args)
 	}
 }
 

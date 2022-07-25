@@ -22,7 +22,7 @@ var (
 	_ ArgGetter     = (*Workflow)(nil)
 	_ Filter        = (*Workflow)(nil)
 	_ OptionUpdater = (*Workflow)(nil)
-	_ Jobber        = (*Workflow)(nil)
+	_ JobGetter     = (*Workflow)(nil)
 )
 
 type Appender interface {
@@ -99,4 +99,7 @@ type OptionUpdater interface {
 }
 
 // TODO implement
-type Jobber interface{}
+type JobGetter interface {
+	Job(name string) *Job
+	ListJobs() []*Job
+}
