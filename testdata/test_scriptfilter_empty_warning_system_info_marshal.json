@@ -1,0 +1,16 @@
+{
+    "items": [
+        {
+            "title": "systemTitle1",
+            "subtitle": "systemSubtitle1"
+        },
+        {
+            "title": "emptyTitle1",
+            "subtitle": "emptySubtitle1",
+            "valid": false,
+            "icon": {
+                "path": "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/AlertNoteIcon.icns"
+            }
+        }
+    ]
+}

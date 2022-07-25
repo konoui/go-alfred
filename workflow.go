@@ -240,7 +240,7 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(w.Assets().IconAlertNote()),
+			Icon(w.Asseter().IconAlertNote()),
 	)
 	return w
 }
@@ -274,14 +274,17 @@ func (w *Workflow) Bytes() []byte {
 	}
 
 	if !w.system.IsEmpty() {
-		items := w.std.items
-		w.std.Clear()
-		w.std.Items(w.system.items...)
-		w.std.Items(items...)
-		items = w.warn.items
-		w.warn.Clear()
-		w.warn.Items(w.system.items...)
-		w.warn.Items(items...)
+		if w.IsEmpty() {
+			items := w.warn.items
+			w.warn.Clear()
+			w.warn.Items(w.system.items...)
+			w.warn.Items(items...)
+		} else {
+			items := w.std.items
+			w.std.Clear()
+			w.std.Items(w.system.items...)
+			w.std.Items(items...)
+		}
 	}
 
 	if w.IsEmpty() {
@@ -302,7 +305,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(w.Assets().IconCaution()),
+			Icon(w.Asseter().IconCaution()),
 	)
 	w.Output()
 	osExit(1)

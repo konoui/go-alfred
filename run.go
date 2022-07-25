@@ -64,7 +64,7 @@ func outputErr(w *Workflow, err error) {
 		NewItem().
 			Title(err.Error()).
 			Subtitle("Please check workflow debug log").
-			Icon(w.Assets().IconCaution()),
+			Icon(w.Asseter().IconCaution()),
 	)
 	w.Output()
 }

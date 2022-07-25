@@ -69,7 +69,7 @@ type CacheGetter interface {
 }
 
 type AssetGetter interface {
-	Assets() *Assets
+	Asseter() Asseter
 }
 
 type Runner interface {

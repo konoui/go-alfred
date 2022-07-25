@@ -69,6 +69,9 @@ func TestDisplayUpdateSystemInfo(t *testing.T) {
 				Return(tt.newVersionAvailable, nil)
 			defer ctrl.Finish()
 
+			// Note set tmp dir for embded assets
+			t.Setenv("alfred_workflow_data", "/tmp/go-alfred-data")
+
 			outBuffer := new(bytes.Buffer)
 			logBuffer := new(bytes.Buffer)
 			w := alfred.NewWorkflow(

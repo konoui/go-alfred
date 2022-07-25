@@ -50,7 +50,7 @@ func (i *updateChecker) Initialize(w *alfred.Workflow) error {
 				Subtitle("↩ for update").
 				Autocomplete(ArgWorkflowUpdate).
 				Valid(false).
-				Icon(w.Assets().IconAlertNote()),
+				Icon(w.Asseter().IconAlertNote()),
 		)
 	}
 	return nil
