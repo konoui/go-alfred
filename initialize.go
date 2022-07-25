@@ -37,16 +37,6 @@ func (w *Workflow) OnInitialize(initializers ...Initializer) error {
 	return nil
 }
 
-type normalizer struct{}
-
-func (*normalizer) Condition(_ *Workflow) bool { return true }
-func (*normalizer) Initialize(w *Workflow) (err error) {
-	for idx, arg := range w.args {
-		w.args[idx] = Normalize(arg)
-	}
-	return nil
-}
-
 type envs struct{}
 
 // Condition returns true

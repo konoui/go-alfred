@@ -6,22 +6,23 @@ import (
 )
 
 var (
-	_ Appender     = (*Workflow)(nil)
-	_ Outputer     = (*Workflow)(nil)
-	_ Clearer      = (*Workflow)(nil)
-	_ Setter       = (*Workflow)(nil)
-	_ IO           = (*Workflow)(nil)
-	_ fmt.Stringer = (*Workflow)(nil)
-	_ Hooker       = (*Workflow)(nil)
-	_ LogGetter    = (*Workflow)(nil)
-	_ UpdateGetter = (*Workflow)(nil)
-	_ CacheGetter  = (*Workflow)(nil)
-	_ AssetGetter  = (*Workflow)(nil)
-	_ Runner       = (*Workflow)(nil)
-	_ EnvGetter    = (*Workflow)(nil)
-	_ ArgGetter    = (*Workflow)(nil)
-	_ Filter       = (*Workflow)(nil)
-	_ Jobber       = (*Workflow)(nil)
+	_ Appender      = (*Workflow)(nil)
+	_ Outputer      = (*Workflow)(nil)
+	_ Clearer       = (*Workflow)(nil)
+	_ Setter        = (*Workflow)(nil)
+	_ IO            = (*Workflow)(nil)
+	_ fmt.Stringer  = (*Workflow)(nil)
+	_ Hooker        = (*Workflow)(nil)
+	_ LogGetter     = (*Workflow)(nil)
+	_ UpdateGetter  = (*Workflow)(nil)
+	_ CacheGetter   = (*Workflow)(nil)
+	_ AssetGetter   = (*Workflow)(nil)
+	_ Runner        = (*Workflow)(nil)
+	_ EnvGetter     = (*Workflow)(nil)
+	_ ArgGetter     = (*Workflow)(nil)
+	_ Filter        = (*Workflow)(nil)
+	_ OptionUpdater = (*Workflow)(nil)
+	_ Jobber        = (*Workflow)(nil)
 )
 
 type Appender interface {
@@ -91,6 +92,10 @@ type ArgGetter interface {
 type Filter interface {
 	Filter(query string) *Workflow
 	FilterByItemProperty(f func(s string) bool, property ItemProperty) *Workflow
+}
+
+type OptionUpdater interface {
+	UpdateOpts(opts ...Option) *Workflow
 }
 
 // TODO implement

@@ -74,6 +74,14 @@ func Normalize(s string) string {
 	return norm.NFC.String(s)
 }
 
+func normalize(args []string) []string {
+	normargs := make([]string, len(args))
+	for idx, arg := range args {
+		normargs[idx] = Normalize(arg)
+	}
+	return normargs
+}
+
 func parseBool(v string) bool {
 	if strings.HasPrefix(v, "enable") {
 		return true

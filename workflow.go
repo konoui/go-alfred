@@ -67,15 +67,18 @@ func NewWorkflow(opts ...Option) *Workflow {
 			l:      nil,
 			system: nil,
 		},
-		actions: []Initializer{new(envs), new(normalizer)},
+		actions: []Initializer{new(envs)},
 		customEnvs: &customEnvs{
 			maxResults:  0,
 			cacheSuffix: "",
 		},
-		args: os.Args[1:],
+		args: normalize(os.Args[1:]),
 	}
 
 	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
 		opt(wf)
 	}
 
@@ -83,16 +86,18 @@ func NewWorkflow(opts ...Option) *Workflow {
 		wf.logger.level = LogLevelDebug
 	}
 
-	// sync log stream to logger
-	wf.logger.l = newLogger(
-		wf.streams.log,
-		wf.logger.level,
-		wf.logger.tag)
-	wf.logger.system = newLogger(
-		wf.streams.log,
-		wf.logger.level,
-		"System")
+	wf.syncLogger()
 	return wf
+}
+
+func (w *Workflow) UpdateOpts(opts ...Option) *Workflow {
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		opt(w)
+	}
+	return w
 }
 
 // WithMaxResults arranges number of item result listed by Script Filter
@@ -111,6 +116,7 @@ func WithMaxResults(n int) Option {
 func WithLogLevel(l LogLevel) Option {
 	return func(wf *Workflow) {
 		wf.logger.level = l
+		wf.syncLogger()
 	}
 }
 
@@ -119,6 +125,7 @@ func WithLogLevel(l LogLevel) Option {
 func WithLogTag(tag string) Option {
 	return func(wf *Workflow) {
 		wf.logger.tag = tag
+		wf.syncLogger()
 	}
 }
 
@@ -155,6 +162,7 @@ func WithInitializers(i ...Initializer) Option {
 func WithLogWriter(w io.Writer) Option {
 	return func(wf *Workflow) {
 		wf.streams.log = w
+		wf.syncLogger()
 	}
 }
 
@@ -174,7 +182,7 @@ func WithCacheSuffix(suffix string) Option {
 // WithArguments configures input args. default values are os.Args[1:]
 func WithArguments(args ...string) Option {
 	return func(w *Workflow) {
-		w.args = args
+		w.args = normalize(args)
 	}
 }
 
@@ -327,4 +335,16 @@ func (w *Workflow) isLimited() bool {
 		return true
 	}
 	return false
+}
+
+func (w *Workflow) syncLogger() {
+	// sync log stream to logger
+	w.logger.l = newLogger(
+		w.streams.log,
+		w.logger.level,
+		w.logger.tag)
+	w.logger.system = newLogger(
+		w.streams.log,
+		w.logger.level,
+		"System")
 }
