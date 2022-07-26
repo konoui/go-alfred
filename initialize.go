@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+var defaultInitializers = []Initializer{new(envs)}
+
 // Initializer will invoke Initialize() when Condition returns true
 type Initializer interface {
 	Initialize(*Workflow) error

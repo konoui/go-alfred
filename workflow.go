@@ -67,7 +67,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			l:      nil,
 			system: nil,
 		},
-		actions: []Initializer{new(envs)},
+		actions: defaultInitializers,
 		customEnvs: &customEnvs{
 			maxResults:  0,
 			cacheSuffix: "",
@@ -155,7 +155,8 @@ func WithUpdater(source update.UpdaterSource) Option {
 // Initializer will be involved on managed-run such as *Workflow.Run()
 func WithInitializers(i ...Initializer) Option {
 	return func(wf *Workflow) {
-		wf.actions = append(wf.actions, i...)
+		is := append(defaultInitializers, i...)
+		wf.actions = is
 	}
 }
 
