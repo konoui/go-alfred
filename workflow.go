@@ -20,6 +20,7 @@ type Workflow struct {
 	markers    markers
 	streams    *streams
 	logger     *logger
+	assets     Asseter
 	updater    Updater
 	actions    []Initializer
 	customEnvs *customEnvs
@@ -67,6 +68,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 			l:      nil,
 			system: nil,
 		},
+		assets:  &Assets{},
 		actions: defaultInitializers,
 		customEnvs: &customEnvs{
 			maxResults:  0,
@@ -80,10 +82,6 @@ func NewWorkflow(opts ...Option) *Workflow {
 			continue
 		}
 		opt(wf)
-	}
-
-	if IsDebugEnabled() {
-		wf.logger.level = LogLevelDebug
 	}
 
 	wf.syncLogger()
@@ -155,8 +153,10 @@ func WithUpdater(source update.UpdaterSource) Option {
 // Initializer will be involved on managed-run such as *Workflow.Run()
 func WithInitializers(i ...Initializer) Option {
 	return func(wf *Workflow) {
-		is := append(defaultInitializers, i...)
-		wf.actions = is
+		a := make([]Initializer, 0, len(i)+len(defaultInitializers))
+		a = append(a, defaultInitializers...)
+		a = append(a, i...)
+		wf.actions = a
 	}
 }
 
@@ -184,6 +184,12 @@ func WithCacheSuffix(suffix string) Option {
 func WithArguments(args ...string) Option {
 	return func(w *Workflow) {
 		w.args = normalizeAll(args)
+	}
+}
+
+func WithAsseter(a Asseter) Option {
+	return func(w *Workflow) {
+		w.assets = a
 	}
 }
 
@@ -342,6 +348,10 @@ func (w *Workflow) isLimited() bool {
 }
 
 func (w *Workflow) syncLogger() {
+	if IsDebugEnabled() {
+		w.logger.level = LogLevelDebug
+	}
+
 	// sync log stream to logger
 	w.logger.l = newLogger(
 		w.streams.log,

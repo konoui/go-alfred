@@ -11,13 +11,25 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	assetsDirName = "assets"
+)
+
 //go:embed assets/*
 var embedAssetsFS embed.FS
 
-type embedAssets struct{}
+type embedAssets struct {
+	fallback alfred.Asseter
+	wf       *alfred.Workflow
+	dir      string
+}
 
 func NewEmbedAssets() alfred.Initializer {
 	return &embedAssets{}
+}
+
+func GetAssetsDir(w *alfred.Workflow) string {
+	return filepath.Join(w.GetDataDir(), assetsDirName)
 }
 
 // Condition returns true
@@ -25,12 +37,44 @@ func NewEmbedAssets() alfred.Initializer {
 func (*embedAssets) Condition(*alfred.Workflow) bool { return true }
 
 // Initialize creates asset files and directories
-func (*embedAssets) Initialize(w *alfred.Workflow) (err error) {
-	err = os.MkdirAll(w.GetAssetsDir(), os.ModePerm)
+func (ea *embedAssets) Initialize(w *alfred.Workflow) (err error) {
+	ea.fallback, ea.wf, ea.dir = w.Asseter(), w, GetAssetsDir(w)
+
+	w.UpdateOpts(alfred.WithAsseter(ea))
+	err = os.MkdirAll(ea.dir, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	return generateAssets(w.GetAssetsDir())
+	return generateAssets(ea.dir)
+}
+
+func (ea *embedAssets) getIcon(filename string, fallback *alfred.Icon) *alfred.Icon {
+	path := filepath.Join(ea.dir, filename)
+	if alfred.PathExists(path) {
+		return alfred.NewIcon().
+			Path(path)
+	}
+	return fallback
+}
+
+func (ea *embedAssets) IconTrash() *alfred.Icon {
+	return ea.getIcon(alfred.IconTrash, ea.fallback.IconTrash())
+}
+
+func (ea *embedAssets) IconAlertNote() *alfred.Icon {
+	return ea.getIcon(alfred.IconAlerNote, ea.fallback.IconAlertNote())
+}
+
+func (ea *embedAssets) IconCaution() *alfred.Icon {
+	return ea.getIcon(alfred.IconCaution, ea.fallback.IconCaution())
+}
+
+func (ea *embedAssets) IconAlertStop() *alfred.Icon {
+	return ea.getIcon(alfred.IconAlertStop, ea.fallback.IconAlertStop())
+}
+
+func (ea *embedAssets) IconExec() *alfred.Icon {
+	return ea.getIcon(alfred.IconExec, ea.fallback.IconExec())
 }
 
 func generateAssets(assetsDir string) error {

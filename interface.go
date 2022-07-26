@@ -82,7 +82,6 @@ type EnvGetter interface {
 	GetDataDir() string
 	GetCacheDir() string
 	GetWorkflowDir() (string, error)
-	GetAssetsDir() string
 }
 
 type ArgGetter interface {

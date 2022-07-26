@@ -5,8 +5,12 @@ import (
 )
 
 const (
-	assetsDirName  = "assets"
-	systemIconPath = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
+	SystemIconPath = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
+	IconTrash      = "TrashIcon.icns"
+	IconAlerNote   = "AlertNoteIcon.icns"
+	IconCaution    = "AlertCautionBadgeIcon.icns"
+	IconAlertStop  = "AlertStopIcon.icns"
+	IconExec       = "ExecutableBinaryIcon.icns"
 )
 
 type Asseter interface {
@@ -18,48 +22,38 @@ type Asseter interface {
 }
 
 type Assets struct {
-	wf *Workflow
-}
-
-func (w *Workflow) GetAssetsDir() string {
-	return filepath.Join(w.GetDataDir(), assetsDirName)
+	_ *Workflow
 }
 
 func (w *Workflow) Asseter() Asseter {
-	return &Assets{
-		wf: w,
-	}
+	return w.assets
 }
 
-func (a *Assets) getIconPath(filename string) string {
-	path := filepath.Join(a.wf.GetAssetsDir(), filename)
-	if PathExists(path) {
-		return path
-	}
-	return filepath.Join(systemIconPath, filename)
+func getIconPath(filename string) string {
+	return filepath.Join(SystemIconPath, filename)
 }
 
 func (a *Assets) IconTrash() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("TrashIcon.icns"))
+		Path(getIconPath(IconTrash))
 }
 
 func (a *Assets) IconAlertNote() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("AlertNoteIcon.icns"))
+		Path(getIconPath(IconAlerNote))
 }
 
 func (a *Assets) IconCaution() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("AlertCautionBadgeIcon.icns"))
+		Path(getIconPath(IconCaution))
 }
 
 func (a *Assets) IconAlertStop() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("AlertStopIcon.icns"))
+		Path(getIconPath(IconAlertStop))
 }
 
 func (a *Assets) IconExec() *Icon {
 	return NewIcon().
-		Path(a.getIconPath("ExecutableBinaryIcon.icns"))
+		Path(getIconPath(IconExec))
 }
