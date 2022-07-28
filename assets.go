@@ -2,15 +2,8 @@ package alfred
 
 import (
 	"path/filepath"
-)
 
-const (
-	SystemIconPath = "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources"
-	IconTrash      = "TrashIcon.icns"
-	IconAlerNote   = "AlertNoteIcon.icns"
-	IconCaution    = "AlertCautionBadgeIcon.icns"
-	IconAlertStop  = "AlertStopIcon.icns"
-	IconExec       = "ExecutableBinaryIcon.icns"
+	"github.com/konoui/go-alfred/icon"
 )
 
 type Asseter interface {
@@ -30,30 +23,30 @@ func (w *Workflow) Asseter() Asseter {
 }
 
 func getIconPath(filename string) string {
-	return filepath.Join(SystemIconPath, filename)
+	return filepath.Join(icon.SystemIconPath, filename)
 }
 
 func (a *Assets) IconTrash() *Icon {
 	return NewIcon().
-		Path(getIconPath(IconTrash))
+		Path(getIconPath(icon.IconTrash))
 }
 
 func (a *Assets) IconAlertNote() *Icon {
 	return NewIcon().
-		Path(getIconPath(IconAlerNote))
+		Path(getIconPath(icon.IconAlerNote))
 }
 
 func (a *Assets) IconCaution() *Icon {
 	return NewIcon().
-		Path(getIconPath(IconCaution))
+		Path(getIconPath(icon.IconCaution))
 }
 
 func (a *Assets) IconAlertStop() *Icon {
 	return NewIcon().
-		Path(getIconPath(IconAlertStop))
+		Path(getIconPath(icon.IconAlertStop))
 }
 
 func (a *Assets) IconExec() *Icon {
 	return NewIcon().
-		Path(getIconPath(IconExec))
+		Path(getIconPath(icon.IconExec))
 }

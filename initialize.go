@@ -3,6 +3,8 @@ package alfred
 import (
 	"fmt"
 	"os"
+
+	"github.com/konoui/go-alfred/env"
 )
 
 var defaultInitializers = []Initializer{new(envs)}
@@ -49,14 +51,14 @@ func (*envs) Condition(_ *Workflow) bool { return true }
 func (*envs) Initialize(w *Workflow) (err error) {
 	bundleID := w.GetBundleID()
 	if bundleID == "" {
-		return fmt.Errorf(emptyEnvFormat, envWorkflowBundleID)
+		return fmt.Errorf(emptyEnvFormat, env.KeyWorkflowBundleID)
 	}
 
-	if err := initEnvDir(envWorkflowData); err != nil {
+	if err := initEnvDir(env.KeyWorkflowData); err != nil {
 		return err
 	}
 
-	if err := initEnvDir(envWorkflowCache); err != nil {
+	if err := initEnvDir(env.KeyWorkflowCache); err != nil {
 		return err
 	}
 	return nil

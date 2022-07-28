@@ -22,7 +22,7 @@ func (w *Workflow) Run(fn func(*Workflow) error, i ...Initializer) (exitCode int
 func (w *Workflow) run(fn func(*Workflow) error, i ...Initializer) (exitCode int) {
 	exitCode = 1
 	if err := w.OnInitialize(i...); err != nil {
-		outputErr(w, err)
+		outputErrIfNotDone(w, err)
 		return
 	}
 
@@ -34,24 +34,24 @@ func (w *Workflow) run(fn func(*Workflow) error, i ...Initializer) (exitCode int
 
 			err, ok := r.(error)
 			if ok {
-				outputErr(w, err)
+				outputErrIfNotDone(w, err)
 				return
 			}
 
-			outputErr(w, fmt.Errorf("%v", r))
+			outputErrIfNotDone(w, fmt.Errorf("%v", r))
 			return
 		}
 	}()
 
 	if err := fn(w); err != nil {
-		outputErr(w, err)
+		outputErrIfNotDone(w, err)
 		return
 	}
 
 	return 0
 }
 
-func outputErr(w *Workflow, err error) {
+func outputErrIfNotDone(w *Workflow, err error) {
 	if err == nil {
 		return
 	}

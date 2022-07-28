@@ -1,23 +1,11 @@
 package alfred
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
 	"golang.org/x/text/unicode/norm"
-)
-
-const (
-	// see https://www.alfredapp.com/help/workflows/script-environment-variables/
-	envWorkflowData        = "alfred_workflow_data"
-	envWorkflowCache       = "alfred_workflow_cache"
-	envWorkflowBundleID    = "alfred_workflow_bundleid"
-	envWorkflowDebug       = "alfred_debug"
-	envWorkflowPreferences = "alfred_preferences"
-	envWorkflowUID         = "alfred_workflow_uid"
 )
 
 var (
@@ -26,46 +14,9 @@ var (
 	tmpDir = os.TempDir()
 )
 
-// GetBundleID returns value of alfred_workflow_bundleid environment variable
-func (w *Workflow) GetBundleID() string {
-	return os.Getenv(envWorkflowBundleID)
-}
-
-// GetDataDir returns value of alfred_workflow_data environment variable
-func (w *Workflow) GetDataDir() string {
-	return os.Getenv(envWorkflowData)
-}
-
-// GetCacheDir returns value of alfred_workflow_cache environment variable
-func (w *Workflow) GetCacheDir() string {
-	return os.Getenv(envWorkflowCache)
-}
-
-// GetWorkflowDir returns absolute path of the alfred workflow
-func (w *Workflow) GetWorkflowDir() (string, error) {
-	baseDir := os.Getenv(envWorkflowPreferences)
-	if baseDir == "" {
-		return "", fmt.Errorf(emptyEnvFormat, envWorkflowPreferences)
-	}
-	uid := os.Getenv(envWorkflowUID)
-	if uid == "" {
-		return "", fmt.Errorf(emptyEnvFormat, envWorkflowUID)
-	}
-
-	abs := filepath.Join(baseDir, "workflows", uid)
-	if !PathExists(abs) {
-		return "", fmt.Errorf("%s does not stat", abs)
-	}
-	return abs, nil
-}
-
-// IsDebugEnabled return true if alfred_debug is true
-func IsDebugEnabled() bool {
-	isDebug := parseBool(
-		os.Getenv(envWorkflowDebug),
-	)
-	// debug env is highest priority
-	return isDebug
+func PathExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 // Normalize returns NFC string
@@ -101,9 +52,4 @@ func parseBool(v string) bool {
 	}
 
 	return false
-}
-
-func PathExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
 }

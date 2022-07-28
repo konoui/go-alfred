@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/konoui/go-alfred"
+	"github.com/konoui/go-alfred/icon"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -58,23 +59,23 @@ func (ea *embedAssets) getIcon(filename string, fallback *alfred.Icon) *alfred.I
 }
 
 func (ea *embedAssets) IconTrash() *alfred.Icon {
-	return ea.getIcon(alfred.IconTrash, ea.fallback.IconTrash())
+	return ea.getIcon(icon.IconTrash, ea.fallback.IconTrash())
 }
 
 func (ea *embedAssets) IconAlertNote() *alfred.Icon {
-	return ea.getIcon(alfred.IconAlerNote, ea.fallback.IconAlertNote())
+	return ea.getIcon(icon.IconAlerNote, ea.fallback.IconAlertNote())
 }
 
 func (ea *embedAssets) IconCaution() *alfred.Icon {
-	return ea.getIcon(alfred.IconCaution, ea.fallback.IconCaution())
+	return ea.getIcon(icon.IconCaution, ea.fallback.IconCaution())
 }
 
 func (ea *embedAssets) IconAlertStop() *alfred.Icon {
-	return ea.getIcon(alfred.IconAlertStop, ea.fallback.IconAlertStop())
+	return ea.getIcon(icon.IconAlertStop, ea.fallback.IconAlertStop())
 }
 
 func (ea *embedAssets) IconExec() *alfred.Icon {
-	return ea.getIcon(alfred.IconExec, ea.fallback.IconExec())
+	return ea.getIcon(icon.IconExec, ea.fallback.IconExec())
 }
 
 func generateAssets(assetsDir string) error {

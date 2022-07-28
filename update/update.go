@@ -75,12 +75,6 @@ func updateContext(ctx context.Context, url string) error {
 }
 
 func donwloadContext(ctx context.Context, url, path string) error {
-	if err, _ := os.Stat(path); err == nil {
-		if err := os.RemoveAll(path); err != nil {
-			return err
-		}
-	}
-
 	f, err := os.Create(path)
 	if err != nil {
 		return err
