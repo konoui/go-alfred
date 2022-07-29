@@ -20,13 +20,16 @@ const (
 var embedAssetsFS embed.FS
 
 type embedAssets struct {
-	fallback alfred.Asseter
-	wf       *alfred.Workflow
-	dir      string
+	fallback   alfred.Asseter
+	wf         *alfred.Workflow
+	dir        string
+	customfsys []embed.FS
 }
 
-func NewEmbedAssets() alfred.Initializer {
-	return &embedAssets{}
+func NewEmbedAssets(customFS ...embed.FS) alfred.Initializer {
+	return &embedAssets{
+		customfsys: customFS,
+	}
 }
 
 func GetAssetsDir(w *alfred.Workflow) string {
@@ -46,7 +49,18 @@ func (ea *embedAssets) Initialize(w *alfred.Workflow) (err error) {
 	if err != nil {
 		return err
 	}
-	return generateAssets(ea.dir)
+
+	if err := generate(embedAssetsFS, "**/*.icns", ea.dir); err != nil {
+		return err
+	}
+
+	for _, f := range ea.customfsys {
+		if err := generate(f, "**/*", ea.dir); err != nil {
+			return err
+		}
+	}
+	ea.customfsys = nil
+	return
 }
 
 func (ea *embedAssets) getIcon(filename string, fallback *alfred.Icon) *alfred.Icon {
@@ -78,20 +92,24 @@ func (ea *embedAssets) IconExec() *alfred.Icon {
 	return ea.getIcon(icon.IconExec, ea.fallback.IconExec())
 }
 
-func generateAssets(assetsDir string) error {
-	icons, err := fs.Glob(embedAssetsFS, "**/*.icns")
+func (ea *embedAssets) Icon(filename string) *alfred.Icon {
+	return ea.getIcon(filename, ea.fallback.Icon(filename))
+}
+
+func generate(fsys embed.FS, pattern, dir string) error {
+	blobs, err := fs.Glob(fsys, pattern)
 	if err != nil {
 		return err
 	}
 
 	var eg errgroup.Group
-	for _, iconPath := range icons {
+	for _, iconPath := range blobs {
 		relaPath := iconPath
 		// Note relaPath format is `assets/<filename>`.
 		// the assets is a dir name of go-alfred package, not `assetsDir` val.
 		// remove directory name.
 		name := filepath.Base(relaPath)
-		path := filepath.Join(assetsDir, name)
+		path := filepath.Join(dir, name)
 		if alfred.PathExists(path) {
 			continue
 		}

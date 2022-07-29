@@ -12,6 +12,7 @@ type Asseter interface {
 	IconCaution() *Icon
 	IconAlertStop() *Icon
 	IconExec() *Icon
+	Icon(string) *Icon
 }
 
 type Assets struct {
@@ -49,4 +50,9 @@ func (a *Assets) IconAlertStop() *Icon {
 func (a *Assets) IconExec() *Icon {
 	return NewIcon().
 		Path(getIconPath(icon.IconExec))
+}
+
+func (a *Assets) Icon(filename string) *Icon {
+	return NewIcon().
+		Path(getIconPath(filename))
 }
