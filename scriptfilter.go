@@ -39,6 +39,9 @@ func (s *ScriptFilter) Variables(vars Variables) {
 
 // Variable sets ScriptFilter variable
 func (s *ScriptFilter) Variable(k, v string) {
+	if k == "" {
+		return
+	}
 	if s.variables == nil {
 		s.variables = make(Variables)
 	}

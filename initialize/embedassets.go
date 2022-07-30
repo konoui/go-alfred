@@ -17,18 +17,18 @@ const (
 )
 
 //go:embed assets/*
-var embedAssetsFS embed.FS
+var embedSystemAssetsFS embed.FS
 
 type embedAssets struct {
-	fallback   alfred.Asseter
-	wf         *alfred.Workflow
-	dir        string
-	customfsys []embed.FS
+	fallback alfred.Asseter
+	wf       *alfred.Workflow
+	dir      string
+	customFS []embed.FS
 }
 
 func NewEmbedAssets(customFS ...embed.FS) alfred.Initializer {
 	return &embedAssets{
-		customfsys: customFS,
+		customFS: customFS,
 	}
 }
 
@@ -45,21 +45,15 @@ func (ea *embedAssets) Initialize(w *alfred.Workflow) (err error) {
 	ea.fallback, ea.wf, ea.dir = w.Asseter(), w, GetAssetsDir(w)
 
 	w.UpdateOpts(alfred.WithAsseter(ea))
-	err = os.MkdirAll(ea.dir, os.ModePerm)
-	if err != nil {
+	if err := generate(embedSystemAssetsFS, "**/*.icns", ea.dir, true); err != nil {
 		return err
 	}
 
-	if err := generate(embedAssetsFS, "**/*.icns", ea.dir); err != nil {
-		return err
-	}
-
-	for _, f := range ea.customfsys {
-		if err := generate(f, "**/*", ea.dir); err != nil {
+	for _, f := range ea.customFS {
+		if err := generate(f, "**/*", ea.dir, false); err != nil {
 			return err
 		}
 	}
-	ea.customfsys = nil
 	return
 }
 
@@ -96,30 +90,40 @@ func (ea *embedAssets) Icon(filename string) *alfred.Icon {
 	return ea.getIcon(filename, ea.fallback.Icon(filename))
 }
 
-func generate(fsys embed.FS, pattern, dir string) error {
+func generate(fsys embed.FS, pattern, todir string, flat bool) error {
 	blobs, err := fs.Glob(fsys, pattern)
 	if err != nil {
 		return err
 	}
 
 	var eg errgroup.Group
-	for _, iconPath := range blobs {
-		relaPath := iconPath
-		// Note relaPath format is `assets/<filename>`.
-		// the assets is a dir name of go-alfred package, not `assetsDir` val.
-		// remove directory name.
-		name := filepath.Base(relaPath)
-		path := filepath.Join(dir, name)
+	for _, blobPath := range blobs {
+		relaPath := blobPath
+
+		path := filepath.Join(todir, relaPath)
+		if flat {
+			// Note relaPath format is `assets/<filename>`.
+			// the assets is a dir name of go-alfred package, not `assetsDir` val.
+			// remove directory name.
+			name := filepath.Base(relaPath)
+			path = filepath.Join(todir, name)
+		}
+
 		if alfred.PathExists(path) {
 			continue
 		}
 
 		eg.Go(func() error {
-			src, err := embedAssetsFS.Open(relaPath)
+			src, err := fsys.Open(relaPath)
 			if err != nil {
 				return err
 			}
 			defer src.Close()
+
+			err = os.MkdirAll(filepath.Dir(path), os.ModePerm)
+			if err != nil {
+				return err
+			}
 
 			dst, err := os.Create(path)
 			if err != nil {

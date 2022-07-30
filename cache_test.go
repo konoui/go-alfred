@@ -93,7 +93,7 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 			}
 
 			// load cache from new workflow
-			err = tt.wf.Cache(cacheKey).TTL(tt.ttl).LoadItems().Err()
+			err = tt.wf.Cache(cacheKey).MaxAge(tt.ttl).LoadItems().Err()
 			if !tt.expectErr && err != nil {
 				t.Fatal(err)
 			}
@@ -103,8 +103,8 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 			}
 
 			// compare new workflow data to soted workflow data
-			want := prepared.std.items
-			got := tt.wf.std.items
+			want := prepared.items
+			got := tt.wf.items
 			if diff := Diff(want, got); !tt.expectErr && diff != "" {
 				t.Errorf(diff)
 			}

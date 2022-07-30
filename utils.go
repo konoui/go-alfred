@@ -14,6 +14,29 @@ var (
 	tmpDir = os.TempDir()
 )
 
+func UnsetVariable(w *Workflow, key string) {
+	delete(w.variables, key)
+}
+
+func GetItems(w *Workflow) Items {
+	return w.items
+}
+
+func ResetItems(w *Workflow) {
+	w.items = Items{}
+	w.system = Items{}
+	w.warn = Items{}
+	w.err = Items{}
+}
+
+func ResetSystemInfo(w *Workflow) {
+	w.system = Items{}
+}
+
+func ResetWarnings(w *Workflow) {
+	w.warn = Items{}
+}
+
 func PathExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil

@@ -112,7 +112,7 @@ func TestWorkflow_FilterByItemProperty(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := NewWorkflow().Append(tt.items...)
-			got := w.FilterByItemProperty(tt.args.f, tt.args.property).std.items
+			got := w.FilterByItemProperty(tt.args.f, tt.args.property).items
 			if diff := Diff(tt.want, got); diff != "" {
 				t.Errorf("-want +got\n%s", diff)
 			}

@@ -18,12 +18,12 @@ type Cache struct {
 	filename string
 	wf       *Workflow
 	err      error
-	ttl      time.Duration
+	maxAge   time.Duration
 }
 
 type Cacher interface {
 	Workflow() *Workflow
-	TTL(time.Duration) CacheLoader
+	MaxAge(time.Duration) CacheLoader
 	Err() error
 	StoreItems() Cacher
 	ClearItems() Cacher
@@ -83,8 +83,8 @@ func (c *Cache) Err() error {
 	return c.err
 }
 
-func (c *Cache) TTL(ttl time.Duration) CacheLoader {
-	c.ttl = ttl
+func (c *Cache) MaxAge(age time.Duration) CacheLoader {
+	c.maxAge = age
 	return c
 }
 
@@ -100,13 +100,13 @@ func (c *Cache) LoadItems() Cacher {
 		return c
 	}
 
-	if c.iCache.Expired(c.ttl) {
+	if c.iCache.Expired(c.maxAge) {
 		err = fmt.Errorf("%s ttl is expired: %w", c.filename, ErrCacheExpired)
 		c.wf.sLogger().Infoln(err.Error())
 		return c
 	}
 
-	c.wf.std.items = items
+	c.wf.items = items
 	return c
 }
 
@@ -123,7 +123,7 @@ func (c *Cache) StoreItems() Cacher {
 		return c
 	}
 
-	items := c.wf.std.items
+	items := c.wf.items
 	if err = c.iCache.Store(&items); err != nil {
 		c.wf.sLogger().Errorln(err)
 	}

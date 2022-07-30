@@ -24,7 +24,7 @@ func TestWorkflow_Rerun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			w := NewWorkflow().Rerun(tt.args.i)
-			if !(w.err.rerun == tt.args.i && w.std.rerun == tt.args.i && w.warn.rerun == tt.args.i) {
+			if !(w.rerun == tt.args.i) {
 				t.Errorf("Workflow.Rerun() = %v, want %v", w, tt.args.i)
 			}
 		})
@@ -98,7 +98,7 @@ func TestWorfkfloByte(t *testing.T) {
 				t.Errorf("-want +got\n%+v", diff)
 			}
 
-			if diff := Diff(tt.items, awf.std.items); diff != "" {
+			if diff := Diff(tt.items, awf.items); diff != "" {
 				t.Errorf("limit does not work -want +got\n%+v", diff)
 			}
 		})

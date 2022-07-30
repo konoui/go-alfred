@@ -60,7 +60,7 @@ func outputErrIfNotDone(w *Workflow, err error) {
 		return
 	}
 
-	w.err.Items(
+	w.err = append(w.err,
 		NewItem().
 			Title(err.Error()).
 			Subtitle("Please check workflow debug log").

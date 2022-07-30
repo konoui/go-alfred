@@ -12,10 +12,10 @@ import (
 
 // Workflow is map of ScriptFilters
 type Workflow struct {
-	std        *ScriptFilter
-	warn       *ScriptFilter
-	err        *ScriptFilter
-	system     *ScriptFilter
+	*ScriptFilter
+	warn       Items
+	err        Items
+	system     Items
 	cache      sync.Map
 	markers    markers
 	streams    *streams
@@ -54,10 +54,10 @@ type Option func(*Workflow)
 // NewWorkflow has simple ScriptFilter api
 func NewWorkflow(opts ...Option) *Workflow {
 	wf := &Workflow{
-		std:    NewScriptFilter(),
-		warn:   NewScriptFilter(),
-		err:    NewScriptFilter(),
-		system: NewScriptFilter(),
+		ScriptFilter: NewScriptFilter(),
+		warn:         Items{},
+		err:          Items{},
+		system:       Items{},
 		streams: &streams{
 			out: os.Stdout,
 			log: os.Stderr,
@@ -209,40 +209,36 @@ func (w *Workflow) Args() []string {
 
 // Append new items to ScriptFilter
 func (w *Workflow) Append(item ...*Item) *Workflow {
-	w.std.Items(item...)
+	w.Items(item...)
+	return w
+}
+
+func (w *Workflow) Rerun(i Rerun) *Workflow {
+	w.ScriptFilter.Rerun(i)
+	return w
+}
+
+func (w *Workflow) Variables(v Variables) *Workflow {
+	w.ScriptFilter.Variables(v)
+	return w
+}
+
+func (w *Workflow) Variable(k, v string) *Workflow {
+	w.ScriptFilter.Variable(k, v)
 	return w
 }
 
 // Clear items of ScriptFilters
+// Set* is not clear
 func (w *Workflow) Clear() *Workflow {
-	w.std.Clear()
-	w.warn.Clear()
-	return w
-}
-
-// Rerun adds rerun variable
-func (w *Workflow) Rerun(i Rerun) *Workflow {
-	w.std.Rerun(i)
-	w.warn.Rerun(i)
-	w.err.Rerun(i)
-	return w
-}
-
-// Variables adds variables for ScriptFilter
-func (w *Workflow) Variables(v Variables) *Workflow {
-	w.std.Variables(v)
-	return w
-}
-
-// Variable adds variable for ScriptFilter
-func (w *Workflow) Variable(key, value string) *Workflow {
-	w.std.Variable(key, value)
+	w.ScriptFilter.Clear()
+	w.err = Items{}
 	return w
 }
 
 // SetEmptyWarning displays messages if items are empty
 func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
-	w.warn.Items(
+	w.warn = append(w.warn,
 		NewItem().
 			Title(title).
 			Subtitle(subtitle).
@@ -258,47 +254,46 @@ func (w *Workflow) SetSystemInfo(i *Item) *Workflow {
 	if i == nil {
 		return w
 	}
-	w.system.Items(i)
+	w.system = append(w.system, i)
 	return w
 }
 
 func (w *Workflow) Bytes() []byte {
-	if !w.err.IsEmpty() {
-		return w.err.Bytes()
-	}
-
-	savedStdItems := make(Items, len(w.std.items), cap(w.std.items))
-	copy(savedStdItems, w.std.items)
-	savedWarnItems := make(Items, len(w.std.items), cap(w.std.items))
-	copy(savedWarnItems, w.warn.items)
+	savedStdItems := make(Items, len(w.items), cap(w.items))
+	copy(savedStdItems, w.items)
 	defer func() {
-		w.std.items = savedStdItems
-		w.warn.items = savedWarnItems
+		w.items = savedStdItems
 	}()
 
-	if w.isLimited() {
-		w.std.items = savedStdItems[:w.customEnvs.maxResults]
+	if len(w.err) > 0 {
+		items := w.err
+		w.Clear()
+		w.Items(items...)
 	}
 
-	if !w.system.IsEmpty() {
+	if w.isLimited() {
+		w.items = savedStdItems[:w.customEnvs.maxResults]
+	}
+
+	if len(w.system) > 0 {
 		if w.IsEmpty() {
-			items := w.warn.items
-			w.warn.Clear()
-			w.warn.Items(w.system.items...)
-			w.warn.Items(items...)
+			w.Clear()
+			w.Items(w.system...)
+			w.Items(w.warn...)
 		} else {
-			items := w.std.items
-			w.std.Clear()
-			w.std.Items(w.system.items...)
-			w.std.Items(items...)
+			items := w.items
+			w.Clear()
+			w.Items(w.system...)
+			w.Items(items...)
 		}
 	}
 
 	if w.IsEmpty() {
-		return w.warn.Bytes()
+		w.Clear()
+		w.Items(w.warn...)
 	}
 
-	return w.std.Bytes()
+	return w.ScriptFilter.Bytes()
 }
 
 func (w *Workflow) String() string {
@@ -307,13 +302,12 @@ func (w *Workflow) String() string {
 
 // Fatal outputs error to io stream and call os.Exit(1)
 func (w *Workflow) Fatal(title, subtitle string) {
-	w.err.Items(
+	w.err = append(w.err,
 		NewItem().
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(w.Asseter().IconCaution()),
-	)
+			Icon(w.Asseter().IconCaution()))
 	w.Output()
 	osExit(1)
 }
@@ -329,11 +323,6 @@ func (w *Workflow) Output() *Workflow {
 	return w
 }
 
-// IsEmpty returns true if the items is empty
-func (w *Workflow) IsEmpty() bool {
-	return w.std.IsEmpty()
-}
-
 func (w *Workflow) markDone() {
 	w.markers.outputDone = true
 }
@@ -341,7 +330,7 @@ func (w *Workflow) markDone() {
 func (w *Workflow) isLimited() bool {
 	// if maxResults equal 0, this means unlimited
 	limit := w.customEnvs.maxResults
-	if limit > 0 && len(w.std.items) > limit {
+	if limit > 0 && len(w.items) > limit {
 		return true
 	}
 	return false

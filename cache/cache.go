@@ -10,8 +10,8 @@ import (
 
 // Cacher implements a simple store/load API
 type Cacher interface {
-	Load(interface{}) error
-	Store(interface{}) error
+	Load(any) error
+	Store(any) error
 	Clear() error
 	Expired(time.Duration) bool
 }
@@ -35,7 +35,7 @@ func New(dir, file string) (Cacher, error) {
 }
 
 // Load read data saved cache into v
-func (c *Cache) Load(v interface{}) error {
+func (c *Cache) Load(v any) error {
 	p := c.path()
 	f, err := os.Open(p)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *Cache) Load(v interface{}) error {
 }
 
 // Store save data into cache
-func (c *Cache) Store(v interface{}) error {
+func (c *Cache) Store(v any) error {
 	p := c.path()
 	f, err := os.Create(p)
 	if err != nil {

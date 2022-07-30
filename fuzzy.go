@@ -32,13 +32,13 @@ func (p ItemProperty) String() string {
 
 // Filter by item title with fuzzy
 func (w *Workflow) Filter(query string) *Workflow {
-	w.std.items = w.std.items.Filter(query)
+	w.items = w.items.Filter(query)
 	return w
 }
 
 func (w *Workflow) FilterByItemProperty(f func(s string) bool, property ItemProperty) *Workflow {
-	items := make(Items, 0, cap(w.std.items))
-	for _, item := range w.std.items {
+	items := make(Items, 0, cap(w.items))
+	for _, item := range w.items {
 		v := getItemValue(item, property.String())
 		if f(v) {
 			items = append(items, item)
@@ -46,7 +46,7 @@ func (w *Workflow) FilterByItemProperty(f func(s string) bool, property ItemProp
 	}
 
 	// update
-	w.std.items = items
+	w.items = items
 	return w
 }
 
