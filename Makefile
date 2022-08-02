@@ -1,4 +1,4 @@
-GOLANGCI_LINT_VERSION := v1.47.2
+GOLANGCI_LINT_VERSION := v1.47.3
 export GO111MODULE=on
 
 ## Format source codes

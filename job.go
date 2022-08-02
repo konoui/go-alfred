@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/konoui/go-alfred/asl"
 	"github.com/konoui/go-alfred/daemon"
 )
 
@@ -121,7 +122,8 @@ func (j *Job) Name() string {
 	return j.name
 }
 
-// Loggin enables file logging for the job
+// Loggin enables asl(syslog) logging for the job.
+// stdout/stderr of the job process will redirect to asl
 func (j *Job) Logging() *Job {
 	j.logging = true
 	return j
@@ -131,7 +133,8 @@ func (j *Job) Logging() *Job {
 func (j *Job) Start(cmd *exec.Cmd) (JobProcess, error) {
 	mergeEnv(cmd, os.Environ())
 	if j.logging {
-		cmd.Stdout, cmd.Stderr = j.files()
+		l := asl.New()
+		cmd.Stdout, cmd.Stderr = l, l
 	}
 	ret, err := j.daemonCtx.Daemonize(cmd)
 	if err != nil {
@@ -155,7 +158,7 @@ func (j *Job) StartWithExit(cmd *exec.Cmd) *Workflow {
 	return j.wf
 }
 
-// IsJob returns true if a caller am a job but the caller may no be the job
+// IsJob returns true if a caller is a job but the caller may no be the job
 func (j *Job) IsJob() bool {
 	return j.daemonCtx.IsChildProcess()
 }
@@ -189,19 +192,4 @@ func mergeEnv(cmd *exec.Cmd, envs []string) {
 		}
 		cmd.Env = append(cmd.Env, env)
 	}
-}
-
-// Logging redirects output of stdout/err to log file
-func (j *Job) files() (out, stderr *os.File) {
-	absPath, err := filepath.Abs(filepath.Join(j.daemonCtx.PidDir, j.name+".log"))
-	if err != nil {
-		return nil, nil
-	}
-
-	f, err := os.OpenFile(absPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
-	j.wf.sLogger().Debugln("job logs will be stored at", absPath)
-	if err != nil {
-		return nil, nil
-	}
-	return f, f
 }
