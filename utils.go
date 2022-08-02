@@ -14,14 +14,17 @@ var (
 	tmpDir = os.TempDir()
 )
 
+// UnsetVariable unsets variable with key for existing Workflow
 func UnsetVariable(w *Workflow, key string) {
 	delete(w.variables, key)
 }
 
+// GetItems returns all appended items
 func GetItems(w *Workflow) Items {
 	return w.items
 }
 
+// ResetItems resets all items including EmptyWarning(), SetSystemInfo()
 func ResetItems(w *Workflow) {
 	w.items = Items{}
 	w.system = Items{}
@@ -29,14 +32,17 @@ func ResetItems(w *Workflow) {
 	w.err = Items{}
 }
 
+// ResetSystemInfo resets items by SetSystemInfo()
 func ResetSystemInfo(w *Workflow) {
 	w.system = Items{}
 }
 
-func ResetWarnings(w *Workflow) {
+// ResetWarning resets items by SetEmptyWarning()
+func ResetWarning(w *Workflow) {
 	w.warn = Items{}
 }
 
+// PathExists return true if path exists
 func PathExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil

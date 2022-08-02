@@ -186,8 +186,19 @@ func TestWorkflow_Clear(t *testing.T) {
 
 func TestWorkflow_Fatal(t *testing.T) {
 	t.Run("fatal", func(t *testing.T) {
-		w := NewWorkflow()
 		osExit = func(code int) {}
-		w.Fatal("test", "test1")
+		w := NewWorkflow()
+		w.Fatal("title", "subtitle")
+		got := w.Bytes()
+
+		item := NewItem().
+			Title("title").
+			Subtitle("subtitle").
+			Valid(false).
+			Icon(w.Asseter().IconCaution())
+		want := NewWorkflow().Append(item).Bytes()
+		if diff := DiffOutput(want, got); diff != "" {
+			t.Errorf("-want +got\n%+v", diff)
+		}
 	})
 }

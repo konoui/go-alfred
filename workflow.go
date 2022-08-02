@@ -49,6 +49,7 @@ type customEnvs struct {
 	cacheSuffix string
 }
 
+// Option is type for workflow configurations
 type Option func(*Workflow)
 
 // NewWorkflow has simple ScriptFilter api
@@ -88,6 +89,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 	return wf
 }
 
+// UpdateOpts apply options to existing Workflow
 func (w *Workflow) UpdateOpts(opts ...Option) *Workflow {
 	for _, opt := range opts {
 		if opt == nil {
@@ -160,6 +162,7 @@ func WithInitializers(i ...Initializer) Option {
 	}
 }
 
+// WithLogWriter sets log output. os.Stderr is default value.
 func WithLogWriter(w io.Writer) Option {
 	return func(wf *Workflow) {
 		wf.streams.log = w
@@ -167,6 +170,7 @@ func WithLogWriter(w io.Writer) Option {
 	}
 }
 
+// WithOutWriter sets ScriptFilter output. os.Stdout is default value.
 func WithOutWriter(w io.Writer) Option {
 	return func(wf *Workflow) {
 		wf.streams.out = w
@@ -213,16 +217,19 @@ func (w *Workflow) Append(item ...*Item) *Workflow {
 	return w
 }
 
+// Rerun sets Rerun value
 func (w *Workflow) Rerun(i Rerun) *Workflow {
 	w.ScriptFilter.Rerun(i)
 	return w
 }
 
+// Variables sets Variables for ScriptFilter
 func (w *Workflow) Variables(v Variables) *Workflow {
 	w.ScriptFilter.Variables(v)
 	return w
 }
 
+// Variable sets Key/Value variable for ScriptFilter
 func (w *Workflow) Variable(k, v string) *Workflow {
 	w.ScriptFilter.Variable(k, v)
 	return w
@@ -260,15 +267,19 @@ func (w *Workflow) SetSystemInfo(i *Item) *Workflow {
 
 func (w *Workflow) Bytes() []byte {
 	savedStdItems := make(Items, len(w.items), cap(w.items))
+	savedErrItems := make(Items, len(w.err), cap(w.err))
 	copy(savedStdItems, w.items)
+	copy(savedErrItems, w.err)
 	defer func() {
 		w.items = savedStdItems
+		w.err = savedErrItems
 	}()
 
 	if len(w.err) > 0 {
 		items := w.err
 		w.Clear()
 		w.Items(items...)
+		return w.ScriptFilter.Bytes()
 	}
 
 	if w.isLimited() {
@@ -280,22 +291,26 @@ func (w *Workflow) Bytes() []byte {
 			w.Clear()
 			w.Items(w.system...)
 			w.Items(w.warn...)
+			return w.ScriptFilter.Bytes()
 		} else {
 			items := w.items
 			w.Clear()
 			w.Items(w.system...)
 			w.Items(items...)
+			return w.ScriptFilter.Bytes()
 		}
 	}
 
 	if w.IsEmpty() {
 		w.Clear()
 		w.Items(w.warn...)
+		return w.ScriptFilter.Bytes()
 	}
 
 	return w.ScriptFilter.Bytes()
 }
 
+// String show workflow outputs as JSON
 func (w *Workflow) String() string {
 	return string(w.Bytes())
 }
@@ -312,7 +327,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 	osExit(1)
 }
 
-// Output to io stream
+// Output outputs JSON of ScriptFilter to io stream
 func (w *Workflow) Output() *Workflow {
 	if w.markers.outputDone {
 		w.sLogger().Warnln(sentMessage)
