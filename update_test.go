@@ -3,6 +3,7 @@ package alfred
 import (
 	"context"
 	"errors"
+	"io"
 	"reflect"
 	"testing"
 
@@ -45,7 +46,7 @@ func Test_updater_IfNewVersionAvailable(t *testing.T) {
 			tt.setupMockFunc(m)
 			updater := &updater{
 				source: m,
-				wf:     NewWorkflow(),
+				wf:     NewWorkflow(WithLogWriter(io.Discard)),
 			}
 			defer ctrl.Finish()
 			if got := updater.IsNewVersionAvailable(context.TODO()); !reflect.DeepEqual(got, tt.want) {
@@ -56,7 +57,6 @@ func Test_updater_IfNewVersionAvailable(t *testing.T) {
 }
 
 func TestWorkflow_Updater(t *testing.T) {
-
 	tests := []struct {
 		name string
 		wf   *Workflow
@@ -123,7 +123,7 @@ func Test_updater_Update(t *testing.T) {
 			tt.setupMockFunc(mockSource, mockUpdater)
 			updater := &updater{
 				source: mockSource,
-				wf:     NewWorkflow(),
+				wf:     testWorkflow(),
 			}
 			defer ctrl.Finish()
 

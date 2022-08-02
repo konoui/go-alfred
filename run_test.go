@@ -2,7 +2,6 @@ package alfred
 
 import (
 	"fmt"
-	"io"
 	"testing"
 )
 
@@ -62,9 +61,7 @@ func TestWorkflow_Run(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := NewWorkflow(
-				WithLogWriter(io.Discard),
-			)
+			w := testWorkflow()
 			got := w.Run(tt.args.fn, tt.args.initializer...)
 			if tt.want != got {
 				t.Errorf("want: %d got: %d", tt.want, got)
@@ -75,7 +72,7 @@ func TestWorkflow_Run(t *testing.T) {
 
 func TestWorkflow_RunSimple(t *testing.T) {
 	wantExitCode := 0
-	w := NewWorkflow()
+	w := testWorkflow()
 	fn := func() error {
 		w.Output()
 		return nil

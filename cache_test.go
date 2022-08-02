@@ -17,7 +17,7 @@ func TestWorkflow_Cache(t *testing.T) {
 	}{
 		{
 			name: "Cache behaves singleton. return same address",
-			wf:   NewWorkflow(),
+			wf:   testWorkflow(),
 			args: args{
 				key: "test1",
 			},
@@ -44,12 +44,11 @@ func TestCache_Workflow(t *testing.T) {
 	}{
 		{
 			name: "workflow.Cache(key).Wrokflow() return itself",
-			want: NewWorkflow(),
+			want: testWorkflow(),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			if got := tt.want.Cache("dummy").Workflow(); got != tt.want {
 				t.Errorf("Cache.Workflow() = %v, want %v", got, tt.want)
 			}
@@ -66,13 +65,13 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 	}{
 		{
 			name:      "equal address and data stored and loaded instance",
-			wf:        NewWorkflow(),
+			wf:        testWorkflow(),
 			ttl:       1 * time.Minute,
 			expectErr: false,
 		},
 		{
 			name:      "cache expired error",
-			wf:        NewWorkflow(),
+			wf:        testWorkflow(),
 			ttl:       0 * time.Minute,
 			expectErr: true,
 		},
@@ -86,7 +85,7 @@ func TestCache_LoadStoreClearItems(t *testing.T) {
 				}
 			}()
 			// Input test data
-			prepared := NewWorkflow().Append(items01[0])
+			prepared := testWorkflow().Append(items01[0])
 			err := prepared.Cache(cacheKey).StoreItems().Err()
 			if err != nil {
 				t.Fatal(err)
@@ -116,7 +115,7 @@ func Test_SetGetCacheSuffix(t *testing.T) {
 	name := "set/get cache suffix"
 	t.Run(name, func(t *testing.T) {
 		want := "test"
-		awf := NewWorkflow(
+		awf := testWorkflow(
 			WithCacheSuffix(want),
 		)
 		got := awf.getCacheSuffix()

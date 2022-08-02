@@ -8,6 +8,11 @@ import (
 	"testing"
 )
 
+func testWorkflow(opts ...Option) *Workflow {
+	d := append([]Option{WithLogWriter(io.Discard), WithOutWriter(io.Discard)}, opts...)
+	return NewWorkflow(d...)
+}
+
 func TestWorkflow_Rerun(t *testing.T) {
 	type args struct{ i Rerun }
 	tests := []struct {
@@ -88,7 +93,7 @@ func TestWorfkfloByte(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			awf := NewWorkflow(tt.opts...)
+			awf := testWorkflow(tt.opts...)
 			awf.SetEmptyWarning(tt.emptyItem.title, tt.emptyItem.subtitle)
 			awf.SetSystemInfo(tt.systemItem)
 			awf.Append(tt.items...)
@@ -175,9 +180,8 @@ func TestOutput(t *testing.T) {
 
 func TestWorkflow_Clear(t *testing.T) {
 	t.Run("clear item", func(t *testing.T) {
-		item := &Item{title: "test"}
 		want := NewWorkflow().Bytes()
-		got := NewWorkflow().Append(item).Clear().Bytes()
+		got := NewWorkflow().Append(NewItem().Title("title")).Clear().Bytes()
 		if diff := DiffOutput(want, got); diff != "" {
 			t.Errorf("-want +got\n%+v", diff)
 		}
@@ -187,7 +191,7 @@ func TestWorkflow_Clear(t *testing.T) {
 func TestWorkflow_Fatal(t *testing.T) {
 	t.Run("fatal", func(t *testing.T) {
 		osExit = func(code int) {}
-		w := NewWorkflow()
+		w := testWorkflow()
 		w.Fatal("title", "subtitle")
 		got := w.Bytes()
 
