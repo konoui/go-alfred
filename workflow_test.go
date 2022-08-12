@@ -199,7 +199,7 @@ func TestWorkflow_Fatal(t *testing.T) {
 			Title("title").
 			Subtitle("subtitle").
 			Valid(false).
-			Icon(w.Asseter().IconCaution())
+			Icon(IconCaution())
 		want := NewWorkflow().Append(item).Bytes()
 		if diff := DiffOutput(want, got); diff != "" {
 			t.Errorf("-want +got\n%+v", diff)

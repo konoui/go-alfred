@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/konoui/go-alfred/update"
@@ -16,11 +15,9 @@ type Workflow struct {
 	warn       Items
 	err        Items
 	system     Items
-	cache      sync.Map
 	markers    markers
 	streams    *streams
 	logger     *logger
-	assets     Asseter
 	updater    Updater
 	actions    []Initializer
 	customEnvs *customEnvs
@@ -69,7 +66,6 @@ func NewWorkflow(opts ...Option) *Workflow {
 			l:      nil,
 			system: nil,
 		},
-		assets:  &Assets{},
 		actions: defaultInitializers,
 		customEnvs: &customEnvs{
 			maxResults:  0,
@@ -191,12 +187,6 @@ func WithArguments(args ...string) Option {
 	}
 }
 
-func WithAsseter(a Asseter) Option {
-	return func(w *Workflow) {
-		w.assets = a
-	}
-}
-
 // OutWriter returns output writer
 func (w *Workflow) OutWriter() io.Writer {
 	return w.streams.out
@@ -250,7 +240,7 @@ func (w *Workflow) SetEmptyWarning(title, subtitle string) *Workflow {
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(w.Asseter().IconAlertNote()),
+			Icon(IconAlertNote()),
 	)
 	return w
 }
@@ -292,13 +282,13 @@ func (w *Workflow) Bytes() []byte {
 			w.Items(w.system...)
 			w.Items(w.warn...)
 			return w.ScriptFilter.Bytes()
-		} else {
-			items := w.items
-			w.Clear()
-			w.Items(w.system...)
-			w.Items(items...)
-			return w.ScriptFilter.Bytes()
 		}
+
+		items := w.items
+		w.Clear()
+		w.Items(w.system...)
+		w.Items(items...)
+		return w.ScriptFilter.Bytes()
 	}
 
 	if w.IsEmpty() {
@@ -322,7 +312,7 @@ func (w *Workflow) Fatal(title, subtitle string) {
 			Title(title).
 			Subtitle(subtitle).
 			Valid(false).
-			Icon(w.Asseter().IconCaution()))
+			Icon(IconCaution()))
 	w.Output()
 	osExit(1)
 }

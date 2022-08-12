@@ -14,11 +14,7 @@ var (
 	_ fmt.Stringer  = (*Workflow)(nil)
 	_ Hooker        = (*Workflow)(nil)
 	_ LogGetter     = (*Workflow)(nil)
-	_ UpdateGetter  = (*Workflow)(nil)
-	_ CacheGetter   = (*Workflow)(nil)
-	_ AssetGetter   = (*Workflow)(nil)
 	_ Runner        = (*Workflow)(nil)
-	_ EnvGetter     = (*Workflow)(nil)
 	_ ArgGetter     = (*Workflow)(nil)
 	_ Filter        = (*Workflow)(nil)
 	_ OptionUpdater = (*Workflow)(nil)
@@ -60,28 +56,9 @@ type LogGetter interface {
 	Logger() Logger
 }
 
-type UpdateGetter interface {
-	Updater() Updater
-}
-
-type CacheGetter interface {
-	Cache(key string) Cacher
-}
-
-type AssetGetter interface {
-	Asseter() Asseter
-}
-
 type Runner interface {
 	RunSimple(fn func() error, i ...Initializer) (exitCode int)
 	Run(fn func(*Workflow) error, i ...Initializer) (exitCode int)
-}
-
-type EnvGetter interface {
-	GetBundleID() string
-	GetDataDir() string
-	GetCacheDir() string
-	GetWorkflowDir() (string, error)
 }
 
 type ArgGetter interface {

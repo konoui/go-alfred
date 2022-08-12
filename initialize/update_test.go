@@ -71,15 +71,18 @@ func TestDisplayUpdateSystemInfo(t *testing.T) {
 
 			outBuffer := new(bytes.Buffer)
 			logBuffer := new(bytes.Buffer)
+			ei := NewEmbedSystemIcons()
 			w := alfred.NewWorkflow(
 				alfred.WithUpdater(mockSource),
 				alfred.WithOutWriter(outBuffer),
 				alfred.WithLogWriter(logBuffer),
 				alfred.WithInitializers(
-					NewEmbedAssets(),
+					ei,
 					NewUpdateRecommendation(2*time.Second),
 				),
 			)
+			defer ei.(*embedIcon).Down()
+
 			exitCode := w.Run(app)
 			if exitCode != 0 {
 				t.Errorf("unexpected exit code %d", exitCode)

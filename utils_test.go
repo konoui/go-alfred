@@ -89,7 +89,7 @@ func TestWorkflow_GetWorkflowDir(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := w.GetWorkflowDir()
+			got, err := GetWorkflowDir()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Workflow.GetWorkflowDir() error = %v, wantErr %v", err, tt.wantErr)
 				return

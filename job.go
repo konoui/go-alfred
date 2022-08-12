@@ -53,7 +53,7 @@ type Job struct {
 }
 
 func (w *Workflow) getJobDir() string {
-	dir, err := w.GetWorkflowDir()
+	dir, err := GetWorkflowDir()
 	if err != nil {
 		w.sLogger().Warnf("using tmp dir %s for job dir as %s", tmpDir, err)
 		return tmpDir

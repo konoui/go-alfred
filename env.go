@@ -9,22 +9,22 @@ import (
 )
 
 // GetBundleID returns value of alfred_workflow_bundleid environment variable
-func (w *Workflow) GetBundleID() string {
+func GetBundleID() string {
 	return os.Getenv(env.KeyWorkflowBundleID)
 }
 
 // GetDataDir returns value of alfred_workflow_data environment variable
-func (w *Workflow) GetDataDir() string {
+func GetDataDir() string {
 	return os.Getenv(env.KeyWorkflowData)
 }
 
 // GetCacheDir returns value of alfred_workflow_cache environment variable
-func (w *Workflow) GetCacheDir() string {
+func GetCacheDir() string {
 	return os.Getenv(env.KeyWorkflowCache)
 }
 
 // GetWorkflowDir returns absolute path of the alfred workflow
-func (w *Workflow) GetWorkflowDir() (string, error) {
+func GetWorkflowDir() (string, error) {
 	baseDir := os.Getenv(env.KeyWorkflowPreferences)
 	if baseDir == "" {
 		return "", fmt.Errorf(emptyEnvFormat, env.KeyWorkflowPreferences)

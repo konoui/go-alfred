@@ -49,7 +49,7 @@ func (*envs) Condition(_ *Workflow) bool { return true }
 
 // Initialize validates alfred workflow environment variables and creates directories
 func (*envs) Initialize(w *Workflow) (err error) {
-	bundleID := w.GetBundleID()
+	bundleID := GetBundleID()
 	if bundleID == "" {
 		return fmt.Errorf(emptyEnvFormat, env.KeyWorkflowBundleID)
 	}

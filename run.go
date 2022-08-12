@@ -64,7 +64,7 @@ func outputErrIfNotDone(w *Workflow, err error) {
 		NewItem().
 			Title(err.Error()).
 			Subtitle("Please check workflow debug log").
-			Icon(w.Asseter().IconCaution()),
+			Icon(IconCaution()),
 	)
 	w.Output()
 }
