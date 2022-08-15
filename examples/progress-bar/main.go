@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -31,9 +32,11 @@ func main() {
 func run(awf *alfred.Workflow) error {
 	key := "test"
 	jobName := "progress-bar"
-	if awf.Cache(key).MaxAge(60*time.Second).LoadItems().Err() == nil {
+	if err := awf.Cache(key).MaxAge(60 * time.Second).Load(); err == nil {
 		awf.Output()
 		return nil
+	} else if !errors.Is(err, alfred.ErrCacheExpired) {
+		return err
 	}
 
 	job := awf.Job(jobName)
@@ -48,7 +51,7 @@ func run(awf *alfred.Workflow) error {
 	cmd := exec.Command(os.Args[0], os.Args[1:]...)
 	awf.Append(
 		alfred.NewItem().Title("start a backgroup job"),
-	).Rerun(0.5).Job(jobName).Logging().StartWithExit(cmd)
+	).Rerun(0.5).Job(jobName).StartWithExit(cmd)
 	// clear existing(above) items as here is running as daemon
 	awf.Clear()
 	for i := 0; i < 5; i++ {
@@ -58,6 +61,5 @@ func run(awf *alfred.Workflow) error {
 		)
 	}
 
-	awf.Cache(key).StoreItems().Workflow().Output()
-	return awf.Cache(key).Err()
+	return awf.Output().Cache(key).Store()
 }
