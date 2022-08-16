@@ -26,7 +26,10 @@ func TestWrite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			asl := New()
+			asl, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
 			out := &bytes.Buffer{}
 			mw := io.MultiWriter(asl, out)
 			n, err := mw.Write([]byte(tt.input))

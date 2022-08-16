@@ -24,7 +24,6 @@ func main() {
 	awf = alfred.NewWorkflow(
 		alfred.WithLogLevel(alfred.LogLevelDebug),
 		alfred.WithLogWriter(os.Stderr),
-		alfred.WithCacheSuffix(cacheSuffix),
 	)
 	os.Exit(awf.Run(run))
 }
@@ -51,11 +50,12 @@ func run(awf *alfred.Workflow) error {
 	cmd := exec.Command(os.Args[0], os.Args[1:]...)
 	awf.Append(
 		alfred.NewItem().Title("start a backgroup job"),
-	).Rerun(0.5).Job(jobName).StartWithExit(cmd)
+	).Rerun(0.5).Job(jobName).Logging().StartWithExit(cmd)
 	// clear existing(above) items as here is running as daemon
 	awf.Clear()
 	for i := 0; i < 5; i++ {
 		time.Sleep(5 * time.Second)
+		awf.Logger().Infof("logging test")
 		awf.Append(
 			alfred.NewItem().Title(fmt.Sprintf("%d", i)),
 		)

@@ -75,7 +75,7 @@ func (c *Cache) Load() error {
 	if age > 0 && c.icache.expired(c.staleWhileRevalidate) {
 		cmd := exec.Command(os.Args[0], os.Args...) //nolint
 		cmd.Env = os.Environ()
-		c.wf.Job(GetBundleID()).Logging().StartWithExit(cmd)
+		c.wf.Job(GetBundleID()).Logging().Start(cmd)
 		items, err := c.fetcher()
 		if err != nil {
 			c.wf.sLogger().Errorf("failed to fetcher: %w", err)

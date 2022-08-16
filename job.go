@@ -1,6 +1,7 @@
 package alfred
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -132,14 +133,21 @@ func (j *Job) Logging() *Job {
 // Start behaves as fork if run a self program. If run a external command, it behaves as fork/exec
 func (j *Job) Start(cmd *exec.Cmd) (JobProcess, error) {
 	mergeEnv(cmd, os.Environ())
-	if j.logging {
-		l := asl.New()
-		cmd.Stdout, cmd.Stderr = l, l
-	}
+
 	ret, err := j.daemonCtx.Daemonize(cmd)
 	if err != nil {
-		return JobWorker, err
+		return JobFailed, err
 	}
+
+	if ret == daemon.ChildProcess && j.logging {
+		a, err := asl.New()
+		if err != nil {
+			return JobWorker, fmt.Errorf("failed to prepare als logging: %w", err)
+		}
+		j.wf.UpdateOpts(WithOutWriter(a), WithLogWriter(a))
+		// FIXME Add stdout/err streaming to io.Writer for asl with os.Pipe
+	}
+
 	return JobProcess(ret), nil
 }
 

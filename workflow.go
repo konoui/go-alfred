@@ -42,8 +42,7 @@ type logger struct {
 }
 
 type customEnvs struct {
-	maxResults  int
-	cacheSuffix string
+	maxResults int
 }
 
 // Option is type for workflow configurations
@@ -68,8 +67,7 @@ func NewWorkflow(opts ...Option) *Workflow {
 		},
 		actions: defaultInitializers,
 		customEnvs: &customEnvs{
-			maxResults:  0,
-			cacheSuffix: "",
+			maxResults: 0,
 		},
 		args: normalizeAll(os.Args[1:]),
 	}
@@ -170,13 +168,6 @@ func WithLogWriter(w io.Writer) Option {
 func WithOutWriter(w io.Writer) Option {
 	return func(wf *Workflow) {
 		wf.streams.out = w
-	}
-}
-
-// WithCacheSuffix configures custom cacche siffux. default value is empty.
-func WithCacheSuffix(suffix string) Option {
-	return func(wf *Workflow) {
-		wf.customEnvs.cacheSuffix = suffix
 	}
 }
 

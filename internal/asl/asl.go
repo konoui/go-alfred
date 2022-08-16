@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -41,7 +42,7 @@ func WithLoggerCommandName(s string) Option {
 // io.Writer.Write() writes data to asl by `logger` command
 // `log show` command can dig logs.
 // e.g.) `log show --style compact --info --predicate 'process == "logger"'`
-func New(opts ...Option) io.Writer {
+func New(opts ...Option) (io.Writer, error) {
 	cfg := &Config{
 		timeout:           500 * time.Millisecond,
 		loggerCommandName: "logger",
@@ -57,6 +58,9 @@ func New(opts ...Option) io.Writer {
 	if err != nil {
 		// default logger command path
 		bin = "/usr/bin/" + cfg.loggerCommandName
+		if _, err := os.Stat(bin); err != nil {
+			return nil, err
+		}
 	}
 
 	a := &asl{
@@ -64,7 +68,7 @@ func New(opts ...Option) io.Writer {
 		cfg: cfg,
 	}
 
-	return log.New(a, "", 0).Writer()
+	return log.New(a, "", 0).Writer(), nil
 }
 
 func (a *asl) log(msg string) error {
