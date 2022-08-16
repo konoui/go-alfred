@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/konoui/go-alfred/asl"
-	"github.com/konoui/go-alfred/daemon"
+	"github.com/konoui/go-alfred/internal/asl"
+	"github.com/konoui/go-alfred/internal/daemon"
 )
 
 const (

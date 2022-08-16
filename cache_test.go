@@ -37,7 +37,7 @@ func TestCache_Load(t *testing.T) {
 			key := "test"
 			wf := testWorkflow().Append(NewItem().Title("title").Subtitle("subtitle"))
 			if err := wf.Cache(key).Store(); err != nil {
-				t.Fatalf("Cache.Store() error = %v", err)
+				t.Fatalf("Cache.StoreItems() error = %v", err)
 			}
 
 			want := wf.Bytes()
