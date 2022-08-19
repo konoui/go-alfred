@@ -10,7 +10,7 @@ import (
 	time "time"
 
 	gomock "github.com/golang/mock/gomock"
-	update "github.com/konoui/go-alfred/update"
+	update "github.com/konoui/go-alfred/internal/update"
 )
 
 // MockUpdaterSource is a mock of UpdaterSource interface.

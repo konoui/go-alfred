@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 )
@@ -14,11 +13,9 @@ import (
 var ErrCacheExpired = errors.New("cache expired")
 
 type Cache struct {
-	icache               internalCacher
-	wf                   *Workflow
-	maxAge               time.Duration
-	staleWhileRevalidate time.Duration
-	fetcher              Fetcher
+	icache internalCacher
+	wf     *Workflow
+	maxAge time.Duration
 }
 
 type Cacher interface {
@@ -33,10 +30,7 @@ type CacheLoader interface {
 
 type CacheControlerOrLoader interface {
 	CacheLoader
-	StaleWhileRevalidate(Fetcher) CacheLoader
 }
-
-type Fetcher func() (any, error)
 
 func (w *Workflow) Cache(key string) Cacher {
 	if key == "" {
@@ -60,31 +54,9 @@ func (c *Cache) MaxAge(age time.Duration) CacheControlerOrLoader {
 	return c
 }
 
-func (c *Cache) StaleWhileRevalidate(fetcher Fetcher) CacheLoader {
-	c.staleWhileRevalidate = c.maxAge * 2
-	c.fetcher = fetcher
-	return c
-}
-
 func (c *Cache) Load() error {
-	age := c.staleWhileRevalidate
-	if age == 0 && c.icache.expired(c.maxAge) {
+	if c.icache.expired(c.maxAge) {
 		return ErrCacheExpired
-	}
-
-	if age > 0 && c.icache.expired(c.staleWhileRevalidate) {
-		cmd := exec.Command(os.Args[0], os.Args...) //nolint
-		cmd.Env = os.Environ()
-		c.wf.Job(GetBundleID()).Logging().Start(cmd)
-		items, err := c.fetcher()
-		if err != nil {
-			c.wf.sLogger().Errorf("failed to fetcher: %w", err)
-			return err
-		}
-		if err := c.icache.store(&items); err != nil {
-			c.wf.sLogger().Errorf("failed to store: %w", err)
-			return err
-		}
 	}
 
 	err := c.icache.load(&c.wf.items)

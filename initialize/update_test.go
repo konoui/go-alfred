@@ -10,7 +10,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/konoui/go-alfred"
-	mock "github.com/konoui/go-alfred/update/mock_update"
+	mock "github.com/konoui/go-alfred/internal/update/mock_update"
 )
 
 const systemInfoOutput = `{

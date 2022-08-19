@@ -1,12 +1,5 @@
 package alfred
 
-import (
-	"bytes"
-	"os"
-	"os/exec"
-	"testing"
-)
-
 // func TestJob_Start(t *testing.T) {
 // 	tests := []struct {
 // 		name string
@@ -45,13 +38,13 @@ import (
 // 	}
 // }
 
-func getLog(t *testing.T) string {
-	cmd := exec.Command("/usr/bin/log", "show", "--style", "compact", "--info", "--predicate", "'process == \"logger\"'", "--last", "1m")
-	buf := &bytes.Buffer{}
-	cmd.Stdout = buf
-	cmd.Env = os.Environ()
-	if err := cmd.Run(); err != nil {
-		t.Fatalf("getLog failed %v", err)
-	}
-	return buf.String()
-}
+// func getLog(t *testing.T) string {
+// 	cmd := exec.Command("/usr/bin/log", "show", "--style", "compact", "--info", "--predicate", "'process == \"logger\"'", "--last", "1m")
+// 	buf := &bytes.Buffer{}
+// 	cmd.Stdout = buf
+// 	cmd.Env = os.Environ()
+// 	if err := cmd.Run(); err != nil {
+// 		t.Fatalf("getLog failed %v", err)
+// 	}
+// 	return buf.String()
+// }

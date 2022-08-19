@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/konoui/go-alfred/update"
+	"github.com/konoui/go-alfred/internal/update"
 )
 
 type updater struct {

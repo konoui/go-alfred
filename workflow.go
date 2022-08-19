@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/konoui/go-alfred/update"
+	"github.com/konoui/go-alfred/internal/update"
 )
 
 // Workflow is map of ScriptFilters

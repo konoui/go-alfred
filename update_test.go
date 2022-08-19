@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	mock "github.com/konoui/go-alfred/update/mock_update"
+	mock "github.com/konoui/go-alfred/internal/update/mock_update"
 )
 
 func Test_updater_IfNewVersionAvailable(t *testing.T) {
